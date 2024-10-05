@@ -1,0 +1,24 @@
+.section {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.title {
+  @include font-styles($body-18B);
+
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.link_wrap {
+  @include flex(center);
+
+  margin-top: 32px;
+}
+
+.link {
+  &:hover {
+    text-decoration: underline;
+  }
+}

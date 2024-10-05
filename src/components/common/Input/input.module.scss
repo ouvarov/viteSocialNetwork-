@@ -1,0 +1,29 @@
+.input {
+  margin: 16px 0;
+
+  &__control {
+    @include placeholder-color($text-color);
+    @include font-styles($body-14R, $them-color);
+    @include placeholder-font-family('Lato, sans-serif');
+
+    background-color: $bg-color;
+    border: 1px solid rgba($them-color, .6);
+    color: $text-color;
+    margin-bottom: 16px;
+    width: 100%;
+    min-height: 50px;
+    padding: 16px;
+    border-radius: 16px;
+
+    &:focus{
+      border-color: $them-color;
+    }
+  }
+
+  &__label {
+    @include font-styles($body-12R, $text-color);
+
+    margin-bottom: 4px;
+  }
+
+}

@@ -1,0 +1,14 @@
+.button {
+  @include flex(center);
+  @include font-styles($body-14R, $text-color);
+
+  width: 100%;
+  min-height: 56px;
+  border-radius: 16px;
+  background-color: $them-color;
+
+  &__disable {
+    cursor: none;
+    background-color: rgba($them-color, .4);
+  }
+}

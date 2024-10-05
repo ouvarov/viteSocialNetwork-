@@ -1,0 +1,97 @@
+@mixin size($size) {
+  height: $size;
+  width: $size;
+}
+
+@mixin placeholder-color($color) {
+  &::-webkit-input-placeholder {
+    color: $color;
+  }
+  &::-moz-placeholder {
+    color: $color;
+    opacity: 1;
+  }
+  &:-moz-placeholder {
+    color: $color;
+    opacity: 1;
+  }
+  &:-ms-input-placeholder {
+    color: $color;
+  }
+}
+
+@mixin media($width) {
+  @media (max-width: $width + px) {
+    @content
+  }
+}
+
+@mixin font-styles($font-type, $color: #fff) {
+  @each $key, $value in $font-type {
+    #{$key}: $value;
+  }
+
+  color: $color;
+}
+
+
+@mixin pseudo-element($pseudo-element: after, $content: '', $position: absolute) {
+  @if ($pseudo-element == all) {
+    &:after,
+    &:before {
+      content: $content;
+      position: $position;
+      display: block;
+      @content;
+    }
+  }
+  @else {
+    &:#{$pseudo-element} {
+      content: $content;
+      position: $position;
+      display: block;
+      @content;
+    }
+  }
+}
+
+@mixin placeholder-font-family($font-family) {
+  &::-webkit-input-placeholder {
+    font-family: $font-family;
+  }
+  &::-moz-placeholder {
+    font-family: $font-family;
+  }
+  &:-moz-placeholder {
+    font-family: $font-family;
+  }
+  &:-ms-input-placeholder {
+    font-family: $font-family;
+  }
+}
+
+@mixin background($icon: null, $size: contain, $position: center, $color: transparent, $repeat: no-repeat) {
+  @if ($icon == null) {
+    background: $color $position / $size $repeat;
+  }
+  @else {
+    background: $color url($icon) $position / $size $repeat;
+  }
+}
+
+@mixin flex($type: default, $direction: row, $display: flex,  $align-items: null, $justify-content: null) {
+  @if $type == center {
+    align-items: center;
+    justify-content: center;
+  }
+
+  @else if $type == between {
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  display: $display;
+  flex-direction: $direction;
+  align-items: $align-items;
+  justify-content: $justify-content;
+}
