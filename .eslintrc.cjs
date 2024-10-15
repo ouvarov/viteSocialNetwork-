@@ -31,6 +31,7 @@ module.exports = {
     'prettier',
   ],
   rules: {
+    "react/react-in-jsx-scope": "off",
     "react-hooks/exhaustive-deps": "off",
     "react/prop-types": "off",
     "prettier/prettier": ["error", { "singleQuote": true }],

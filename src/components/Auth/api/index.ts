@@ -20,9 +20,9 @@ const validateToken = (): Promise<
   return api.get('auth/validate-refresh');
 };
 
-const logout = (): Promise<null> => {
-  return api.post<AuthTypes>('auth/logout');
-};
+// const logout = (): Promise<null> => {
+//   return api.post<AuthTypes>('auth/logout');
+// };
 
 const loginUser = (
   data: AuthTypes,
@@ -34,4 +34,4 @@ const loginUser = (
   return api.post<AuthTypes>('auth/login', { email, password });
 };
 
-export { createUser, validateToken, logout, loginUser };
+export { createUser, validateToken, loginUser };

@@ -1,19 +1,23 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { UserDataTypes } from '@/types/user';
-import { validateToken } from '../components/Auth/api';
+import { validateToken } from '@/components/Auth/api';
 
 type AuthContextType = {
   user: UserDataTypes | null;
-  login: ({ user: UserDataTypes, access_token: string }) => void;
+  login: ({
+    user,
+    access_token,
+  }: {
+    user: UserDataTypes;
+    access_token: string;
+  }) => void;
   logout: () => void;
   checkUser: () => void;
   isLoading: boolean;
 };
 
-// Создаем контекст для авторизации
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Провайдер авторизации
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -28,7 +32,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     access_token: string;
   }): void => {
     localStorage.setItem(import.meta.env.VITE_ACCESS_TOKEN, access_token);
-    setUser(user);
+    setUser({ id: user._id, ...user });
     setIsLoading(false);
   };
 
@@ -52,7 +56,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
   };
 
-  // При загрузке компонента проверяем юзера
+  console.log(user);
+
   useEffect(() => {
     checkUser();
   }, []);

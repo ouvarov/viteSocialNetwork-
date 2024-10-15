@@ -1,4 +1,4 @@
-import React, { JSX } from 'react';
+import { JSX } from 'react';
 import { Routing } from '@/routes/Routing.tsx';
 
 const App = (): JSX.Element => <Routing />;

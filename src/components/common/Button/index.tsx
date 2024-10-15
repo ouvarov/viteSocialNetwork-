@@ -14,16 +14,16 @@ const Button: FC<ButtonOptionalPropsType> = ({
   children = null,
   isDisabled = false,
   ...props
-}) => (
-  <button
-    {...props}
-    disabled={isDisabled}
-    className={classNames(styles.button, className, {
-      [styles.button__disable]: isDisabled,
-    })}
-  >
-    {children}
-  </button>
-);
+}) => {
+  const buttonClassnames = classNames(styles.button, className, {
+    [styles.button__disable]: isDisabled,
+  });
+
+  return (
+    <button {...props} disabled={isDisabled} className={buttonClassnames}>
+      {children}
+    </button>
+  );
+};
 
 export { Button };

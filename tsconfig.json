@@ -4,11 +4,12 @@
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
+    "jsx": "react-jsx",
     "allowJs": true,
     "skipLibCheck": true,
     "baseUrl": "src", // Устанавливаем базовую директорию для всех импортов
     "paths": {
-      "@*": ["*"] // Алиас для всех файлов в src
+      "@/*": ["./*"]
     },
 
     /* Bundler mode */
@@ -29,5 +30,5 @@
   "include": [
     "src/**/*"  // Include all files in the src directory
   ],
-  "exclude": ["node_modules","src"]
+  "exclude": ["node_modules"]
 }

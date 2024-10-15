@@ -1,8 +1,9 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 
 const Layout: FC = () => {
-  const handleClassName = ({ isActive }): string => (isActive ? 'fdfd' : 'dfd');
+  const handleClassName = ({ isActive }: { isActive: boolean }): string =>
+    isActive ? 'fdfd' : 'dfd';
 
   return (
     <div>
