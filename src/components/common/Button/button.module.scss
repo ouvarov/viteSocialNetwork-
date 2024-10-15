@@ -8,7 +8,7 @@
   background-color: $them-color;
 
   &__disable {
-    cursor: none;
+    pointer-events: none;
     background-color: rgba($them-color, .4);
   }
 }

@@ -1,0 +1,16 @@
+.textarea {
+  padding: 16px;
+
+  &__control {
+    @include size(100%);
+    @include placeholder-color($text-color);
+    @include font-styles($body-14R, $them-color);
+    @include placeholder-font-family('Lato, sans-serif');
+
+    background-color: $bg-color;
+    border: 1px solid rgba($them-color, .6);
+    color: $text-color;
+    margin-bottom: 16px;
+    border-radius: 16px;
+  }
+}

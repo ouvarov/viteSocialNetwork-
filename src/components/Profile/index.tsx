@@ -1,20 +1,14 @@
 import { FC } from 'react';
-import { useQuery } from 'react-query';
-import { getUser } from '@/components/Profile/api';
+import { ProfileInfo } from '@/components/Profile/components/ProfileInfo';
+import { Post } from '@/components/Profile/components/Post';
 
 const Profile: FC = () => {
-  const { isPending, error, data } = useQuery({
-    queryKey: ['users'],
-    queryFn: () => getUser().then((res) => res),
-  });
-
-  console.log(data);
-
-  if (isPending) return 'Loading...';
-
-  if (error) return 'An error has occurred: ';
-
-  return <div>fdfd</div>;
+  return (
+    <div>
+      <ProfileInfo />
+      <Post />
+    </div>
+  );
 };
 
 export { Profile };

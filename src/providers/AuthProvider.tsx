@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { UserDataTypes } from '@/types/user';
-import { validateToken } from '@/components/Auth/api';
+import { logoutUser, validateToken } from '@/components/Auth/api';
 
 type AuthContextType = {
   user: UserDataTypes | null;
@@ -32,14 +32,16 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     access_token: string;
   }): void => {
     localStorage.setItem(import.meta.env.VITE_ACCESS_TOKEN, access_token);
-    setUser({ id: user._id, ...user });
+    setUser({ id: user.id, ...user });
     setIsLoading(false);
   };
 
   // Метод для выхода (очистка состояния и локального хранилища)
   const logout = (): void => {
-    localStorage.removeItem(import.meta.env.VITE_ACCESS_TOKEN);
-    setUser(null);
+    logoutUser().finally(() => {
+      localStorage.removeItem(import.meta.env.VITE_ACCESS_TOKEN);
+      setUser(null);
+    });
   };
 
   const checkUser = (): void => {

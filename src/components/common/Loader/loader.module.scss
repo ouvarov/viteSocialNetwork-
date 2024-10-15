@@ -1,0 +1,80 @@
+@keyframes rotateCircle {
+  0% {
+    opacity: 0;
+  }
+  0% {
+    opacity: 1;
+    transform: rotateZ(36deg);
+  }
+  7% {
+    transform: rotateZ(0deg);
+  }
+  57% {
+    transform: rotateZ(0deg);
+  }
+  100% {
+    transform: rotateZ(-324deg);
+    opacity: 1;
+  }
+}
+
+@keyframes rotatePreloader {
+  0% {
+    transform: translateX(-50%) translateY(-50%) rotateZ(0deg);
+  }
+  100% {
+    transform: translateX(-50%) translateY(-50%) rotateZ(-360deg);
+  }
+}
+
+.loader {
+  @include size(100%);
+
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background-color: $bg-color;
+
+  &__wrap {
+    @include size(100px);
+
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    animation: rotatePreloader 2s infinite ease-in;
+  }
+
+  &__wrap {
+    div {
+      @include size(100%);
+
+      position: absolute;
+      opacity: 0;
+      @include pseudo-element {
+        @include size(10%);
+        left: 50%;
+        top: 0;
+        background-color: $them-color; /* Assuming $green is green */
+        transform: translateX(-50%);
+        border-radius: 50%;
+      }
+    }
+  }
+
+  &__item {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
+@for $i from 1 through 10 {
+  $rotate: calc(360 / 10) * ($i - 1);
+  .loader__item:nth-child(#{$i}) {
+    transform: rotateZ(#{$rotate}deg);
+    animation: rotateCircle 2s infinite linear;
+    z-index: calc(10 - #{$i});
+    animation-delay: 0 - (($i / 10))+s;
+  }
+}

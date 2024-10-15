@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC, ChangeEvent } from 'react';
 
 import styles from './input.module.scss';
 
@@ -9,7 +9,7 @@ type InputPropsType = {
   placeholder?: string;
   type?: 'text' | 'email' | 'password';
   className?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   label?: string;
 };
 

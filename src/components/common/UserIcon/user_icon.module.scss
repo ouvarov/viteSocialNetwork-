@@ -1,0 +1,11 @@
+.wrapper {
+  @include size(100%);
+
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.figure {
+  @include size(100%);
+  @include background;
+}
