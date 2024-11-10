@@ -18,9 +18,9 @@ const ProfileInfo: FC = () => {
         <UserIcon imageUrl={user.imageUrl} />
         <div>{user.userName}</div>
         <Button onClick={() => {}} isDisabled={isOwnerProfile}>
-          {user.followers.length}
+          {user?.followers?.length}
         </Button>
-        <div>{user.following.length}</div>
+        <div>{user?.following?.length}</div>
       </div>
       <Button onClick={logout}>Logout</Button>
     </div>

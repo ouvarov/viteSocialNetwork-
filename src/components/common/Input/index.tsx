@@ -23,7 +23,7 @@ const Input: FC<InputPropsType> = ({
   label,
   onChange,
 }) => (
-  <div className={`${styles.input}, ${className}`}>
+  <div className={className}>
     <label htmlFor={id}>
       {label && <p className={styles.input__label}>{label}</p>}
       <input

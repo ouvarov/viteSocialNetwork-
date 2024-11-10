@@ -1,20 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { UserDataTypes } from '@/types/user';
 import { logoutUser, validateToken } from '@/components/Auth/api';
-
-type AuthContextType = {
-  user: UserDataTypes | null;
-  login: ({
-    user,
-    access_token,
-  }: {
-    user: UserDataTypes;
-    access_token: string;
-  }) => void;
-  logout: () => void;
-  checkUser: () => void;
-  isLoading: boolean;
-};
+import { AuthContextType } from '@/types/auth.ts';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -32,7 +19,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     access_token: string;
   }): void => {
     localStorage.setItem(import.meta.env.VITE_ACCESS_TOKEN, access_token);
-    setUser({ id: user.id, ...user });
+    setUser(user);
     setIsLoading(false);
   };
 
@@ -57,8 +44,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsLoading(false);
       });
   };
-
-  console.log(user);
 
   useEffect(() => {
     checkUser();

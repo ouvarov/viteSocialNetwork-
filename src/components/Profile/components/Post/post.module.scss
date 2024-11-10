@@ -1,0 +1,14 @@
+.figure {
+  width: 100%;
+  height: 400px;
+}
+
+.text {
+  @include font-styles($body-18R, $text-color);
+
+  padding: 16px;
+}
+
+.likes {
+  @include font-styles($body-12R, $text-color);
+}

@@ -1,19 +1,33 @@
 import React, { ChangeEvent, FC, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+
+import { PostDataTypes } from '@/types/post.ts';
+
 import Input from '@/components/common/Input';
 import Textarea from '@/components/common/Textarea';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/providers/AuthProvider.tsx';
-import { createPost, getPost } from '@/components/Profile/api';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import {
+  createPost,
+  getPost,
+  likePost,
+  removePost,
+} from '@/components/Profile/api';
 import { Loader } from '@/components/common/Loader';
+
+import styles from './post.module.scss';
 
 const Post: FC = () => {
   const { user } = useAuth();
 
-  const { data, isLoading } = useQuery({
+  const { data: resData, isLoading } = useQuery<PostDataTypes>({
     queryKey: ['posts'],
-    queryFn: () => getPost({ id: user?.id || '' }),
+    queryFn: async () => {
+      const response = await getPost(user?.id || '');
+      return response.data;
+    },
   });
+
   const queryClient = useQueryClient();
 
   const { mutate: createNewPost } = useMutation(createPost, {
@@ -22,7 +36,20 @@ const Post: FC = () => {
     },
   });
 
-  console.log(data);
+  const { mutate: onLikePost } = useMutation((id: string) => likePost(id), {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['posts']);
+    },
+  });
+
+  const { mutate: removePostItem } = useMutation(
+    (id: string) => removePost(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(['posts']);
+      },
+    },
+  );
 
   const [image, setImage] = useState<string>('');
   const [text, setText] = useState<string>('');
@@ -38,7 +65,7 @@ const Post: FC = () => {
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
-    createNewPost({ image, text, ownerId: user?.id });
+    createNewPost({ imageUrl: image, text });
   };
 
   return (
@@ -62,7 +89,43 @@ const Post: FC = () => {
           <Button type="submit">Submit</Button>
         </form>
       </div>
-      <div>{isLoading && <Loader />}</div>
+      <div>
+        {isLoading && <Loader />}
+        {resData?.data?.postsData?.length &&
+          resData.data.postsData
+            .sort(
+              (a, b) =>
+                new Date(a.created).getTime() - new Date(b.created).getTime(),
+            )
+            .map(({ id, imageUrl, text, ownerId, likes }) => (
+              <div key={id}>
+                {imageUrl && (
+                  <figure className={styles.figure}>
+                    <img src={imageUrl} alt="" />
+                  </figure>
+                )}
+                <p className={styles.text}>{text}</p>
+
+                <button
+                  type="button"
+                  onClick={() => onLikePost(id)}
+                  className={styles.likes}
+                >
+                  likes {likes.length}
+                </button>
+
+                {user?.id === ownerId && (
+                  <Button
+                    onClick={() => {
+                      removePostItem(id);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+      </div>
     </div>
   );
 };

@@ -1,10 +1,26 @@
 import { UserDataTypes } from '@/types/user.ts';
 
-export type AuthTypes = {
-  email?: string;
-  password?: string;
-  accessToken?: string;
-  userName?: string;
-  userData?: UserDataTypes;
-  access_token?: string;
+export type LoginTypes = {
+  email: string;
+  password: string;
+};
+
+export type SignUpTypes = {
+  email: string;
+  password: string;
+  userName: string;
+};
+
+export type AuthContextType = {
+  user: UserDataTypes | null;
+  login: ({
+    user,
+    access_token,
+  }: {
+    user: UserDataTypes;
+    access_token: string;
+  }) => void;
+  logout: () => void;
+  checkUser: () => void;
+  isLoading: boolean;
 };

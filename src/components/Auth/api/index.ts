@@ -1,17 +1,17 @@
 import { AxiosResponse } from 'axios';
 
 import { api } from '@/api';
-import { AuthTypes } from '@/types/auth';
+import { LoginTypes, SignUpTypes } from '@/types/auth';
 import { UserDataTypes } from '@/types/user';
 
 const createUser = (
-  data: AuthTypes,
+  data: SignUpTypes,
 ): Promise<
   AxiosResponse<{ userData: UserDataTypes; access_token: string }>
 > => {
   const { email, password, userName } = data;
 
-  return api.post<AuthTypes>('auth/create', { email, password, userName });
+  return api.post('auth/create', { email, password, userName });
 };
 
 const validateToken = (): Promise<
@@ -25,13 +25,13 @@ const logoutUser = (): Promise<null> => {
 };
 
 const loginUser = (
-  data: AuthTypes,
+  data: LoginTypes,
 ): Promise<
   AxiosResponse<{ userData: UserDataTypes; access_token: string }>
 > => {
   const { email, password } = data;
 
-  return api.post<AuthTypes>('auth/login', { email, password });
+  return api.post('auth/login', { email, password });
 };
 
 export { createUser, validateToken, loginUser, logoutUser };

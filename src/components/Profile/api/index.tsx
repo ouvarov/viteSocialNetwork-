@@ -1,13 +1,23 @@
 import { api } from '@/api';
 import { AxiosResponse } from 'axios';
-import { PostTypes } from '@/types/post.ts';
+import { PostDataTypes, ResPostTypes } from '@/types/post.ts';
 
-const createPost = (data: PostTypes): Promise<AxiosResponse<PostTypes>> => {
-  return api.post<any>('post/create', data);
+const createPost = (
+  data: ResPostTypes,
+): Promise<AxiosResponse<PostDataTypes>> => {
+  return api.post('post/create', data);
 };
 
-const getPost = (data: { id: string }): Promise<AxiosResponse<PostTypes>> => {
-  return api.post<any>('post/getPosts', data);
+const getPost = (id: string): Promise<AxiosResponse<PostDataTypes>> => {
+  return api.get(`post/getPosts/${id}`);
 };
 
-export { getPost, createPost };
+const removePost = (id: string): Promise<AxiosResponse<PostDataTypes>> => {
+  return api.delete(`post/${id}`);
+};
+
+const likePost = (id: string): Promise<AxiosResponse<PostDataTypes>> => {
+  return api.put(`post/like`, { postId: id });
+};
+
+export { getPost, createPost, removePost, likePost };
