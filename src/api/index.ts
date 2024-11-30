@@ -1,4 +1,9 @@
 import axios from 'axios';
+import io from 'socket.io-client';
+
+const socket = io(`${import.meta.env.VITE_SOCKET_URL}`, {
+  transports: ['websocket'],
+});
 
 const api = axios.create({
   withCredentials: true,
@@ -10,4 +15,4 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export { api };
+export { api, socket };

@@ -11,8 +11,14 @@ import { Registration } from '@/components/Auth/Registration';
 import { Login } from '@/components/Auth/Login';
 import { AnonymousRoute } from '@/routes/AnonymousRoute.tsx';
 import { Profile } from '@/components/Profile';
-import { loginPage, signUpPage, profilePage } from '@/routes/routePaths.ts';
+import {
+  loginPage,
+  signUpPage,
+  profilePage,
+  usersPage,
+} from '@/routes/routePaths.ts';
 import { PrivateRoute } from '@/routes/PrivateRoute.tsx';
+import { Users } from '@/components/Users';
 
 const Routing: FC = () => {
   const router = createBrowserRouter(
@@ -40,6 +46,15 @@ const Routing: FC = () => {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path={usersPage()}
+            element={
+              <PrivateRoute>
+                <Users />
               </PrivateRoute>
             }
           />

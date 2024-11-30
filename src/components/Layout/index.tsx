@@ -13,6 +13,7 @@ const Layout: FC = () => {
             login
           </NavLink>
           <NavLink to="/sign-up">registration</NavLink>
+          <NavLink to="/users">users</NavLink>
         </nav>
       </header>
       <div>

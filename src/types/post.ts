@@ -13,5 +13,5 @@ export type ResPostTypes = {
 };
 
 export type PostDataTypes = {
-  data: { postsData: PostTypes[] };
+  postsData: PostTypes[];
 };

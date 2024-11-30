@@ -91,8 +91,8 @@ const Post: FC = () => {
       </div>
       <div>
         {isLoading && <Loader />}
-        {resData?.data?.postsData?.length &&
-          resData.data.postsData
+        {resData?.postsData?.length &&
+          resData.postsData
             .sort(
               (a, b) =>
                 new Date(a.created).getTime() - new Date(b.created).getTime(),
