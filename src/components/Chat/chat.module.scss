@@ -1,0 +1,11 @@
+.button_wrap {
+  @include flex(between)
+}
+
+.title {
+  @include font-styles($body-18B);
+
+  color: #fff;
+  text-align: center;
+  margin: 10px;
+}

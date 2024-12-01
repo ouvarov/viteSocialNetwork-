@@ -9,8 +9,19 @@ const getChat = (id: string): Promise<AxiosResponse> => {
   return api.get(`chat/find/${id}`);
 };
 
+const deleteChat = (id: string): Promise<AxiosResponse> => {
+  return api.delete(`chat/${id}`);
+};
+
+const renameChat = (body: {
+  chatId: string;
+  newChatName: string;
+}): Promise<AxiosResponse> => {
+  return api.put(`chat/update`, body);
+};
+
 const getAllChat = (): Promise<AxiosResponse> => {
-  return api.get(`chat`);
+  return api.get(`chat/`);
 };
 
 const useCreateChat = () => {
@@ -22,4 +33,11 @@ const useCreateChat = () => {
   });
 };
 
-export { createChat, useCreateChat, getChat, getAllChat };
+export {
+  createChat,
+  useCreateChat,
+  getChat,
+  getAllChat,
+  deleteChat,
+  renameChat,
+};

@@ -1,12 +1,12 @@
 import { FC } from 'react';
 import classNames from 'classnames';
 
-import { ChatDataTypes } from '@/types/chat.ts';
+import { MessagesDataTypes } from '@/types/chat.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 
 import styles from './message.module.scss';
 
-const Message: FC<ChatDataTypes> = ({ sender_id, content }) => {
+const Message: FC<MessagesDataTypes> = ({ sender_id, content }) => {
   const { user } = useAuth();
 
   const isOwner = sender_id === user?.id;
