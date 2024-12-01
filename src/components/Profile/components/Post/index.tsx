@@ -1,5 +1,6 @@
 import React, { ChangeEvent, FC, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useParams } from 'react-router-dom';
 
 import { PostDataTypes } from '@/types/post.ts';
 
@@ -19,11 +20,12 @@ import styles from './post.module.scss';
 
 const Post: FC = () => {
   const { user } = useAuth();
+  const { userId } = useParams();
 
   const { data: resData, isLoading } = useQuery<PostDataTypes>({
-    queryKey: ['posts'],
+    queryKey: [`posts${userId}`],
     queryFn: async () => {
-      const response = await getPost(user?.id || '');
+      const response = await getPost(userId || '');
       return response.data;
     },
   });
@@ -32,13 +34,13 @@ const Post: FC = () => {
 
   const { mutate: createNewPost } = useMutation(createPost, {
     onSuccess: () => {
-      queryClient.invalidateQueries(['posts']);
+      queryClient.invalidateQueries([`posts${userId}`]);
     },
   });
 
   const { mutate: onLikePost } = useMutation((id: string) => likePost(id), {
     onSuccess: () => {
-      queryClient.invalidateQueries(['posts']);
+      queryClient.invalidateQueries([`posts${userId}`]);
     },
   });
 
@@ -46,7 +48,7 @@ const Post: FC = () => {
     (id: string) => removePost(id),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(['posts']);
+        queryClient.invalidateQueries([`posts${userId}`]);
       },
     },
   );
@@ -65,30 +67,32 @@ const Post: FC = () => {
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
-    createNewPost({ imageUrl: image, text });
+    createNewPost({ imageUrl: image, text, ownerId: userId || '' });
   };
 
   return (
     <div>
-      <div>
-        <form onSubmit={handleOneSubmit}>
-          <Input
-            id="image"
-            name={'image'}
-            value={image}
-            onChange={onChangeImage}
-            placeholder={'enter image url'}
-          />
-          <Textarea
-            id={'text'}
-            name="text"
-            value={text}
-            onChange={onChangeText}
-            placeholder={'enter post text'}
-          />
-          <Button type="submit">Submit</Button>
-        </form>
-      </div>
+      {userId === user?.id && (
+        <div>
+          <form onSubmit={handleOneSubmit}>
+            <Input
+              id="image"
+              name={'image'}
+              value={image}
+              onChange={onChangeImage}
+              placeholder={'enter image url'}
+            />
+            <Textarea
+              id={'text'}
+              name="text"
+              value={text}
+              onChange={onChangeText}
+              placeholder={'enter post text'}
+            />
+            <Button type="submit">Submit</Button>
+          </form>
+        </div>
+      )}
       <div>
         {isLoading && <Loader />}
         {resData?.postsData?.length &&

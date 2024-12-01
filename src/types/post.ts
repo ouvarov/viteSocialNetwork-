@@ -10,6 +10,7 @@ export type PostTypes = {
 export type ResPostTypes = {
   imageUrl?: string;
   text: string;
+  ownerId: string;
 };
 
 export type PostDataTypes = {
