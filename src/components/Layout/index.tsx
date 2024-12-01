@@ -1,9 +1,11 @@
 import { FC } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 
+import styles from './layout.module.scss';
+
 const Layout: FC = () => {
   const handleClassName = ({ isActive }: { isActive: boolean }): string =>
-    isActive ? 'fdfd' : 'dfd';
+    isActive ? `${styles.link} ${styles.link_active}` : styles.link;
 
   return (
     <div>
@@ -12,8 +14,15 @@ const Layout: FC = () => {
           <NavLink to="/sign-in" className={handleClassName}>
             login
           </NavLink>
-          <NavLink to="/sign-up">registration</NavLink>
-          <NavLink to="/users">users</NavLink>
+          <NavLink to="/sign-up" className={handleClassName}>
+            registration
+          </NavLink>
+          <NavLink to="/users" className={handleClassName}>
+            users
+          </NavLink>
+          <NavLink className={handleClassName} to="chats">
+            chats
+          </NavLink>
         </nav>
       </header>
       <div>

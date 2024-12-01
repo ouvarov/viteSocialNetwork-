@@ -16,9 +16,13 @@ import {
   signUpPage,
   profilePage,
   usersPage,
+  chatPage,
+  chatsPage,
 } from '@/routes/routePaths.ts';
 import { PrivateRoute } from '@/routes/PrivateRoute.tsx';
 import { Users } from '@/components/Users';
+import { Chat } from '@/components/Chat';
+import { Chats } from '@/components/Chat/Chats';
 
 const Routing: FC = () => {
   const router = createBrowserRouter(
@@ -55,6 +59,22 @@ const Routing: FC = () => {
             element={
               <PrivateRoute>
                 <Users />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path={chatPage(':chatId')}
+            element={
+              <PrivateRoute>
+                <Chat />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path={chatsPage()}
+            element={
+              <PrivateRoute>
+                <Chats />
               </PrivateRoute>
             }
           />

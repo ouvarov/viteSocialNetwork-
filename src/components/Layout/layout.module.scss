@@ -1,0 +1,12 @@
+.link {
+  padding: 10px;
+  color: #fff;
+
+  &:hover {
+   text-decoration: underline;
+  }
+
+  &_active {
+    color: $them-color;
+  }
+}

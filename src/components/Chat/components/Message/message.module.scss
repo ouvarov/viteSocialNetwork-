@@ -1,0 +1,20 @@
+.text {
+  @include font-styles($body-16R);
+
+  color: #fff;
+}
+
+.item {
+  @include flex(center);
+
+  max-width: 300px;
+  padding: 10px;
+  border-radius: 20px;
+  margin: 10px auto 10px 10px;
+  background-color: $second-them-color;
+
+  &__owner {
+    margin: 10px  10px 10px auto;
+    background-color: $them-color;
+  }
+}

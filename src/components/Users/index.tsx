@@ -18,8 +18,6 @@ const Users: FC = () => {
     },
   });
 
-  console.log(resData);
-
   if (isLoading) {
     <Loader />;
   }

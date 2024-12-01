@@ -1,27 +1,32 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { Button } from '@/components/common/Button';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { UserIcon } from '@/components/common/UserIcon';
-import { socket } from '@/api';
+import { useCreateChat } from '@/components/Chat/api';
+import { chatPage } from '@/routes/routePaths.ts';
 
 const ProfileInfo: FC = () => {
   const { user, logout } = useAuth();
   const { userId } = useParams();
+  const { mutate: createChatMutation, data: chatData } = useCreateChat();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (chatData) {
+      navigate(chatPage(chatData));
+    }
+  }, [chatData]);
 
   if (!user) return null;
 
   const isOwnerProfile = userId === user.id;
 
   const handleStartChat = () => {
-    const createChatDto = {
-      userIds: [userId, user.id],
-    };
-
-    socket.emit('createChat', createChatDto, (response: any) => {
-      console.log('Server response:', response);
-    });
+    if (userId) {
+      createChatMutation([userId, user.id]);
+    }
   };
 
   return (
