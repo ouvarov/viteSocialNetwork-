@@ -1,10 +1,11 @@
 import React, { ChangeEvent, FC, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useParams } from 'react-router-dom';
 
-import { PostDataTypes } from '@/types/post.ts';
+import { upload } from '@/api';
 
-import Input from '@/components/common/Input';
+import { PostDataTypes } from '@/types/post.ts';
 import Textarea from '@/components/common/Textarea';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/providers/AuthProvider.tsx';
@@ -55,13 +56,24 @@ const Post: FC = () => {
 
   const [image, setImage] = useState<string>('');
   const [text, setText] = useState<string>('');
+  const onDrop = async (acceptedFiles: any) => {
+    if (!acceptedFiles) return;
+
+    const formData = new FormData();
+    formData.append('image', acceptedFiles[0]);
+
+    try {
+      const response = await upload(formData);
+      setImage(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   const onChangeText = (e: ChangeEvent<HTMLTextAreaElement>): void => {
     setText(e.target.value);
-  };
-
-  const onChangeImage = (e: ChangeEvent<HTMLInputElement>): void => {
-    setImage(e.target.value);
   };
 
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -74,14 +86,21 @@ const Post: FC = () => {
     <div>
       {userId === user?.id && (
         <div>
+          <div
+            {...getRootProps()}
+            style={{
+              border: '2px dashed #fff',
+              padding: '20px',
+              margin: '20px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              color: '#fff',
+            }}
+          >
+            <input {...getInputProps()} />
+            <p>Choose a file</p>
+          </div>
           <form onSubmit={handleOneSubmit}>
-            <Input
-              id="image"
-              name={'image'}
-              value={image}
-              onChange={onChangeImage}
-              placeholder={'enter image url'}
-            />
             <Textarea
               id={'text'}
               name="text"
@@ -105,7 +124,11 @@ const Post: FC = () => {
               <div key={id}>
                 {imageUrl && (
                   <figure className={styles.figure}>
-                    <img src={imageUrl} alt="" />
+                    <img
+                      src={imageUrl}
+                      alt=""
+                      style={{ objectFit: 'contain' }}
+                    />
                   </figure>
                 )}
                 <p className={styles.text}>{text}</p>
