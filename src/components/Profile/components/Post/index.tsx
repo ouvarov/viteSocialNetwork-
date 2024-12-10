@@ -20,6 +20,9 @@ import { Loader } from '@/components/common/Loader';
 import styles from './post.module.scss';
 
 const Post: FC = () => {
+  const [image, setImage] = useState<string>('');
+  const [text, setText] = useState<string>('');
+
   const { user } = useAuth();
   const { userId } = useParams();
 
@@ -36,6 +39,8 @@ const Post: FC = () => {
   const { mutate: createNewPost } = useMutation(createPost, {
     onSuccess: () => {
       queryClient.invalidateQueries([`posts${userId}`]);
+      setText('');
+      setImage('');
     },
   });
 
@@ -53,9 +58,6 @@ const Post: FC = () => {
       },
     },
   );
-
-  const [image, setImage] = useState<string>('');
-  const [text, setText] = useState<string>('');
   const onDrop = async (acceptedFiles: any) => {
     if (!acceptedFiles) return;
 
@@ -86,20 +88,27 @@ const Post: FC = () => {
     <div>
       {userId === user?.id && (
         <div>
-          <div
-            {...getRootProps()}
-            style={{
-              border: '2px dashed #fff',
-              padding: '20px',
-              margin: '20px',
-              textAlign: 'center',
-              cursor: 'pointer',
-              color: '#fff',
-            }}
-          >
-            <input {...getInputProps()} />
-            <p>Choose a file</p>
-          </div>
+          {!image && (
+            <div
+              {...getRootProps()}
+              style={{
+                border: '2px dashed #fff',
+                padding: '20px',
+                margin: '20px',
+                textAlign: 'center',
+                cursor: 'pointer',
+                color: '#fff',
+              }}
+            >
+              <input {...getInputProps()} />
+              <p>Choose a file</p>
+            </div>
+          )}
+          {image && (
+            <figure>
+              <img src={image} alt="" />
+            </figure>
+          )}
           <form onSubmit={handleOneSubmit}>
             <Textarea
               id={'text'}
