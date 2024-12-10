@@ -4,6 +4,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   RouterProvider,
+  Navigate,
 } from 'react-router-dom';
 
 import { Layout } from '@/components/Layout';
@@ -28,6 +29,7 @@ const Routing: FC = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/">
+        <Route index element={<Navigate to={loginPage()} replace />} />
         <Route
           path={loginPage()}
           element={
