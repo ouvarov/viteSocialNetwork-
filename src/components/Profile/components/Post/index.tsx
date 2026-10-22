@@ -79,7 +79,7 @@ const Post: FC = () => {
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
-    createNewPost({ imageUrl: image, text });
+    createNewPost({ imageUrl: image || undefined, text });
   };
 
   return (
