@@ -1,8 +1,8 @@
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 
 import { api } from '@/api';
-import { LoginTypes, SignUpTypes } from '@/types/auth';
-import { UserDataTypes } from '@/types/user';
+import type { LoginTypes, SignUpTypes } from '@/types/auth';
+import type { UserDataTypes } from '@/types/user';
 
 const createUser = (
   data: SignUpTypes,
@@ -11,13 +11,13 @@ const createUser = (
 > => {
   const { email, password, userName } = data;
 
-  return api.post('auth/create', { email, password, userName });
+  return api.post('auth/register', { email, password, userName });
 };
 
 const validateToken = (): Promise<
   AxiosResponse<{ userData: UserDataTypes; access_token: string }>
 > => {
-  return api.get('auth/validate-refresh');
+  return api.post('auth/refresh');
 };
 
 const logoutUser = (): Promise<null> => {

@@ -1,11 +1,13 @@
-import React, { ChangeEvent, FC, useState } from 'react';
+import type { ChangeEvent, FC } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useParams } from 'react-router-dom';
 
 import { upload } from '@/api';
 
-import { PostDataTypes } from '@/types/post.ts';
+import type { PostDataTypes } from '@/types/post.ts';
 import Textarea from '@/components/common/Textarea';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/providers/AuthProvider.tsx';
@@ -38,24 +40,20 @@ const Post: FC = () => {
 
   const { mutate: createNewPost } = useMutation(createPost, {
     onSuccess: () => {
-      queryClient.invalidateQueries([`posts${userId}`]);
       setText('');
       setImage('');
+      return queryClient.invalidateQueries([`posts${userId}`]);
     },
   });
 
   const { mutate: onLikePost } = useMutation((id: string) => likePost(id), {
-    onSuccess: () => {
-      queryClient.invalidateQueries([`posts${userId}`]);
-    },
+    onSuccess: () => queryClient.invalidateQueries([`posts${userId}`]),
   });
 
   const { mutate: removePostItem } = useMutation(
     (id: string) => removePost(id),
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries([`posts${userId}`]);
-      },
+      onSuccess: () => queryClient.invalidateQueries([`posts${userId}`]),
     },
   );
   const onDrop = async (acceptedFiles: any) => {
@@ -81,7 +79,7 @@ const Post: FC = () => {
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
-    createNewPost({ imageUrl: image, text, ownerId: userId || '' });
+    createNewPost({ imageUrl: image, text });
   };
 
   return (
