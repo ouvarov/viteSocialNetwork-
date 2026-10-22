@@ -22,7 +22,7 @@
 
 @mixin media($width) {
   @media (max-width: $width + px) {
-    @content
+    @content;
   }
 }
 
@@ -34,8 +34,11 @@
   color: $color;
 }
 
-
-@mixin pseudo-element($pseudo-element: after, $content: '', $position: absolute) {
+@mixin pseudo-element(
+  $pseudo-element: after,
+  $content: '',
+  $position: absolute
+) {
   @if ($pseudo-element == all) {
     &:after,
     &:before {
@@ -44,8 +47,7 @@
       display: block;
       @content;
     }
-  }
-  @else {
+  } @else {
     &:#{$pseudo-element} {
       content: $content;
       position: $position;
@@ -70,22 +72,31 @@
   }
 }
 
-@mixin background($icon: null, $size: contain, $position: center, $color: transparent, $repeat: no-repeat) {
+@mixin background(
+  $icon: null,
+  $size: contain,
+  $position: center,
+  $color: transparent,
+  $repeat: no-repeat
+) {
   @if ($icon == null) {
     background: $color $position / $size $repeat;
-  }
-  @else {
+  } @else {
     background: $color url($icon) $position / $size $repeat;
   }
 }
 
-@mixin flex($type: default, $direction: row, $display: flex,  $align-items: null, $justify-content: null) {
+@mixin flex(
+  $type: default,
+  $direction: row,
+  $display: flex,
+  $align-items: null,
+  $justify-content: null
+) {
   @if $type == center {
     align-items: center;
     justify-content: center;
-  }
-
-  @else if $type == between {
+  } @else if $type == between {
     align-items: center;
     justify-content: space-between;
   }

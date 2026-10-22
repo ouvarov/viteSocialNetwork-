@@ -75,6 +75,6 @@
     transform: rotateZ(#{$rotate}deg);
     animation: rotateCircle 2s infinite linear;
     z-index: calc(10 - #{$i});
-    animation-delay: 0 - (($i / 10))+s;
+    animation-delay: 0 - (($i / 10)) + s;
   }
 }
