@@ -1,10 +1,12 @@
 export type MessagesDataTypes = {
-  chat_created_at: Date;
-  chat_id: string;
+  messageId: string;
+  senderId: string;
   content: string;
-  message_id: string;
-  sender_id: string;
-  sent_at: Date;
+  sentAt: string;
+};
+
+export type NewMessageTypes = MessagesDataTypes & {
+  chatId: string;
 };
 
 export type ChatDataTypes = {
@@ -13,6 +15,6 @@ export type ChatDataTypes = {
 };
 
 export type ChatsDataTypes = {
-  chat_id: string;
-  chat_name: string;
+  chatId: string;
+  chatName: string | null;
 };

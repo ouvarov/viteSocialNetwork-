@@ -1,7 +1,9 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { UserDataTypes } from '@/types/user';
+import type React from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
+import type { UserDataTypes } from '@/types/user';
 import { logoutUser, validateToken } from '@/components/Auth/api';
-import { AuthContextType } from '@/types/auth.ts';
+import type { AuthContextType } from '@/types/auth.ts';
+import { ACCESS_TOKEN_KEY, socket } from '@/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -18,17 +20,19 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     user: UserDataTypes;
     access_token: string;
   }): void => {
-    localStorage.setItem(import.meta.env.VITE_ACCESS_TOKEN, access_token);
+    localStorage.setItem(ACCESS_TOKEN_KEY, access_token);
     setUser(user);
     setIsLoading(false);
   };
 
-  // Метод для выхода (очистка состояния и локального хранилища)
   const logout = (): void => {
-    logoutUser().finally(() => {
-      localStorage.removeItem(import.meta.env.VITE_ACCESS_TOKEN);
-      setUser(null);
-    });
+    void logoutUser()
+      .catch(() => undefined)
+      .finally(() => {
+        localStorage.removeItem(ACCESS_TOKEN_KEY);
+        socket.disconnect();
+        setUser(null);
+      });
   };
 
   const checkUser = (): void => {

@@ -1,6 +1,6 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useQuery } from 'react-query';
-import { ChatsDataTypes } from '@/types/chat.ts';
+import type { ChatsDataTypes } from '@/types/chat.ts';
 import { getAllChat } from '@/components/Chat/api';
 import { Loader } from '@/components/common/Loader';
 import { Link } from 'react-router-dom';
@@ -20,9 +20,9 @@ const Chats: FC = () => {
 
   return (
     <div>
-      {resData?.map(({ chat_id, chat_name }) => (
-        <Link to={chatPage(chat_id)} key={chat_id}>
-          {chat_name}
+      {resData?.map(({ chatId, chatName }) => (
+        <Link to={chatPage(chatId)} key={chatId}>
+          {chatName}
         </Link>
       ))}
     </div>

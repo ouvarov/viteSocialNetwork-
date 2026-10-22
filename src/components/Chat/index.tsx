@@ -1,10 +1,16 @@
-import React, { ChangeEvent, FC, useEffect, useState } from 'react';
+import type { ChangeEvent, FC } from 'react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
 import { deleteChat, getChat, renameChat } from '@/components/Chat/api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Loader } from '@/components/common/Loader';
-import { ChatDataTypes, MessagesDataTypes } from '@/types/chat.ts';
+import type {
+  ChatDataTypes,
+  MessagesDataTypes,
+  NewMessageTypes,
+} from '@/types/chat.ts';
 import Textarea from '@/components/common/Textarea';
 import { Button } from '@/components/common/Button';
 import { socket } from '@/api';
@@ -37,29 +43,26 @@ const Chat: FC = () => {
 
   const { mutate: deleteChatMutate } = useMutation(deleteChat, {
     onSuccess: () => {
-      queryClient.invalidateQueries([`chat${chatId}`]);
-      queryClient.invalidateQueries([`chats`]);
       navigate(profilePage(String(user?.id)));
+      return Promise.all([
+        queryClient.invalidateQueries([`chat${chatId}`]),
+        queryClient.invalidateQueries([`chats`]),
+      ]);
     },
   });
 
   const { mutate: renameChatMutate } = useMutation(renameChat, {
-    onSuccess: () => {
-      queryClient.invalidateQueries([`chat${chatId}`]);
-      queryClient.invalidateQueries([`chats`]);
-    },
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries([`chat${chatId}`]),
+        queryClient.invalidateQueries([`chats`]),
+      ]),
   });
 
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
-    const createMessageDto = {
-      chatId,
-      senderId: user?.id,
-      content: message,
-    };
-
-    socket.emit('createMessage', createMessageDto);
+    socket.emit('createMessage', { chatId, content: message });
 
     setMessage('');
   };
@@ -90,11 +93,23 @@ const Chat: FC = () => {
   }, [resData]);
 
   useEffect(() => {
-    socket.emit('joinChat', { chatId });
+    if (!chatId) return;
+
+    const joinChat = () => socket.emit('joinChat', { chatId });
+    socket.on('connect', joinChat);
+
+    if (socket.connected) joinChat();
+    else socket.connect();
+
+    return () => {
+      socket.off('connect', joinChat);
+      socket.emit('leaveChat', { chatId });
+    };
   }, [chatId]);
 
   useEffect(() => {
-    const saveMessage = (message: MessagesDataTypes) => {
+    const saveMessage = (message: NewMessageTypes) => {
+      if (message.chatId !== chatId) return;
       setMessages((prevState) => [...prevState, message]);
     };
     socket.on('newMessage', saveMessage);
@@ -102,7 +117,7 @@ const Chat: FC = () => {
     return () => {
       socket.off('newMessage', saveMessage);
     };
-  }, []);
+  }, [chatId]);
 
   if (isLoading) return <Loader />;
 
@@ -125,7 +140,7 @@ const Chat: FC = () => {
           <Button type="submit">Rename Chat</Button>
         </form>
       </div>
-      {messages?.map((item) => <Message {...item} key={item.message_id} />)}
+      {messages?.map((item) => <Message {...item} key={item.messageId} />)}
 
       <form onSubmit={handleOneSubmit}>
         <Textarea
