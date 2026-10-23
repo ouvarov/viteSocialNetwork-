@@ -22,7 +22,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-const upload = (image: FormData): Promise<AxiosResponse<string>> => {
+const upload = (image: FormData): Promise<AxiosResponse<{ url: string }>> => {
   return api.post('/upload', image);
 };
 
