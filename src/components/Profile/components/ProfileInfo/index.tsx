@@ -1,10 +1,13 @@
-import { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import { useEffect } from 'react';
+import { useQuery } from 'react-query';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { Button } from '@/components/common/Button';
-import { useNavigate, useParams } from 'react-router-dom';
 import { UserIcon } from '@/components/common/UserIcon';
 import { useCreateChat } from '@/components/Chat/api';
+import { getUser } from '@/components/Profile/api';
 import { chatPage } from '@/routes/routePaths.ts';
 
 const ProfileInfo: FC = () => {
@@ -13,31 +16,31 @@ const ProfileInfo: FC = () => {
   const { mutate: createChatMutation, data: chatData } = useCreateChat();
   const navigate = useNavigate();
 
+  const { data: profile } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: async () => (await getUser(String(userId))).data,
+    enabled: Boolean(userId),
+  });
+
   useEffect(() => {
     if (chatData) {
       navigate(chatPage(chatData));
     }
   }, [chatData]);
 
-  if (!user) return null;
+  if (!user || !profile) return null;
 
-  const isOwnerProfile = userId === user.id;
+  const isOwnerProfile = profile.id === user.id;
 
   const handleStartChat = () => {
-    if (userId) {
-      createChatMutation([userId, user.id]);
-    }
+    createChatMutation([profile.id, user.id]);
   };
 
   return (
     <div>
       <div>
-        <UserIcon imageUrl={user.imageUrl} />
-        <div>{user.userName}</div>
-        <Button onClick={() => {}} isDisabled={isOwnerProfile}>
-          {user?.followers?.length || 0}
-        </Button>
-        <div>{user?.following?.length || 0}</div>
+        <UserIcon imageUrl={profile.imageUrl ?? undefined} />
+        <div>{profile.userName}</div>
       </div>
       {isOwnerProfile && <Button onClick={logout}>Logout</Button>}
       {!isOwnerProfile && <Button onClick={handleStartChat}>start chat</Button>}

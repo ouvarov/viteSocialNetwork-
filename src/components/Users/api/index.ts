@@ -1,8 +1,9 @@
-import { AxiosResponse } from 'axios';
-import { api } from '@/api';
+import type { AxiosResponse } from 'axios';
 
-const findAllUser = (): Promise<AxiosResponse> => {
-  return api.get('user/all');
-};
+import { api } from '@/api';
+import type { UserDataTypes } from '@/types/user.ts';
+
+const findAllUser = (): Promise<AxiosResponse<UserDataTypes[]>> =>
+  api.get('users');
 
 export { findAllUser };

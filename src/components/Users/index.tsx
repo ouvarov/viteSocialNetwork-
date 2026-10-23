@@ -1,8 +1,8 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import { useQuery } from 'react-query';
 import { findAllUser } from '@/components/Users/api';
 import { Loader } from '@/components/common/Loader';
-import { UserDataTypes } from '@/types/user.ts';
+import type { UserDataTypes } from '@/types/user.ts';
 import { Link } from 'react-router-dom';
 import { profilePage } from '@/routes/routePaths.ts';
 
@@ -18,9 +18,7 @@ const Users: FC = () => {
     },
   });
 
-  if (isLoading) {
-    <Loader />;
-  }
+  if (isLoading) return <Loader />;
 
   return (
     <div>

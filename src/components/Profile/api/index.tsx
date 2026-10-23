@@ -1,23 +1,27 @@
+import type { AxiosResponse } from 'axios';
+
 import { api } from '@/api';
-import { AxiosResponse } from 'axios';
-import { PostDataTypes, ResPostTypes } from '@/types/post.ts';
+import type { PostPageTypes, PostTypes, ResPostTypes } from '@/types/post.ts';
+import type { UserDataTypes } from '@/types/user.ts';
 
-const createPost = (
-  data: ResPostTypes,
-): Promise<AxiosResponse<PostDataTypes>> => {
-  return api.post('post/create', data);
-};
+const POSTS_PAGE_SIZE = 50;
 
-const getPost = (id: string): Promise<AxiosResponse<PostDataTypes>> => {
-  return api.get(`post/getPosts/${id}`);
-};
+const getUser = (id: string): Promise<AxiosResponse<UserDataTypes>> =>
+  api.get(`users/${id}`);
 
-const removePost = (id: string): Promise<AxiosResponse<PostDataTypes>> => {
-  return api.delete(`post/${id}`);
-};
+const createPost = (data: ResPostTypes): Promise<AxiosResponse<PostTypes>> =>
+  api.post('posts', data);
 
-const likePost = (id: string): Promise<AxiosResponse<PostDataTypes>> => {
-  return api.put(`post/like`, { postId: id });
-};
+const getPosts = (userId: string): Promise<AxiosResponse<PostPageTypes>> =>
+  api.get(`users/${userId}/posts`, { params: { limit: POSTS_PAGE_SIZE } });
 
-export { getPost, createPost, removePost, likePost };
+const removePost = (id: string): Promise<AxiosResponse<void>> =>
+  api.delete(`posts/${id}`);
+
+const likePost = (id: string): Promise<AxiosResponse<PostTypes>> =>
+  api.put(`posts/${id}/like`);
+
+const unlikePost = (id: string): Promise<AxiosResponse<PostTypes>> =>
+  api.delete(`posts/${id}/like`);
+
+export { createPost, getPosts, getUser, likePost, removePost, unlikePost };

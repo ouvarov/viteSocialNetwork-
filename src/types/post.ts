@@ -1,10 +1,11 @@
 export type PostTypes = {
-  created: Date;
-  imageUrl: string;
-  ownerId: string;
-  likes: string[];
-  text: string;
   id: string;
+  ownerId: string;
+  imageUrl: string | null;
+  text: string;
+  created: string;
+  likeCount: number;
+  likedByMe: boolean;
 };
 
 export type ResPostTypes = {
@@ -12,6 +13,7 @@ export type ResPostTypes = {
   text: string;
 };
 
-export type PostDataTypes = {
-  postsData: PostTypes[];
+export type PostPageTypes = {
+  items: PostTypes[];
+  nextCursor: string | null;
 };
