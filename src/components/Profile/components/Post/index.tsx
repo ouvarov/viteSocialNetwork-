@@ -69,7 +69,7 @@ const Post: FC = () => {
 
     try {
       const response = await upload(formData);
-      setImage(response.data);
+      setImage(response.data.url);
     } catch (error) {
       console.error(error);
     }
