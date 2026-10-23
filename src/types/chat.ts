@@ -18,3 +18,7 @@ export type ChatsDataTypes = {
   chatId: string;
   chatName: string | null;
 };
+
+export type CreatedChatTypes = {
+  chatId: string;
+};
