@@ -1,8 +1,12 @@
-import { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import { api } from '@/api';
 import { useMutation } from 'react-query';
 
-const createChat = (userIds: string[]): Promise<AxiosResponse> => {
+import type { CreatedChatTypes } from '@/types/chat.ts';
+
+const createChat = (
+  userIds: string[],
+): Promise<AxiosResponse<CreatedChatTypes>> => {
   return api.post('chat/create', { userIds });
 };
 const getChat = (id: string): Promise<AxiosResponse> => {
