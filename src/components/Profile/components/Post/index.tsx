@@ -7,15 +7,16 @@ import { useParams } from 'react-router-dom';
 
 import { upload } from '@/api';
 
-import type { PostDataTypes } from '@/types/post.ts';
+import type { PostPageTypes, PostTypes } from '@/types/post.ts';
 import Textarea from '@/components/common/Textarea';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import {
   createPost,
-  getPost,
+  getPosts,
   likePost,
   removePost,
+  unlikePost,
 } from '@/components/Profile/api';
 import { Loader } from '@/components/common/Loader';
 
@@ -28,10 +29,10 @@ const Post: FC = () => {
   const { user } = useAuth();
   const { userId } = useParams();
 
-  const { data: resData, isLoading } = useQuery<PostDataTypes>({
+  const { data: resData, isLoading } = useQuery<PostPageTypes>({
     queryKey: [`posts${userId}`],
     queryFn: async () => {
-      const response = await getPost(userId || '');
+      const response = await getPosts(userId || '');
       return response.data;
     },
   });
@@ -46,9 +47,13 @@ const Post: FC = () => {
     },
   });
 
-  const { mutate: onLikePost } = useMutation((id: string) => likePost(id), {
-    onSuccess: () => queryClient.invalidateQueries([`posts${userId}`]),
-  });
+  const { mutate: toggleLike } = useMutation(
+    ({ id, likedByMe }: PostTypes) =>
+      likedByMe ? unlikePost(id) : likePost(id),
+    {
+      onSuccess: () => queryClient.invalidateQueries([`posts${userId}`]),
+    },
+  );
 
   const { mutate: removePostItem } = useMutation(
     (id: string) => removePost(id),
@@ -121,44 +126,39 @@ const Post: FC = () => {
       )}
       <div>
         {isLoading && <Loader />}
-        {resData?.postsData?.length &&
-          resData.postsData
-            .sort(
-              (a, b) =>
-                new Date(a.created).getTime() - new Date(b.created).getTime(),
-            )
-            .map(({ id, imageUrl, text, ownerId, likes }) => (
-              <div key={id}>
-                {imageUrl && (
-                  <figure className={styles.figure}>
-                    <img
-                      src={imageUrl}
-                      alt=""
-                      style={{ objectFit: 'contain' }}
-                    />
-                  </figure>
-                )}
-                <p className={styles.text}>{text}</p>
+        {resData?.items.map((post) => (
+          <div key={post.id}>
+            {post.imageUrl && (
+              <figure className={styles.figure}>
+                <img
+                  src={post.imageUrl}
+                  alt=""
+                  style={{ objectFit: 'contain' }}
+                />
+              </figure>
+            )}
+            <p className={styles.text}>{post.text}</p>
 
-                <button
-                  type="button"
-                  onClick={() => onLikePost(id)}
-                  className={styles.likes}
-                >
-                  likes {likes.length}
-                </button>
+            <button
+              type="button"
+              aria-pressed={post.likedByMe}
+              onClick={() => toggleLike(post)}
+              className={styles.likes}
+            >
+              likes {post.likeCount}
+            </button>
 
-                {user?.id === ownerId && (
-                  <Button
-                    onClick={() => {
-                      removePostItem(id);
-                    }}
-                  >
-                    Remove
-                  </Button>
-                )}
-              </div>
-            ))}
+            {user?.id === post.ownerId && (
+              <Button
+                onClick={() => {
+                  removePostItem(post.id);
+                }}
+              >
+                Remove
+              </Button>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -1,9 +1,7 @@
 export type UserDataTypes = {
-  imageUrl: string;
-  userName: string;
-  following: string[];
-  followers: string[];
-  activationLink: string;
-  created: string;
   id: string;
+  userName: string;
+  imageUrl: string | null;
+  description: string;
+  created: string;
 };
