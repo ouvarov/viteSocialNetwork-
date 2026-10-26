@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { findAllUser } from '@/components/Users/api';
 import { Loader } from '@/components/common/Loader';
 import { queryKeys } from '@/api/query-keys.ts';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { profilePage } from '@/routes/routePaths.ts';
 
 import styles from './users.module.scss';
