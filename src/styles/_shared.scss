@@ -1,0 +1,58 @@
+@forward 'tokens';
+@use 'sass:list';
+@use 'sass:map';
+@use 'tokens' as *;
+@use 'themes-data' as themes;
+
+$reference-theme: list.nth(map.values(themes.$themes), 1);
+
+@function theme($component, $prop) {
+  $styles: map.get($reference-theme, $component);
+
+  @if not $styles or not map.has-key($styles, $prop) {
+    @error "Unknown theme token '#{$component}.#{$prop}'";
+  }
+
+  @return var(--#{$component}-#{$prop});
+}
+
+@mixin use-theme($component) {
+  $styles: map.get($reference-theme, $component);
+
+  @if not $styles {
+    @error "Unknown theme component '#{$component}'";
+  }
+
+  @each $prop, $_ in $styles {
+    #{$prop}: var(--#{$component}-#{$prop});
+  }
+}
+
+@mixin text($size, $weight: regular) {
+  font-size: token($font-sizes, $size, 'font size');
+  font-weight: token($font-weights, $weight, 'font weight');
+  line-height: token($line-heights, $size, 'line height');
+}
+
+@mixin size($size) {
+  width: $size;
+  height: $size;
+}
+
+@mixin flex($justify: center, $align: center, $direction: row) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: $align;
+  justify-content: $justify;
+}
+
+@mixin media-up($breakpoint) {
+  @media (min-width: token($breakpoints, $breakpoint, 'breakpoint')) {
+    @content;
+  }
+}
+
+@mixin focus-ring {
+  outline: 2px solid theme(focus, outline-color);
+  outline-offset: 2px;
+}

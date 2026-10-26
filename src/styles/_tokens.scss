@@ -1,0 +1,81 @@
+@use 'sass:map';
+@use 'sass:math';
+
+$root-font-size: 16px;
+
+@function rem($px) {
+  @return math.div($px, $root-font-size) * 1rem;
+}
+
+$space: (
+  0: 0,
+  1: rem(4px),
+  2: rem(8px),
+  3: rem(12px),
+  4: rem(16px),
+  5: rem(24px),
+  6: rem(32px),
+  7: rem(48px),
+  8: rem(64px),
+);
+$radius: (
+  sm: rem(8px),
+  md: rem(16px),
+  lg: rem(24px),
+  full: 9999px,
+);
+$font-sizes: (
+  caption: rem(12px),
+  body: rem(14px),
+  body-lg: rem(16px),
+  lead: rem(18px),
+  title: clamp(#{rem(20px)}, 1rem + 1vw, #{rem(28px)}),
+);
+$line-heights: (
+  caption: 1.5,
+  body: 1.5,
+  body-lg: 1.5,
+  lead: 1.4,
+  title: 1.2,
+);
+$font-weights: (
+  regular: 400,
+  bold: 700,
+);
+$breakpoints: (
+  sm: 480px,
+  md: 768px,
+  lg: 1024px,
+);
+$z-layers: (
+  base: 1,
+  overlay: 10,
+);
+$durations: (
+  fast: 150ms,
+  base: 300ms,
+);
+
+@function token($map, $key, $scale) {
+  @if not map.has-key($map, $key) {
+    @error "Unknown #{$scale} '#{$key}'. Use one of: #{map.keys($map)}";
+  }
+
+  @return map.get($map, $key);
+}
+
+@function space($key) {
+  @return token($space, $key, 'space');
+}
+
+@function radius($key) {
+  @return token($radius, $key, 'radius');
+}
+
+@function z($layer) {
+  @return token($z-layers, $layer, 'z-layer');
+}
+
+@function duration($key) {
+  @return token($durations, $key, 'duration');
+}

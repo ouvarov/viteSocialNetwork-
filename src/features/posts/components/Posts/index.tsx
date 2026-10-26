@@ -63,19 +63,9 @@ const Posts: FC = () => {
       {userId === user?.id && (
         <div>
           {!image && (
-            <div
-              {...getRootProps()}
-              style={{
-                border: '2px dashed #fff',
-                padding: '20px',
-                margin: '20px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                color: '#fff',
-              }}
-            >
-              <input {...getInputProps()} />
-              <p>Choose a file</p>
+            <div {...getRootProps({ className: styles.dropzone })}>
+              <input {...getInputProps({ 'aria-label': 'Post image' })} />
+              <p>Choose an image</p>
             </div>
           )}
           {uploadError && (
@@ -108,11 +98,7 @@ const Posts: FC = () => {
           <div key={post.id}>
             {post.imageUrl && (
               <figure className={styles.figure}>
-                <img
-                  src={post.imageUrl}
-                  alt=""
-                  style={{ objectFit: 'contain' }}
-                />
+                <img className={styles.image} src={post.imageUrl} alt="" />
               </figure>
             )}
             <p className={styles.text}>{post.text}</p>

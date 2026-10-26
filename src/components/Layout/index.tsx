@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { NavLink, Outlet } from 'react-router';
 
+import { ThemeToggle } from '@/features/theme/components/ThemeToggle';
 import {
   chatsPage,
   loginPage,
@@ -16,8 +17,8 @@ const Layout: FC = () => {
 
   return (
     <div>
-      <header>
-        <nav>
+      <header className={styles.header}>
+        <nav className={styles.nav}>
           <NavLink to={loginPage()} className={handleClassName}>
             login
           </NavLink>
@@ -31,10 +32,11 @@ const Layout: FC = () => {
             chats
           </NavLink>
         </nav>
+        <ThemeToggle />
       </header>
-      <div>
+      <main className={styles.main}>
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 };

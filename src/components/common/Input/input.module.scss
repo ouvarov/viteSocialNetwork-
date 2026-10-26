@@ -1,39 +1,37 @@
 .input {
-  padding-bottom: 16px;
+  padding-bottom: space(4);
 
   &__control {
-    @include placeholder-color(rgba($text-color, 0.6));
-    @include font-styles($body-14-regular, $text-color);
-    @include placeholder-font-family('Lato, sans-serif');
+    @include text(body);
+    @include use-theme(field);
 
-    background-color: $bg-color;
-    border: 1px solid rgba($them-color, 0.6);
     width: 100%;
-    min-height: 50px;
-    padding: 16px;
-    border-radius: 16px;
+    min-height: rem(48px);
+    padding: space(3) space(4);
+    border-width: 1px;
+    border-style: solid;
+    border-radius: radius(md);
 
-    &:focus-visible {
-      border-color: $them-color;
-      outline: 2px solid $second-them-color;
-      outline-offset: 2px;
+    &::placeholder {
+      @include use-theme(muted);
     }
 
     &[aria-invalid='true'] {
-      border-color: $them-color;
+      border-color: theme(danger, color);
     }
   }
 
   &__label {
-    @include font-styles($body-12-regular, $text-color);
+    @include text(caption, bold);
 
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: space(1);
   }
 
   &__error {
-    @include font-styles($body-12-regular, $them-color);
+    @include text(caption);
 
-    margin-top: 4px;
+    margin-top: space(1);
+    color: theme(danger, color);
   }
 }

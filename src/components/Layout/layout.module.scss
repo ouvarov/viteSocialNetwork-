@@ -1,12 +1,28 @@
-.link {
-  padding: 10px;
-  color: #fff;
+.header {
+  @include flex(space-between);
 
-  &:hover {
-    text-decoration: underline;
-  }
+  gap: space(3);
+  padding: space(2) space(4);
+  border-bottom: 1px solid theme(surface, border-color);
+}
+
+.nav {
+  @include flex(flex-start);
+
+  flex-wrap: wrap;
+  gap: space(1);
+}
+
+.link {
+  padding: space(2) space(3);
+  border-radius: radius(sm);
+  color: theme(page, color);
 
   &_active {
-    color: $them-color;
+    color: theme(link, color);
   }
+}
+
+.main {
+  padding: space(4);
 }

@@ -98,9 +98,7 @@ const Registration: FC = () => {
       </form>
 
       <div className={styles.link_wrap}>
-        <Link className={styles.link} to={loginPage()}>
-          Login
-        </Link>
+        <Link to={loginPage()}>Login</Link>
       </div>
     </section>
   );

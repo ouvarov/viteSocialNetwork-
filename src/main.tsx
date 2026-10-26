@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from '@/App';
 import { AuthProvider } from '@/features/auth/AuthProvider.tsx';
 
-import './index.css';
+import '@/styles/global.scss';
 
 const MINUTE_MS = 60 * 1000;
 

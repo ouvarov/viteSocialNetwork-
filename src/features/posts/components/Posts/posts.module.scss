@@ -1,19 +1,35 @@
+.dropzone {
+  margin: space(4) 0;
+  padding: space(5);
+  border: 2px dashed theme(field, border-color);
+  border-radius: radius(md);
+  color: theme(muted, color);
+  text-align: center;
+  cursor: pointer;
+}
+
 .figure {
   width: 100%;
-  height: 400px;
+  height: rem(400px);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .text {
-  @include font-styles($body-18-regular, $text-color);
+  @include text(lead);
 
-  padding: 16px;
+  padding: space(4) 0;
 }
 
 .likes {
-  @include font-styles($body-12-regular, $text-color);
+  @include text(caption);
 }
 
 .error {
-  margin: 0 20px 16px;
-  color: $them-color;
+  margin-bottom: space(4);
+  color: theme(danger, color);
 }
