@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/providers/AuthProvider.tsx';
-import { ReactNode, FC } from 'react';
+import { useAuth } from '@/providers/useAuth.ts';
+import type { ReactNode, FC } from 'react';
 import { Loader } from '@/components/common/Loader';
 
 type PrivateRouteProps = {

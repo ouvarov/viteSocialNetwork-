@@ -1,4 +1,4 @@
-import { FC, ChangeEvent } from 'react';
+import type { FC, ChangeEvent } from 'react';
 
 import styles from './input.module.scss';
 

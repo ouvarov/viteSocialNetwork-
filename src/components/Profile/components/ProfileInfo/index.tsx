@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useAuth } from '@/providers/useAuth.ts';
 import { Button } from '@/components/common/Button';
 import { UserIcon } from '@/components/common/UserIcon';
 import { useCreateChat } from '@/components/Chat/api';
@@ -26,7 +26,7 @@ const ProfileInfo: FC = () => {
     if (chatData) {
       navigate(chatPage(chatData.chatId));
     }
-  }, [chatData]);
+  }, [chatData, navigate]);
 
   if (!user || !profile) return null;
 

@@ -3,7 +3,7 @@
 }
 
 .title {
-  @include font-styles($body-18B);
+  @include font-styles($body-18-bold);
 
   color: #fff;
   text-align: center;

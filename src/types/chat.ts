@@ -11,3 +11,5 @@ export type ChatDataTypes = Schemas['ChatDto'];
 export type ChatsDataTypes = Schemas['ChatSummaryDto'];
 
 export type CreatedChatTypes = Schemas['ChatIdDto'];
+
+export type RenameChatTypes = Schemas['UpdateChatDto'];

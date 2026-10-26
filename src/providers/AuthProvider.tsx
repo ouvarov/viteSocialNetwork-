@@ -1,11 +1,12 @@
 import type React from 'react';
-import { createContext, useState, useEffect, useContext } from 'react';
-import type { UserDataTypes } from '@/types/user';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { ACCESS_TOKEN_KEY, socket } from '@/api';
 import { logoutUser, validateToken } from '@/components/Auth/api';
 import type { AuthContextType } from '@/types/auth.ts';
-import { ACCESS_TOKEN_KEY, socket } from '@/api';
+import type { UserDataTypes } from '@/types/user.ts';
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext } from './useAuth.ts';
 
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -13,19 +14,16 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<UserDataTypes | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const login = ({
-    user,
-    access_token,
-  }: {
-    user: UserDataTypes;
-    access_token: string;
-  }): void => {
-    localStorage.setItem(ACCESS_TOKEN_KEY, access_token);
-    setUser(user);
-    setIsLoading(false);
-  };
+  const login = useCallback<AuthContextType['login']>(
+    ({ user, access_token }) => {
+      localStorage.setItem(ACCESS_TOKEN_KEY, access_token);
+      setUser(user);
+      setIsLoading(false);
+    },
+    [],
+  );
 
-  const logout = (): void => {
+  const logout = useCallback(() => {
     void logoutUser()
       .catch(() => undefined)
       .finally(() => {
@@ -33,12 +31,13 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         socket.disconnect();
         setUser(null);
       });
-  };
+  }, []);
 
-  const checkUser = (): void => {
+  const checkUser = useCallback(() => {
+    setIsLoading(true);
+
     validateToken()
       .then((res) => {
-        setIsLoading(true);
         login({ user: res.data.userData, access_token: res.data.access_token });
       })
       .catch(() => {
@@ -47,25 +46,18 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, [login]);
 
   useEffect(() => {
     checkUser();
-  }, []);
+  }, [checkUser]);
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout, checkUser, isLoading }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ user, login, logout, checkUser, isLoading }),
+    [user, login, logout, checkUser, isLoading],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export { AuthProvider, useAuth };
+export { AuthProvider };

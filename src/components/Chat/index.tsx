@@ -14,7 +14,7 @@ import type {
 import Textarea from '@/components/common/Textarea';
 import { Button } from '@/components/common/Button';
 import { socket } from '@/api';
-import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useAuth } from '@/providers/useAuth.ts';
 import { Message } from '@/components/Chat/components/Message';
 
 import { profilePage } from '@/routes/routePaths.ts';

@@ -1,30 +1,49 @@
-# React + TypeScript + Vite
+# Pulse — web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite client for **Pulse**, a small social network: profiles, posts with images, likes and real-time chat.
 
-Currently, two official plugins are available:
+The API lives in a separate repo: [ouvarov/nestSocialNetwork](https://github.com/ouvarov/nestSocialNetwork) (NestJS, PostgreSQL, Redis, Socket.IO).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+> Work in progress. The plan: React 19, TanStack Query v5, React Router 7, feature folders, a typed API layer and a live demo.
 
-## Expanding the ESLint configuration
+## Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- React 18, TypeScript (strict), Vite
+- react-query, react-router, axios, socket.io-client
+- SCSS modules
+- API types generated from the backend OpenAPI spec with `openapi-typescript`
+- ESLint (type-checked, React, hooks, a11y), Stylelint, Prettier, pre-commit hooks
 
-- Configure the top-level `parserOptions` property like this:
+## Getting started
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-};
+Requires Node.js 24 and a running [API](https://github.com/ouvarov/nestSocialNetwork).
+
+```bash
+npm ci
+cp .env.example .env
+npm run dev
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+The app runs on http://localhost:3001 and expects the API on http://localhost:5000 (see `.env.example`).
+
+## API contract
+
+The backend publishes `openapi.json`. Types in `src/api/generated` are generated from it and committed.
+
+```bash
+npm run api:pull     # download the spec from the API main branch and regenerate types
+npm run api:check    # fail if the committed types are out of date
+OPENAPI_SOURCE=../nestSocialNetwork/openapi.json npm run api:pull   # use a local API checkout
+```
+
+Hand-written types in `src/types` are aliases of the generated schemas, so a renamed API field fails `tsc` instead of breaking the UI. Socket.IO events, which OpenAPI does not describe, are typed in `src/api/socket-events.ts`.
+
+## Scripts
+
+| Script             | What it does                               |
+| ------------------ | ------------------------------------------ |
+| `npm run dev`      | Dev server                                 |
+| `npm run build`    | Type-check and build                       |
+| `npm run check`    | Type-check, ESLint, Stylelint and Prettier |
+| `npm run lint:fix` | ESLint with autofix                        |
+| `npm run api:pull` | Pull the OpenAPI spec and regenerate types |

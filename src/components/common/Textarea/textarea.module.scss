@@ -4,7 +4,7 @@
   &__control {
     @include size(100%);
     @include placeholder-color($text-color);
-    @include font-styles($body-14R, $them-color);
+    @include font-styles($body-14-regular, $them-color);
     @include placeholder-font-family('Lato, sans-serif');
 
     background-color: $bg-color;

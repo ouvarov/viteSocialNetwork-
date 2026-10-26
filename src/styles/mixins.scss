@@ -4,19 +4,9 @@
 }
 
 @mixin placeholder-color($color) {
-  &::-webkit-input-placeholder {
-    color: $color;
-  }
-  &::-moz-placeholder {
+  &::placeholder {
     color: $color;
     opacity: 1;
-  }
-  &:-moz-placeholder {
-    color: $color;
-    opacity: 1;
-  }
-  &:-ms-input-placeholder {
-    color: $color;
   }
 }
 
@@ -39,16 +29,16 @@
   $content: '',
   $position: absolute
 ) {
-  @if ($pseudo-element == all) {
-    &:after,
-    &:before {
+  @if $pseudo-element == all {
+    &::after,
+    &::before {
       content: $content;
       position: $position;
       display: block;
       @content;
     }
   } @else {
-    &:#{$pseudo-element} {
+    &::#{$pseudo-element} {
       content: $content;
       position: $position;
       display: block;
@@ -58,16 +48,7 @@
 }
 
 @mixin placeholder-font-family($font-family) {
-  &::-webkit-input-placeholder {
-    font-family: $font-family;
-  }
-  &::-moz-placeholder {
-    font-family: $font-family;
-  }
-  &:-moz-placeholder {
-    font-family: $font-family;
-  }
-  &:-ms-input-placeholder {
+  &::placeholder {
     font-family: $font-family;
   }
 }
@@ -79,7 +60,7 @@
   $color: transparent,
   $repeat: no-repeat
 ) {
-  @if ($icon == null) {
+  @if not $icon {
     background: $color $position / $size $repeat;
   } @else {
     background: $color url($icon) $position / $size $repeat;

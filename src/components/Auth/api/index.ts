@@ -1,37 +1,28 @@
 import type { AxiosResponse } from 'axios';
 
 import { api } from '@/api';
-import type { LoginTypes, SignUpTypes } from '@/types/auth';
-import type { UserDataTypes } from '@/types/user';
+import type {
+  AuthResponseTypes,
+  LoginTypes,
+  SignUpTypes,
+} from '@/types/auth.ts';
 
-const createUser = (
-  data: SignUpTypes,
-): Promise<
-  AxiosResponse<{ userData: UserDataTypes; access_token: string }>
-> => {
-  const { email, password, userName } = data;
+const createUser = ({
+  email,
+  password,
+  userName,
+}: SignUpTypes): Promise<AxiosResponse<AuthResponseTypes>> =>
+  api.post('auth/register', { email, password, userName });
 
-  return api.post('auth/register', { email, password, userName });
-};
+const validateToken = (): Promise<AxiosResponse<AuthResponseTypes>> =>
+  api.post('auth/refresh');
 
-const validateToken = (): Promise<
-  AxiosResponse<{ userData: UserDataTypes; access_token: string }>
-> => {
-  return api.post('auth/refresh');
-};
+const logoutUser = (): Promise<AxiosResponse<void>> => api.post('auth/logout');
 
-const logoutUser = (): Promise<null> => {
-  return api.post('auth/logout');
-};
-
-const loginUser = (
-  data: LoginTypes,
-): Promise<
-  AxiosResponse<{ userData: UserDataTypes; access_token: string }>
-> => {
-  const { email, password } = data;
-
-  return api.post('auth/login', { email, password });
-};
+const loginUser = ({
+  email,
+  password,
+}: LoginTypes): Promise<AxiosResponse<AuthResponseTypes>> =>
+  api.post('auth/login', { email, password });
 
 export { createUser, validateToken, loginUser, logoutUser };
