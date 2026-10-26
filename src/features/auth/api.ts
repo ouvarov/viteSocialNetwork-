@@ -9,11 +9,8 @@ const registerUser = (body: SignUpTypes): Promise<AuthResponseTypes> =>
 const loginUser = (body: LoginTypes): Promise<AuthResponseTypes> =>
   unwrap(client.POST('/api/auth/login', { body }));
 
-const refreshSession = (): Promise<AuthResponseTypes> =>
-  unwrap(client.POST('/api/auth/refresh'));
-
 const logoutUser = async (): Promise<void> => {
   await unwrap(client.POST('/api/auth/logout'));
 };
 
-export { loginUser, logoutUser, refreshSession, registerUser };
+export { loginUser, logoutUser, registerUser };

@@ -1,9 +1,10 @@
-import type { ReactNode, FC } from 'react';
+import type { FC, ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router';
 
-import { Navigate } from 'react-router';
-import { useAuth } from '@/features/auth/useAuth.ts';
-import { profilePage } from '@/routes/routePaths.ts';
 import { Loader } from '@/components/common/Loader';
+import { useAuth } from '@/features/auth/useAuth.ts';
+import { readRedirectPath } from '@/routes/redirect-state.ts';
+import { profilePage } from '@/routes/routePaths.ts';
 
 type AnonymousRouteProps = {
   children: ReactNode;
@@ -11,10 +12,18 @@ type AnonymousRouteProps = {
 
 const AnonymousRoute: FC<AnonymousRouteProps> = ({ children }): ReactNode => {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) return <Loader />;
 
-  return !user ? children : <Navigate to={profilePage(user.id)} replace />;
+  if (!user) return children;
+
+  return (
+    <Navigate
+      to={readRedirectPath(location.state) ?? profilePage(user.id)}
+      replace
+    />
+  );
 };
 
 export { AnonymousRoute };
