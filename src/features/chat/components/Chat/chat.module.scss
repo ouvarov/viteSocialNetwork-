@@ -1,11 +1,6 @@
-.button_wrap {
-  @include flex(between);
-}
-
 .title {
-  @include font-styles($body-18-bold);
+  @include text(lead, bold);
 
-  color: #fff;
+  margin: space(3);
   text-align: center;
-  margin: 10px;
 }

@@ -1,0 +1,98 @@
+@use 'sass:map';
+@use 'themes-data' as themes;
+
+@mixin theme-variables($theme-name) {
+  color-scheme: $theme-name;
+
+  @each $component, $styles in map.get(themes.$themes, $theme-name) {
+    @each $prop, $value in $styles {
+      --#{$component}-#{$prop}: #{$value};
+    }
+  }
+}
+
+:root,
+:root[data-theme='dark'] {
+  @include theme-variables(dark);
+}
+
+:root[data-theme='light'] {
+  @include theme-variables(light);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    @include theme-variables(light);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+body {
+  @include use-theme(page);
+  @include text(body);
+
+  min-height: 100vh;
+  font-family: Lato, system-ui, sans-serif;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  @include use-theme(link);
+
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+:focus-visible {
+  @include focus-ring;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

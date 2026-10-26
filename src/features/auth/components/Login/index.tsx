@@ -81,9 +81,7 @@ const Login: FC = () => {
         </Button>
       </form>
       <div className={styles.link_wrap}>
-        <Link className={styles.link} to={signUpPage()}>
-          Registration
-        </Link>
+        <Link to={signUpPage()}>Registration</Link>
       </div>
     </section>
   );

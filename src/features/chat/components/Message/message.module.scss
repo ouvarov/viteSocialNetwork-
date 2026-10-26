@@ -1,20 +1,19 @@
 .text {
-  @include font-styles($body-16-regular);
-
-  color: #fff;
+  @include text(body-lg);
 }
 
 .item {
-  @include flex(center);
+  @include flex;
+  @include use-theme(message-other);
 
-  max-width: 300px;
-  padding: 10px;
-  border-radius: 20px;
-  margin: 10px auto 10px 10px;
-  background-color: $second-them-color;
+  max-width: rem(300px);
+  margin: space(3) auto space(3) space(3);
+  padding: space(3);
+  border-radius: radius(lg);
 
   &__owner {
-    margin: 10px 10px 10px auto;
-    background-color: $them-color;
+    @include use-theme(message-own);
+
+    margin: space(3) space(3) space(3) auto;
   }
 }

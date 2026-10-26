@@ -12,5 +12,23 @@ export default {
       { message: 'Use @use instead of @import' },
     ],
     'max-nesting-depth': 3,
+    'color-no-hex': [
+      true,
+      { message: 'Colors come from theme tokens: use theme() or use-theme()' },
+    ],
+    'color-named': [
+      'never',
+      { message: 'Colors come from theme tokens: use theme() or use-theme()' },
+    ],
+    'function-disallowed-list': [
+      ['rgb', 'rgba', 'hsl', 'hsla'],
+      { message: 'Colors come from theme tokens: use theme() or use-theme()' },
+    ],
   },
+  overrides: [
+    {
+      files: ['src/styles/_themes-data.scss'],
+      rules: { 'color-no-hex': null },
+    },
+  ],
 };

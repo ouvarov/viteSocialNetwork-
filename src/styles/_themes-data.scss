@@ -1,0 +1,137 @@
+@use 'sass:map';
+
+$themes: (
+  dark: (
+    page: (
+      background-color: #110f17,
+      color: #f4f2f8,
+    ),
+    surface: (
+      background-color: #1b1824,
+      border-color: #2e2a3b,
+    ),
+    field: (
+      background-color: #110f17,
+      border-color: #6e6680,
+      color: #f4f2f8,
+    ),
+    muted: (
+      color: #a9a3b8,
+    ),
+    accent: (
+      background-color: #c2461f,
+      color: #fff,
+    ),
+    link: (
+      color: #ff9b73,
+    ),
+    focus: (
+      outline-color: #b9a3ff,
+    ),
+    danger: (
+      color: #ff8f7a,
+    ),
+    message-own: (
+      background-color: #c2461f,
+      color: #fff,
+    ),
+    message-other: (
+      background-color: #3a2f63,
+      color: #f4f2f8,
+    ),
+  ),
+  light: (
+    page: (
+      background-color: #f6f4fa,
+      color: #1b1824,
+    ),
+    surface: (
+      background-color: #fff,
+      border-color: #dcd7e6,
+    ),
+    field: (
+      background-color: #fff,
+      border-color: #8a8499,
+      color: #1b1824,
+    ),
+    muted: (
+      color: #5d576b,
+    ),
+    accent: (
+      background-color: #b8401b,
+      color: #fff,
+    ),
+    link: (
+      color: #a13a17,
+    ),
+    focus: (
+      outline-color: #5b3fc4,
+    ),
+    danger: (
+      color: #b3261e,
+    ),
+    message-own: (
+      background-color: #b8401b,
+      color: #fff,
+    ),
+    message-other: (
+      background-color: #e6e0f8,
+      color: #1b1824,
+    ),
+  ),
+);
+$required-keys: (
+  page: (
+    background-color,
+    color,
+  ),
+  surface: (
+    background-color,
+    border-color,
+  ),
+  field: (
+    background-color,
+    border-color,
+    color,
+  ),
+  muted: (
+    color,
+  ),
+  accent: (
+    background-color,
+    color,
+  ),
+  link: (
+    color,
+  ),
+  focus: (
+    outline-color,
+  ),
+  danger: (
+    color,
+  ),
+  message-own: (
+    background-color,
+    color,
+  ),
+  message-other: (
+    background-color,
+    color,
+  ),
+);
+
+@each $theme-name, $components in $themes {
+  @each $component, $required in $required-keys {
+    $styles: map.get($components, $component);
+
+    @if not $styles {
+      @error "Theme '#{$theme-name}' is missing component '#{$component}'";
+    }
+
+    @each $key in $required {
+      @if not map.has-key($styles, $key) {
+        @error "Theme '#{$theme-name}' component '#{$component}' is missing '#{$key}'";
+      }
+    }
+  }
+}
