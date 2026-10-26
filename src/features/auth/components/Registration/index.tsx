@@ -1,6 +1,6 @@
 import type { FC } from 'react';
-import type React from 'react';
-import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { Link } from 'react-router';
 
 import { loginPage } from '@/routes/routePaths';
@@ -11,88 +11,75 @@ import { useAuth } from '@/features/auth/useAuth.ts';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
 import { registerUser } from '@/features/auth/api.ts';
+import { signUpSchema } from '@/features/auth/schemas.ts';
+import type { SignUpFormValues } from '@/features/auth/schemas.ts';
 
 import styles from './registration.module.scss';
 
 const Registration: FC = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [userName, setUserName] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { login } = useAuth();
 
-  const isDisabled = ![email, password, userName].every(Boolean);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+    mode: 'onTouched',
+    defaultValues: { userName: '', email: '', password: '' },
+  });
 
-  const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
-
-    registerUser({ email, password, userName })
-      .then(login)
-      .catch((registrationError: unknown) => {
-        setError(getApiErrorMessage(registrationError, 'Could not sign up'));
-      })
-      .finally(() => setIsSubmitting(false));
-  };
-
-  const onChangeEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setEmail(e.target.value);
-  };
-
-  const onChangeName = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setUserName(e.target.value);
-  };
-
-  const onChangePassword = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setPassword(e.target.value);
+  const onSubmit = async (values: SignUpFormValues): Promise<void> => {
+    try {
+      login(await registerUser(values));
+    } catch (registrationError) {
+      setError('root.server', {
+        message: getApiErrorMessage(registrationError, 'Could not sign up'),
+      });
+    }
   };
 
   return (
     <section className={styles.section}>
       <h2 className={styles.title}>Registration</h2>
 
-      <form onSubmit={handleOneSubmit}>
+      <form noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
         <Input
+          {...register('userName')}
           id="userName"
-          name="userName"
           autoComplete="name"
           required
-          value={userName}
           label="Your name"
-          onChange={onChangeName}
           placeholder="Enter your name"
+          error={errors.userName?.message}
         />
         <Input
+          {...register('email')}
           id="email"
-          name="email"
-          value={email}
           type="email"
           autoComplete="email"
           required
           label="Your email"
-          onChange={onChangeEmail}
           placeholder="Enter your email"
+          error={errors.email?.message}
         />
         <Input
+          {...register('password')}
           id="password"
           type="password"
           autoComplete="new-password"
           required
-          name="password"
-          value={password}
           label="Your password"
-          onChange={onChangePassword}
           placeholder="Enter your password"
+          error={errors.password?.message}
         />
-        {error && (
+        {errors.root?.server && (
           <p className={styles.error} role="alert">
-            {error}
+            {errors.root.server.message}
           </p>
         )}
-        <Button disabled={isDisabled} isLoading={isSubmitting} type="submit">
+        <Button isLoading={isSubmitting} type="submit">
           Submit
         </Button>
       </form>

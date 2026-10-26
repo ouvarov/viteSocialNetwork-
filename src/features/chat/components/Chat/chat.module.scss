@@ -4,3 +4,8 @@
   margin: space(3);
   text-align: center;
 }
+
+.error {
+  margin-bottom: space(4);
+  color: theme(danger, color);
+}
