@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useEffect } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/providers/useAuth.ts';
@@ -9,6 +9,7 @@ import { UserIcon } from '@/components/common/UserIcon';
 import { useCreateChat } from '@/components/Chat/api';
 import { getUser } from '@/components/Profile/api';
 import { chatPage } from '@/routes/routePaths.ts';
+import { queryKeys } from '@/api/query-keys.ts';
 
 const ProfileInfo: FC = () => {
   const { user, logout } = useAuth();
@@ -17,7 +18,7 @@ const ProfileInfo: FC = () => {
   const navigate = useNavigate();
 
   const { data: profile } = useQuery({
-    queryKey: ['user', userId],
+    queryKey: queryKeys.user(String(userId)),
     queryFn: async () => (await getUser(String(userId))).data,
     enabled: Boolean(userId),
   });

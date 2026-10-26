@@ -35,18 +35,19 @@
     "*.{json,md,html}": "prettier --write"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.105.0",
     "axios": "^1.7.7",
     "classnames": "^2.5.1",
     "path": "^0.12.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.5",
-    "react-query": "^3.39.3",
     "react-router-dom": "^6.26.2",
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@tanstack/eslint-plugin-query": "^5.105.0",
     "@types/axios": "^0.14.0",
     "@types/classnames": "^2.3.1",
     "@types/node": "^22.5.5",

@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { ACCESS_TOKEN_KEY, socket } from '@/api';
 import { logoutUser, validateToken } from '@/components/Auth/api';
@@ -13,6 +14,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<UserDataTypes | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const login = useCallback<AuthContextType['login']>(
     ({ user, access_token }) => {
@@ -29,9 +31,10 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       .finally(() => {
         localStorage.removeItem(ACCESS_TOKEN_KEY);
         socket.disconnect();
+        queryClient.clear();
         setUser(null);
       });
-  }, []);
+  }, [queryClient]);
 
   const checkUser = useCallback(() => {
     setIsLoading(true);
