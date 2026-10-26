@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import type React from 'react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 
 import { signUpPage } from '@/routes/routePaths';
 

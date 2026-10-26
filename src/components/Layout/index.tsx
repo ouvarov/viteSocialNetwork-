@@ -1,5 +1,12 @@
 import type { FC } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router';
+
+import {
+  chatsPage,
+  loginPage,
+  signUpPage,
+  usersPage,
+} from '@/routes/routePaths.ts';
 
 import styles from './layout.module.scss';
 
@@ -11,16 +18,16 @@ const Layout: FC = () => {
     <div>
       <header>
         <nav>
-          <NavLink to="/sign-in" className={handleClassName}>
+          <NavLink to={loginPage()} className={handleClassName}>
             login
           </NavLink>
-          <NavLink to="/sign-up" className={handleClassName}>
+          <NavLink to={signUpPage()} className={handleClassName}>
             registration
           </NavLink>
-          <NavLink to="/users" className={handleClassName}>
+          <NavLink to={usersPage()} className={handleClassName}>
             users
           </NavLink>
-          <NavLink className={handleClassName} to="chats">
+          <NavLink to={chatsPage()} className={handleClassName}>
             chats
           </NavLink>
         </nav>

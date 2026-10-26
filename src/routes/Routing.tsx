@@ -1,11 +1,11 @@
 import type { FC } from 'react';
 import {
+  Navigate,
   Route,
   createBrowserRouter,
   createRoutesFromElements,
-  RouterProvider,
-  Navigate,
-} from 'react-router-dom';
+} from 'react-router';
+import { RouterProvider } from 'react-router/dom';
 
 import { Layout } from '@/components/Layout';
 import { Registration } from '@/components/Auth/Registration';
@@ -25,67 +25,64 @@ import { Users } from '@/components/Users';
 import { Chat } from '@/components/Chat';
 import { Chats } from '@/components/Chat/Chats';
 
-const Routing: FC = () => {
-  const router = createBrowserRouter(
-    createRoutesFromElements(
-      <Route path="/">
-        <Route index element={<Navigate to={loginPage()} replace />} />
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route path="/">
+      <Route index element={<Navigate to={loginPage()} replace />} />
+      <Route
+        path={loginPage()}
+        element={
+          <AnonymousRoute>
+            <Login />
+          </AnonymousRoute>
+        }
+      />
+      <Route
+        path={signUpPage()}
+        element={
+          <AnonymousRoute>
+            <Registration />
+          </AnonymousRoute>
+        }
+      />
+      <Route element={<Layout />}>
         <Route
-          path={loginPage()}
+          path={profilePage(':userId')}
           element={
-            <AnonymousRoute>
-              <Login />
-            </AnonymousRoute>
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
           }
         />
         <Route
-          path={signUpPage()}
+          path={usersPage()}
           element={
-            <AnonymousRoute>
-              <Registration />{' '}
-            </AnonymousRoute>
+            <PrivateRoute>
+              <Users />
+            </PrivateRoute>
           }
         />
-        <Route element={<Layout />}>
-          <Route
-            path={profilePage(':userId')}
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
+        <Route
+          path={chatPage(':chatId')}
+          element={
+            <PrivateRoute>
+              <Chat />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path={chatsPage()}
+          element={
+            <PrivateRoute>
+              <Chats />
+            </PrivateRoute>
+          }
+        />
+      </Route>
+    </Route>,
+  ),
+);
 
-          <Route
-            path={usersPage()}
-            element={
-              <PrivateRoute>
-                <Users />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path={chatPage(':chatId')}
-            element={
-              <PrivateRoute>
-                <Chat />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path={chatsPage()}
-            element={
-              <PrivateRoute>
-                <Chats />
-              </PrivateRoute>
-            }
-          />
-        </Route>
-      </Route>,
-    ),
-  );
-
-  return <RouterProvider router={router} />;
-};
+const Routing: FC = () => <RouterProvider router={router} />;
 
 export { Routing };

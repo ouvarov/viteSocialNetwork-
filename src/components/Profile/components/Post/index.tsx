@@ -3,7 +3,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 import { upload } from '@/api';
 

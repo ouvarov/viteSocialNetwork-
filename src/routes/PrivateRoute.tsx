@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 import { useAuth } from '@/providers/useAuth.ts';
 import type { ReactNode, FC } from 'react';
 import { Loader } from '@/components/common/Loader';

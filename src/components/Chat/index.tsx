@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { deleteChat, getChat, renameChat } from '@/components/Chat/api';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 import { Loader } from '@/components/common/Loader';
 import type { MessagesDataTypes, NewMessageTypes } from '@/types/chat.ts';
 import { queryKeys } from '@/api/query-keys.ts';
@@ -39,7 +39,7 @@ const Chat: FC = () => {
     mutationFn: deleteChat,
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: queryKeys.chat(String(chatId)) });
-      navigate(profilePage(String(user?.id)));
+      void navigate(profilePage(String(user?.id)));
       return queryClient.invalidateQueries({ queryKey: queryKeys.chats() });
     },
   });

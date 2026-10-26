@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 
 import { useAuth } from '@/providers/useAuth.ts';
 import { Button } from '@/components/common/Button';
@@ -25,7 +25,7 @@ const ProfileInfo: FC = () => {
 
   useEffect(() => {
     if (chatData) {
-      navigate(chatPage(chatData.chatId));
+      void navigate(chatPage(chatData.chatId));
     }
   }, [chatData, navigate]);
 
