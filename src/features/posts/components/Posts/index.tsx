@@ -1,7 +1,7 @@
-import type { ChangeEvent, FC } from 'react';
-import type React from 'react';
-import { useState } from 'react';
+import type { FC } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useDropzone } from 'react-dropzone';
+import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
@@ -16,46 +16,55 @@ import {
   useToggleLike,
   useUploadImage,
 } from '@/features/posts/queries.ts';
+import { postSchema } from '@/features/posts/schemas.ts';
+import type { PostFormValues } from '@/features/posts/schemas.ts';
 
 import styles from './posts.module.scss';
 
 const Posts: FC = () => {
-  const [image, setImage] = useState<string>('');
-  const [text, setText] = useState<string>('');
-
   const { user } = useAuth();
   const { userId } = useParams();
 
   const { data: posts, isPending } = usePosts(userId);
-  const { mutate: createPost } = useCreatePost(userId);
+  const { mutateAsync: createPost } = useCreatePost(userId);
   const { mutate: toggleLike } = useToggleLike(userId);
   const { mutate: removePost } = useRemovePost(userId);
   const { mutate: uploadImage, error: uploadError } = useUploadImage();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<PostFormValues>({
+    resolver: zodResolver(postSchema),
+    defaultValues: { text: '', imageUrl: undefined },
+  });
+
+  const image = watch('imageUrl');
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: ([file]) => {
       if (!file) return;
 
-      uploadImage(file, { onSuccess: ({ url }) => setImage(url) });
+      uploadImage(file, {
+        onSuccess: ({ url }) => setValue('imageUrl', url),
+      });
     },
   });
 
-  const onChangeText = (e: ChangeEvent<HTMLTextAreaElement>): void => {
-    setText(e.target.value);
-  };
-
-  const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-
-    createPost(
-      { imageUrl: image || undefined, text },
-      {
-        onSuccess: () => {
-          setText('');
-          setImage('');
-        },
-      },
-    );
+  const onSubmit = async (values: PostFormValues): Promise<void> => {
+    try {
+      await createPost(values);
+      reset();
+    } catch (createError) {
+      setError('root.server', {
+        message: getApiErrorMessage(createError, 'Could not publish the post'),
+      });
+    }
   };
 
   return (
@@ -78,17 +87,23 @@ const Posts: FC = () => {
               <img src={image} alt="" />
             </figure>
           )}
-          <form onSubmit={handleOneSubmit}>
+          <form noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
             <Textarea
+              {...register('text')}
               id="text"
-              name="text"
               label="New post"
               required
-              value={text}
-              onChange={onChangeText}
               placeholder="What's new?"
+              error={errors.text?.message}
             />
-            <Button type="submit">Submit</Button>
+            {errors.root?.server && (
+              <p className={styles.error} role="alert">
+                {errors.root.server.message}
+              </p>
+            )}
+            <Button isLoading={isSubmitting} type="submit">
+              Submit
+            </Button>
           </form>
         </div>
       )}
