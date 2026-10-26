@@ -13,4 +13,5 @@ export type AuthContextType = {
   logout: () => void;
   checkUser: () => void;
   isLoading: boolean;
+  hasSignedOut: boolean;
 };

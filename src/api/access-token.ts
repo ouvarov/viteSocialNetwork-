@@ -1,11 +1,13 @@
-const ACCESS_TOKEN_KEY = 'pulse_access_token';
+let accessToken: string | null = null;
 
-const readAccessToken = (): string | null =>
-  localStorage.getItem(ACCESS_TOKEN_KEY);
+const readAccessToken = (): string | null => accessToken;
 
-const saveAccessToken = (token: string): void =>
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+const saveAccessToken = (token: string): void => {
+  accessToken = token;
+};
 
-const clearAccessToken = (): void => localStorage.removeItem(ACCESS_TOKEN_KEY);
+const clearAccessToken = (): void => {
+  accessToken = null;
+};
 
 export { clearAccessToken, readAccessToken, saveAccessToken };
