@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 
 import { signUpPage } from '@/routes/routePaths';
 
-import Input from '@/components/common/Input';
+import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/features/auth/useAuth.ts';
 
@@ -18,6 +18,7 @@ const Login: FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { login } = useAuth();
 
@@ -26,12 +27,14 @@ const Login: FC = () => {
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setError(null);
+    setIsSubmitting(true);
 
     loginUser({ email, password })
       .then(login)
       .catch((loginError: unknown) => {
         setError(getApiErrorMessage(loginError, 'Could not log in'));
-      });
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   const onChangeEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -51,6 +54,8 @@ const Login: FC = () => {
           name="email"
           value={email}
           type="email"
+          autoComplete="email"
+          required
           label="Your email"
           onChange={onChangeEmail}
           placeholder="Enter your email"
@@ -58,6 +63,8 @@ const Login: FC = () => {
         <Input
           id="password"
           type="password"
+          autoComplete="current-password"
+          required
           name="password"
           value={password}
           label="Your password"
@@ -69,7 +76,7 @@ const Login: FC = () => {
             {error}
           </p>
         )}
-        <Button isDisabled={isDisabled} type="submit">
+        <Button disabled={isDisabled} isLoading={isSubmitting} type="submit">
           Submit
         </Button>
       </form>
