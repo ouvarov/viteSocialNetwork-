@@ -1,35 +1,4 @@
-.dropzone {
-  margin: space(4) 0;
-  padding: space(5);
-  border: 2px dashed theme(field, border-color);
-  border-radius: radius(md);
-  color: theme(muted, color);
-  text-align: center;
-  cursor: pointer;
-}
-
-.figure {
-  width: 100%;
-  height: rem(400px);
-}
-
-.image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.text {
-  @include text(lead);
-
-  padding: space(4) 0;
-}
-
-.likes {
-  @include text(caption);
-}
-
-.error {
-  margin-bottom: space(4);
-  color: theme(danger, color);
+.posts {
+  display: grid;
+  gap: space(4);
 }

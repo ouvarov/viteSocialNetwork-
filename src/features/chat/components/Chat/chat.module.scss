@@ -1,11 +1,41 @@
-.title {
-  @include text(lead, bold);
+.chat {
+  display: grid;
+  gap: space(4);
 
-  margin: space(3);
-  text-align: center;
-}
+  &__error {
+    color: theme(danger, color);
+  }
 
-.error {
-  margin-bottom: space(4);
-  color: theme(danger, color);
+  &__rename {
+    @include card;
+  }
+
+  &__log {
+    @include card;
+
+    overflow-y: auto;
+    height: clamp(#{rem(240px)}, 100dvh - #{rem(420px)}, #{rem(560px)});
+    overscroll-behavior: contain;
+  }
+
+  &__messages {
+    @include flex(flex-start, stretch, column);
+
+    gap: space(2);
+  }
+
+  &__composer {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: space(3);
+    align-items: end;
+
+    > button {
+      margin-bottom: space(4);
+    }
+  }
+
+  &__field {
+    min-width: 0;
+  }
 }

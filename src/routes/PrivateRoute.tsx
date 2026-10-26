@@ -14,7 +14,7 @@ const PrivateRoute: FC<PrivateRouteProps> = ({ children }): ReactNode => {
   const { user, isLoading, hasSignedOut } = useAuth();
   const location = useLocation();
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <Loader fullScreen />;
 
   if (user) return children;
 

@@ -1,14 +1,17 @@
 import type { FC } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
 import { Button } from '@/components/common/Button';
+import { EmptyState } from '@/components/common/EmptyState';
+import { ErrorState } from '@/components/common/ErrorState';
 import { Input } from '@/components/common/Input';
 import { Loader } from '@/components/common/Loader';
+import { PageHeader } from '@/components/common/PageHeader';
 import { Textarea } from '@/components/common/Textarea';
-import { useAuth } from '@/features/auth/useAuth.ts';
 import { Message } from '@/features/chat/components/Message';
 import {
   useChat,
@@ -21,19 +24,31 @@ import type {
   RenameChatFormValues,
 } from '@/features/chat/schemas.ts';
 import { useChatRoom } from '@/features/chat/useChatRoom.ts';
-import { profilePage } from '@/routes/routePaths.ts';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
+import { chatsPage } from '@/routes/routePaths.ts';
 
 import styles from './chat.module.scss';
 
+const UNNAMED_CHAT = 'Untitled chat';
+
 const Chat: FC = () => {
   const { chatId } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const renameFormId = useId();
+  const [isRenaming, setIsRenaming] = useState(false);
+  const logRef = useRef<HTMLDivElement>(null);
 
-  const { data: chat, isPending } = useChat(chatId);
+  const { data: chat, isPending, isError, error, refetch } = useChat(chatId);
   const { messages, sendMessage } = useChatRoom(chatId, chat?.messages);
-  const { mutate: deleteChat } = useDeleteChat();
+  const {
+    mutate: deleteChat,
+    isPending: isDeleting,
+    error: deleteError,
+  } = useDeleteChat();
   const { mutateAsync: renameChat } = useRenameChat();
+
+  const title = chat?.chatName || UNNAMED_CHAT;
+  useDocumentTitle(title);
 
   const renameForm = useForm<RenameChatFormValues>({
     resolver: zodResolver(renameChatSchema),
@@ -45,12 +60,24 @@ const Chat: FC = () => {
     defaultValues: { content: '' },
   });
 
+  const { setFocus } = renameForm;
+
+  useEffect(() => {
+    if (isRenaming) setFocus('newChatName');
+  }, [isRenaming, setFocus]);
+
+  useEffect(() => {
+    const log = logRef.current;
+    if (log) log.scrollTop = log.scrollHeight;
+  }, [messages.length]);
+
   const onRename = async ({
     newChatName,
   }: RenameChatFormValues): Promise<void> => {
     try {
       await renameChat({ chatId: String(chatId), newChatName });
       renameForm.reset();
+      setIsRenaming(false);
     } catch (renameError) {
       renameForm.setError('root.server', {
         message: getApiErrorMessage(renameError, 'Could not rename the chat'),
@@ -63,25 +90,59 @@ const Chat: FC = () => {
     messageForm.reset();
   };
 
-  const handleOnRemove = () => {
+  const handleDelete = () => {
     deleteChat(String(chatId), {
-      onSuccess: () => void navigate(profilePage(String(user?.id))),
+      onSuccess: () => void navigate(chatsPage()),
     });
   };
 
-  if (isPending) return <Loader />;
+  if (isPending) return <Loader label="Loading chat" />;
+
+  if (isError) {
+    return (
+      <ErrorState
+        title="Could not open this chat"
+        error={error}
+        onRetry={() => void refetch()}
+      />
+    );
+  }
 
   const renameErrors = renameForm.formState.errors;
   const messageErrors = messageForm.formState.errors;
 
   return (
-    <div>
-      {chat?.chatName && <h2 className={styles.title}>{chat.chatName}</h2>}
-      <div>
-        <Button onClick={handleOnRemove}>remove chat</Button>
-      </div>
-      <div>
+    <section className={styles.chat}>
+      <PageHeader title={title}>
+        <Button
+          variant="secondary"
+          size="sm"
+          aria-expanded={isRenaming}
+          aria-controls={renameFormId}
+          onClick={() => setIsRenaming((open) => !open)}
+        >
+          Rename
+        </Button>
+        <Button
+          variant="danger"
+          size="sm"
+          isLoading={isDeleting}
+          onClick={handleDelete}
+        >
+          Delete chat
+        </Button>
+      </PageHeader>
+
+      {deleteError && (
+        <p className={styles.chat__error} role="alert">
+          {getApiErrorMessage(deleteError, 'Could not delete the chat')}
+        </p>
+      )}
+
+      {isRenaming && (
         <form
+          id={renameFormId}
+          className={styles.chat__rename}
           noValidate
           onSubmit={(e) => void renameForm.handleSubmit(onRename)(e)}
         >
@@ -93,20 +154,39 @@ const Chat: FC = () => {
             error={renameErrors.newChatName?.message}
           />
           {renameErrors.root?.server && (
-            <p className={styles.error} role="alert">
+            <p className={styles.chat__error} role="alert">
               {renameErrors.root.server.message}
             </p>
           )}
-          <Button isLoading={renameForm.formState.isSubmitting} type="submit">
-            Rename Chat
+          <Button
+            isLoading={renameForm.formState.isSubmitting}
+            size="sm"
+            type="submit"
+          >
+            Save name
           </Button>
         </form>
+      )}
+
+      <div
+        ref={logRef}
+        className={styles.chat__log}
+        role="log"
+        aria-label="Messages"
+      >
+        {messages.length === 0 ? (
+          <EmptyState title="No messages yet">Say hi to start.</EmptyState>
+        ) : (
+          <ol className={styles.chat__messages}>
+            {messages.map((item) => (
+              <Message {...item} key={item.messageId} />
+            ))}
+          </ol>
+        )}
       </div>
-      {messages.map((item) => (
-        <Message {...item} key={item.messageId} />
-      ))}
 
       <form
+        className={styles.chat__composer}
         noValidate
         onSubmit={(e) => void messageForm.handleSubmit(onSendMessage)(e)}
       >
@@ -115,11 +195,13 @@ const Chat: FC = () => {
           id="message"
           label="Message"
           required
+          rows={2}
+          className={styles.chat__field}
           error={messageErrors.content?.message}
         />
         <Button type="submit">Send</Button>
       </form>
-    </div>
+    </section>
   );
 };
 

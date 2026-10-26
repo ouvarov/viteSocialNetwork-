@@ -33,13 +33,18 @@ $dots: 10;
 }
 
 .loader {
-  position: absolute;
-  inset: 0;
-  z-index: z(overlay);
-  background-color: theme(page, background-color);
+  position: relative;
+  min-height: rem(160px);
+
+  &--full_screen {
+    position: fixed;
+    inset: 0;
+    z-index: z(overlay);
+    background-color: theme(page, background-color);
+  }
 
   &__wrap {
-    @include size(rem(100px));
+    @include size(rem(64px));
 
     position: absolute;
     top: 50%;

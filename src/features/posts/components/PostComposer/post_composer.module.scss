@@ -1,0 +1,43 @@
+.composer {
+  @include card;
+
+  &__dropzone {
+    @include flex;
+    @include text(caption);
+
+    min-height: rem(64px);
+    margin-bottom: space(4);
+    padding: space(3);
+    border: 1px dashed theme(field, border-color);
+    border-radius: radius(md);
+    color: theme(muted, color);
+    text-align: center;
+    cursor: pointer;
+
+    &:hover {
+      color: theme(page, color);
+    }
+  }
+
+  &__preview {
+    @include flex(flex-start, flex-start, column);
+
+    gap: space(2);
+    margin-bottom: space(4);
+  }
+
+  &__image {
+    max-height: rem(240px);
+    border-radius: radius(md);
+    object-fit: contain;
+  }
+
+  &__error {
+    margin-bottom: space(4);
+    color: theme(danger, color);
+  }
+
+  &__actions {
+    @include flex(flex-end);
+  }
+}

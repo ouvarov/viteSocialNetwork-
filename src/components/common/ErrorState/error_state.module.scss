@@ -1,0 +1,17 @@
+.error_state {
+  @include card;
+  @include flex(center, center, column);
+
+  gap: space(2);
+  text-align: center;
+
+  &__title {
+    @include text(lead, bold);
+
+    color: theme(danger, color);
+  }
+
+  &__text {
+    color: theme(muted, color);
+  }
+}

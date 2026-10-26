@@ -1,23 +1,27 @@
 import type { FC } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate } from 'react-router';
 
+import { getApiErrorMessage } from '@/api/errors.ts';
 import { Button } from '@/components/common/Button';
 import { UserIcon } from '@/components/common/UserIcon';
-import { useAuth } from '@/features/auth/useAuth.ts';
 import { useCreateChat } from '@/features/chat/queries.ts';
-import { useUser } from '@/features/users/queries.ts';
+import type { UserDataTypes } from '@/features/users/types.ts';
 import { chatPage } from '@/routes/routePaths.ts';
 
-const ProfileInfo: FC = () => {
-  const { user, logout } = useAuth();
-  const { userId } = useParams();
+import styles from './profile_info.module.scss';
+
+type ProfileInfoProps = {
+  profile: UserDataTypes;
+  isOwnProfile: boolean;
+};
+
+const ProfileInfo: FC<ProfileInfoProps> = ({ profile, isOwnProfile }) => {
   const navigate = useNavigate();
-  const { data: profile } = useUser(userId);
-  const { mutate: createChat } = useCreateChat();
-
-  if (!user || !profile) return null;
-
-  const isOwnerProfile = profile.id === user.id;
+  const {
+    mutate: createChat,
+    isPending,
+    error: createChatError,
+  } = useCreateChat();
 
   const handleStartChat = () => {
     createChat([profile.id], {
@@ -26,14 +30,27 @@ const ProfileInfo: FC = () => {
   };
 
   return (
-    <div>
-      <div>
-        <UserIcon imageUrl={profile.imageUrl} />
-        <div>{profile.userName}</div>
+    <section className={styles.profile_info}>
+      <UserIcon imageUrl={profile.imageUrl} size={96} />
+      <div className={styles.profile_info__body}>
+        <h1 className={styles.profile_info__name}>{profile.userName}</h1>
+        {profile.description && (
+          <p className={styles.profile_info__description}>
+            {profile.description}
+          </p>
+        )}
       </div>
-      {isOwnerProfile && <Button onClick={logout}>Logout</Button>}
-      {!isOwnerProfile && <Button onClick={handleStartChat}>start chat</Button>}
-    </div>
+      {!isOwnProfile && (
+        <Button isLoading={isPending} onClick={handleStartChat}>
+          Send message
+        </Button>
+      )}
+      {createChatError && (
+        <p className={styles.profile_info__error} role="alert">
+          {getApiErrorMessage(createChatError, 'Could not start a chat')}
+        </p>
+      )}
+    </section>
   );
 };
 

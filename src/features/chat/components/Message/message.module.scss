@@ -1,19 +1,18 @@
-.text {
-  @include text(body-lg);
-}
-
 .item {
-  @include flex;
+  @include text(body-lg);
   @include use-theme(message-other);
 
-  max-width: rem(300px);
-  margin: space(3) auto space(3) space(3);
-  padding: space(3);
-  border-radius: radius(lg);
+  align-self: flex-start;
+  max-width: min(80%, #{rem(420px)});
+  padding: space(2) space(4);
+  border-radius: radius(lg) radius(lg) radius(lg) radius(sm);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 
   &__owner {
     @include use-theme(message-own);
 
-    margin: space(3) space(3) space(3) auto;
+    align-self: flex-end;
+    border-radius: radius(lg) radius(lg) radius(sm);
   }
 }

@@ -1,0 +1,18 @@
+.list {
+  display: grid;
+  gap: space(2);
+}
+
+.item {
+  @include card;
+  @include text(body-lg, bold);
+
+  display: block;
+  color: theme(page, color);
+  overflow-wrap: anywhere;
+
+  &:hover {
+    border-color: theme(field, border-color);
+    text-decoration: none;
+  }
+}

@@ -1,0 +1,69 @@
+.post {
+  @include card;
+
+  display: grid;
+  gap: space(3);
+
+  &__figure {
+    overflow: hidden;
+    margin: calc(-1 * #{space(4)}) calc(-1 * #{space(4)}) 0;
+    border-radius: radius(lg) radius(lg) 0 0;
+
+    @include media-up(sm) {
+      margin: calc(-1 * #{space(5)}) calc(-1 * #{space(5)}) 0;
+    }
+  }
+
+  &__image {
+    width: 100%;
+    max-height: rem(480px);
+    object-fit: cover;
+  }
+
+  &__text {
+    @include text(body-lg);
+
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+
+  &__footer {
+    @include flex(space-between);
+
+    flex-wrap: wrap;
+    gap: space(2);
+  }
+
+  &__date {
+    @include text(caption);
+
+    color: theme(muted, color);
+  }
+
+  &__actions {
+    @include flex(flex-end);
+
+    gap: space(2);
+  }
+
+  &__like {
+    @include flex;
+    @include text(caption, bold);
+
+    gap: space(2);
+    min-height: rem(36px);
+    padding: space(1) space(4);
+    border: 1px solid theme(field, border-color);
+    border-radius: radius(full);
+
+    &[aria-pressed='true'] {
+      @include use-theme(accent);
+
+      border-color: transparent;
+    }
+  }
+
+  &__count {
+    font-variant-numeric: tabular-nums;
+  }
+}
