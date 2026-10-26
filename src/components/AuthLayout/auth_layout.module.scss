@@ -1,0 +1,25 @@
+.auth_layout {
+  @include flex(flex-start, stretch, column);
+
+  min-height: 100vh;
+  padding: space(4);
+
+  &__header {
+    @include flex(space-between);
+
+    width: 100%;
+    max-width: rem(960px);
+    margin: 0 auto;
+  }
+
+  &__brand {
+    @include text(lead, bold);
+  }
+
+  &__main {
+    @include flex;
+
+    flex: 1;
+    padding: space(6) 0;
+  }
+}

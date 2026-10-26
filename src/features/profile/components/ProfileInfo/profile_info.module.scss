@@ -1,0 +1,32 @@
+.profile_info {
+  @include card;
+  @include flex(flex-start, center, column);
+
+  gap: space(4);
+  text-align: center;
+
+  @include media-up(sm) {
+    flex-direction: row;
+    text-align: left;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    @include text(title, bold);
+
+    overflow-wrap: anywhere;
+  }
+
+  &__description {
+    margin-top: space(1);
+    color: theme(muted, color);
+  }
+
+  &__error {
+    color: theme(danger, color);
+  }
+}

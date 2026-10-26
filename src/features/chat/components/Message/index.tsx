@@ -15,11 +15,7 @@ const Message: FC<MessagesDataTypes> = ({ senderId, content }) => {
     [styles.item__owner]: isOwner,
   });
 
-  return (
-    <div className={messageClassNames}>
-      <p className={styles.text}>{content}</p>
-    </div>
-  );
+  return <li className={messageClassNames}>{content}</li>;
 };
 
 export { Message };

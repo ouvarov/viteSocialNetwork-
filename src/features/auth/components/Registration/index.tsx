@@ -8,6 +8,7 @@ import { loginPage } from '@/routes/routePaths';
 import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/features/auth/useAuth.ts';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
 import { registerUser } from '@/features/auth/api.ts';
@@ -18,6 +19,7 @@ import styles from './registration.module.scss';
 
 const Registration: FC = () => {
   const { login } = useAuth();
+  useDocumentTitle('Create account');
 
   const {
     register,
@@ -42,7 +44,8 @@ const Registration: FC = () => {
 
   return (
     <section className={styles.section}>
-      <h2 className={styles.title}>Registration</h2>
+      <h1 className={styles.title}>Create account</h1>
+      <p className={styles.subtitle}>Join Pulse in a few seconds.</p>
 
       <form noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
         <Input
@@ -79,14 +82,18 @@ const Registration: FC = () => {
             {errors.root.server.message}
           </p>
         )}
-        <Button isLoading={isSubmitting} type="submit">
-          Submit
+        <Button
+          className={styles.submit}
+          isLoading={isSubmitting}
+          type="submit"
+        >
+          Sign up
         </Button>
       </form>
 
-      <div className={styles.link_wrap}>
-        <Link to={loginPage()}>Login</Link>
-      </div>
+      <p className={styles.switch}>
+        Already have an account? <Link to={loginPage()}>Sign in</Link>
+      </p>
     </section>
   );
 };

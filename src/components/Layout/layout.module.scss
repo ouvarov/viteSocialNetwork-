@@ -1,28 +1,110 @@
-.header {
-  @include flex(space-between);
-
-  gap: space(3);
-  padding: space(2) space(4);
-  border-bottom: 1px solid theme(surface, border-color);
+.shell {
+  min-height: 100vh;
 }
 
-.nav {
-  @include flex(flex-start);
+.skip_link {
+  @include visually-hidden;
 
-  flex-wrap: wrap;
-  gap: space(1);
-}
+  &:focus {
+    @include use-theme(accent);
 
-.link {
-  padding: space(2) space(3);
-  border-radius: radius(sm);
-  color: theme(page, color);
-
-  &_active {
-    color: theme(link, color);
+    position: fixed;
+    top: space(2);
+    left: space(2);
+    z-index: z(overlay);
+    width: auto;
+    height: auto;
+    padding: space(2) space(4);
+    border-radius: radius(sm);
+    clip-path: none;
   }
 }
 
+.header {
+  position: sticky;
+  top: 0;
+  z-index: z(base);
+  border-bottom: 1px solid theme(surface, border-color);
+  background-color: theme(page, background-color);
+
+  &__inner {
+    display: grid;
+    grid-template-areas:
+      'brand actions'
+      'nav nav';
+    grid-template-columns: 1fr auto;
+    gap: space(2) space(4);
+    align-items: center;
+    max-width: rem(960px);
+    margin: 0 auto;
+    padding: space(2) space(4);
+
+    @include media-up(md) {
+      grid-template-areas: 'brand nav actions';
+      grid-template-columns: auto 1fr auto;
+      padding: space(3) space(5);
+    }
+  }
+}
+
+.brand {
+  @include text(lead, bold);
+
+  grid-area: brand;
+  color: theme(page, color);
+}
+
+.nav {
+  display: flex;
+  grid-area: nav;
+  gap: space(1);
+
+  @include media-up(md) {
+    justify-content: center;
+  }
+
+  &__link {
+    @include text(body, bold);
+
+    flex: 1;
+    padding: space(2) space(3);
+    border-radius: radius(full);
+    color: theme(muted, color);
+    text-align: center;
+
+    @include media-up(md) {
+      flex: none;
+    }
+
+    &:hover {
+      color: theme(page, color);
+      text-decoration: none;
+    }
+
+    &--active {
+      background-color: theme(surface, background-color);
+      color: theme(page, color);
+    }
+  }
+}
+
+.actions {
+  @include flex(flex-end);
+
+  grid-area: actions;
+  gap: space(2);
+}
+
 .main {
+  max-width: rem(680px);
+  margin: 0 auto;
   padding: space(4);
+
+  &:focus {
+    outline: none;
+  }
+
+  @include media-up(md) {
+    padding: space(6) space(5);
+  }
 }

@@ -1,0 +1,20 @@
+.page_header {
+  @include flex(space-between);
+
+  flex-wrap: wrap;
+  gap: space(3);
+  margin-bottom: space(5);
+
+  &__title {
+    @include text(title, bold);
+
+    overflow-wrap: anywhere;
+  }
+
+  &__actions {
+    @include flex(flex-end);
+
+    flex-wrap: wrap;
+    gap: space(2);
+  }
+}

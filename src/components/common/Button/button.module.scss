@@ -10,14 +10,40 @@
   @include use-theme(accent);
 
   position: relative;
-  width: 100%;
-  min-height: rem(48px);
-  padding: space(2) space(4);
-  border-radius: radius(md);
+  gap: space(2);
+  min-height: rem(44px);
+  padding: space(2) space(5);
+  border: 1px solid transparent;
+  border-radius: radius(full);
+  white-space: nowrap;
+  transition: filter duration(fast);
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+  }
+
+  &--secondary {
+    border-color: theme(field, border-color);
+    background-color: transparent;
+    color: theme(page, color);
+  }
+
+  &--danger {
+    border-color: theme(danger, color);
+    background-color: transparent;
+    color: theme(danger, color);
+  }
+
+  &--small {
+    @include text(caption, bold);
+
+    min-height: rem(36px);
+    padding: space(1) space(4);
   }
 
   &__loading {

@@ -56,3 +56,28 @@ $reference-theme: list.nth(map.values(themes.$themes), 1);
   outline: 2px solid theme(focus, outline-color);
   outline-offset: 2px;
 }
+
+@mixin card {
+  @include use-theme(surface);
+
+  padding: space(4);
+  border-width: 1px;
+  border-style: solid;
+  border-radius: radius(lg);
+
+  @include media-up(sm) {
+    padding: space(5);
+  }
+}
+
+@mixin visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

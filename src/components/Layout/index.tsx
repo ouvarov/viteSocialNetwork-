@@ -1,40 +1,63 @@
 import type { FC } from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { useEffect, useRef } from 'react';
+import { Link, NavLink, Outlet, useLocation } from 'react-router';
+import classNames from 'classnames';
 
+import { Button } from '@/components/common/Button';
+import { useAuth } from '@/features/auth/useAuth.ts';
 import { ThemeToggle } from '@/features/theme/components/ThemeToggle';
-import {
-  chatsPage,
-  loginPage,
-  signUpPage,
-  usersPage,
-} from '@/routes/routePaths.ts';
+import { chatsPage, profilePage, usersPage } from '@/routes/routePaths.ts';
 
 import styles from './layout.module.scss';
 
+const navLinkClassName = ({ isActive }: { isActive: boolean }): string =>
+  classNames(styles.nav__link, { [styles['nav__link--active']]: isActive });
+
 const Layout: FC = () => {
-  const handleClassName = ({ isActive }: { isActive: boolean }): string =>
-    isActive ? `${styles.link} ${styles.link_active}` : styles.link;
+  const { user, logout } = useAuth();
+  const { pathname } = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
+  const previousPathname = useRef(pathname);
+
+  useEffect(() => {
+    if (previousPathname.current === pathname) return;
+
+    previousPathname.current = pathname;
+    mainRef.current?.focus();
+  }, [pathname]);
+
+  const ownProfile = profilePage(String(user?.id));
 
   return (
-    <div>
+    <div className={styles.shell}>
+      <a href="#main" className={styles.skip_link}>
+        Skip to content
+      </a>
       <header className={styles.header}>
-        <nav className={styles.nav}>
-          <NavLink to={loginPage()} className={handleClassName}>
-            login
-          </NavLink>
-          <NavLink to={signUpPage()} className={handleClassName}>
-            registration
-          </NavLink>
-          <NavLink to={usersPage()} className={handleClassName}>
-            users
-          </NavLink>
-          <NavLink to={chatsPage()} className={handleClassName}>
-            chats
-          </NavLink>
-        </nav>
-        <ThemeToggle />
+        <div className={styles.header__inner}>
+          <Link to={ownProfile} className={styles.brand}>
+            Pulse
+          </Link>
+          <nav aria-label="Main" className={styles.nav}>
+            <NavLink to={ownProfile} className={navLinkClassName}>
+              Profile
+            </NavLink>
+            <NavLink to={usersPage()} className={navLinkClassName}>
+              Users
+            </NavLink>
+            <NavLink to={chatsPage()} className={navLinkClassName}>
+              Chats
+            </NavLink>
+          </nav>
+          <div className={styles.actions}>
+            <ThemeToggle />
+            <Button variant="secondary" size="sm" onClick={logout}>
+              Log out
+            </Button>
+          </div>
+        </div>
       </header>
-      <main className={styles.main}>
+      <main id="main" ref={mainRef} tabIndex={-1} className={styles.main}>
         <Outlet />
       </main>
     </div>

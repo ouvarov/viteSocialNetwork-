@@ -2,7 +2,8 @@
   @include text(caption, bold);
 
   flex-shrink: 0;
-  padding: space(2) space(3);
+  min-height: rem(36px);
+  padding: space(1) space(3);
   border: 1px solid theme(field, border-color);
   border-radius: radius(full);
 }

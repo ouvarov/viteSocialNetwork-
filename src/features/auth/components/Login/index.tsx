@@ -8,6 +8,7 @@ import { signUpPage } from '@/routes/routePaths';
 import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/features/auth/useAuth.ts';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
 import { loginUser } from '@/features/auth/api.ts';
@@ -18,6 +19,7 @@ import styles from './login.module.scss';
 
 const Login: FC = () => {
   const { login } = useAuth();
+  useDocumentTitle('Sign in');
 
   const {
     register,
@@ -42,7 +44,8 @@ const Login: FC = () => {
 
   return (
     <section className={styles.section}>
-      <h2 className={styles.title}>Login</h2>
+      <h1 className={styles.title}>Sign in</h1>
+      <p className={styles.subtitle}>Welcome back to Pulse.</p>
 
       <form noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
         <Input
@@ -70,13 +73,17 @@ const Login: FC = () => {
             {errors.root.server.message}
           </p>
         )}
-        <Button isLoading={isSubmitting} type="submit">
-          Submit
+        <Button
+          className={styles.submit}
+          isLoading={isSubmitting}
+          type="submit"
+        >
+          Sign in
         </Button>
       </form>
-      <div className={styles.link_wrap}>
-        <Link to={signUpPage()}>Registration</Link>
-      </div>
+      <p className={styles.switch}>
+        New here? <Link to={signUpPage()}>Create an account</Link>
+      </p>
     </section>
   );
 };

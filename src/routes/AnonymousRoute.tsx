@@ -14,7 +14,7 @@ const AnonymousRoute: FC<AnonymousRouteProps> = ({ children }): ReactNode => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <Loader fullScreen />;
 
   if (!user) return children;
 

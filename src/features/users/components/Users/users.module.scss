@@ -1,11 +1,23 @@
-.title {
-  @include text(title, bold);
-
-  padding: space(3) 0;
+.list {
+  display: grid;
+  gap: space(2);
 }
 
 .item {
-  display: block;
-  padding: space(3) 0;
+  @include card;
+  @include flex(flex-start);
+
+  gap: space(3);
   color: theme(page, color);
+
+  &:hover {
+    border-color: theme(field, border-color);
+    text-decoration: none;
+  }
+
+  &__name {
+    @include text(body-lg, bold);
+
+    overflow-wrap: anywhere;
+  }
 }

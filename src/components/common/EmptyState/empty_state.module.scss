@@ -1,0 +1,17 @@
+.empty_state {
+  @include flex(center, center, column);
+
+  gap: space(2);
+  padding: space(7) space(4);
+  border: 1px dashed theme(surface, border-color);
+  border-radius: radius(lg);
+  text-align: center;
+
+  &__title {
+    @include text(lead, bold);
+  }
+
+  &__text {
+    color: theme(muted, color);
+  }
+}
