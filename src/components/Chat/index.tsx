@@ -62,6 +62,8 @@ const Chat: FC = () => {
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
+    if (!chatId) return;
+
     socket.emit('createMessage', { chatId, content: message });
 
     setMessage('');

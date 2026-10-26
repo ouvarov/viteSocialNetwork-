@@ -15,7 +15,10 @@
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint && npm run lint:styles && npm run format:check",
     "prepare": "simple-git-hooks",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "api:pull": "node scripts/api-pull.mjs && npm run api:generate",
+    "api:generate": "openapi-typescript src/api/generated/openapi.json -o src/api/generated/schema.ts",
+    "api:check": "npm run api:pull && git diff --exit-code src/api/generated"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
@@ -58,6 +61,7 @@
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^17.13.0",
     "lint-staged": "^17.6.0",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.3.3",
     "sass-embedded": "^1.79.3",
     "simple-git-hooks": "^2.14.0",

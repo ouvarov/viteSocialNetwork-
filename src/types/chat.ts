@@ -1,20 +1,13 @@
-export type MessagesDataTypes = {
-  messageId: string;
-  senderId: string;
-  content: string;
-  sentAt: string;
-};
+import type { Schemas } from '@/api/schemas.ts';
+
+export type MessagesDataTypes = Schemas['ChatMessageDto'];
 
 export type NewMessageTypes = MessagesDataTypes & {
   chatId: string;
 };
 
-export type ChatDataTypes = {
-  chatName: string;
-  messages: MessagesDataTypes[];
-};
+export type ChatDataTypes = Schemas['ChatDto'];
 
-export type ChatsDataTypes = {
-  chatId: string;
-  chatName: string | null;
-};
+export type ChatsDataTypes = Schemas['ChatSummaryDto'];
+
+export type CreatedChatTypes = Schemas['ChatIdDto'];

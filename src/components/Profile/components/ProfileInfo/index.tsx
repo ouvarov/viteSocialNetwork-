@@ -24,7 +24,7 @@ const ProfileInfo: FC = () => {
 
   useEffect(() => {
     if (chatData) {
-      navigate(chatPage(chatData));
+      navigate(chatPage(chatData.chatId));
     }
   }, [chatData]);
 
