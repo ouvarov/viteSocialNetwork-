@@ -1,15 +1,9 @@
-import { UserDataTypes } from '@/types/user.ts';
+import type { Schemas } from '@/api/schemas.ts';
+import type { UserDataTypes } from '@/types/user.ts';
 
-export type LoginTypes = {
-  email: string;
-  password: string;
-};
+export type LoginTypes = Schemas['LoginAuthDto'];
 
-export type SignUpTypes = {
-  email: string;
-  password: string;
-  userName: string;
-};
+export type SignUpTypes = Schemas['CreateAuthDto'];
 
 export type AuthContextType = {
   user: UserDataTypes | null;
