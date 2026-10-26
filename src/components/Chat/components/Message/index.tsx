@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import classNames from 'classnames';
 
 import type { MessagesDataTypes } from '@/types/chat.ts';
-import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useAuth } from '@/providers/useAuth.ts';
 
 import styles from './message.module.scss';
 

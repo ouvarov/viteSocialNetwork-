@@ -1,4 +1,4 @@
-import { SyntheticEvent, ChangeEvent } from 'react';
+import type { SyntheticEvent, ChangeEvent } from 'react';
 import classNames from 'classnames';
 
 import styles from './textarea.module.scss';

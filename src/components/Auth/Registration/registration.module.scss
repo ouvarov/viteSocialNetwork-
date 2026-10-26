@@ -5,7 +5,7 @@
 }
 
 .title {
-  @include font-styles($body-18B);
+  @include font-styles($body-18-bold);
 
   text-align: center;
   margin-bottom: 16px;
@@ -21,4 +21,9 @@
   &:hover {
     text-decoration: underline;
   }
+}
+
+.error {
+  margin-bottom: 16px;
+  color: $them-color;
 }

@@ -5,6 +5,8 @@ export type LoginTypes = Schemas['LoginAuthDto'];
 
 export type SignUpTypes = Schemas['CreateAuthDto'];
 
+export type AuthResponseTypes = Schemas['AuthResponseDto'];
+
 export type AuthContextType = {
   user: UserDataTypes | null;
   login: ({

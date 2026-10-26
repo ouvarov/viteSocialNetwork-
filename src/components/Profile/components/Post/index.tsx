@@ -10,7 +10,7 @@ import { upload } from '@/api';
 import type { PostPageTypes, PostTypes } from '@/types/post.ts';
 import Textarea from '@/components/common/Textarea';
 import { Button } from '@/components/common/Button';
-import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useAuth } from '@/providers/useAuth.ts';
 import {
   createPost,
   getPosts,
@@ -61,11 +61,11 @@ const Post: FC = () => {
       onSuccess: () => queryClient.invalidateQueries([`posts${userId}`]),
     },
   );
-  const onDrop = async (acceptedFiles: any) => {
-    if (!acceptedFiles) return;
+  const uploadImage = async ([file]: File[]) => {
+    if (!file) return;
 
     const formData = new FormData();
-    formData.append('image', acceptedFiles[0]);
+    formData.append('image', file);
 
     try {
       const response = await upload(formData);
@@ -75,7 +75,9 @@ const Post: FC = () => {
     }
   };
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: (acceptedFiles) => void uploadImage(acceptedFiles),
+  });
 
   const onChangeText = (e: ChangeEvent<HTMLTextAreaElement>): void => {
     setText(e.target.value);

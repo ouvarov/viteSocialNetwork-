@@ -1,41 +1,39 @@
 import type { AxiosResponse } from 'axios';
-import { api } from '@/api';
 import { useMutation } from 'react-query';
 
-import type { CreatedChatTypes } from '@/types/chat.ts';
+import { api } from '@/api';
+import type {
+  ChatDataTypes,
+  ChatsDataTypes,
+  CreatedChatTypes,
+  RenameChatTypes,
+} from '@/types/chat.ts';
 
 const createChat = (
   userIds: string[],
-): Promise<AxiosResponse<CreatedChatTypes>> => {
-  return api.post('chat/create', { userIds });
-};
-const getChat = (id: string): Promise<AxiosResponse> => {
-  return api.get(`chat/find/${id}`);
-};
+): Promise<AxiosResponse<CreatedChatTypes>> =>
+  api.post('chat/create', { userIds });
 
-const deleteChat = (id: string): Promise<AxiosResponse> => {
-  return api.delete(`chat/${id}`);
-};
+const getChat = (id: string): Promise<AxiosResponse<ChatDataTypes>> =>
+  api.get(`chat/find/${id}`);
 
-const renameChat = (body: {
-  chatId: string;
-  newChatName: string;
-}): Promise<AxiosResponse> => {
-  return api.put(`chat/update`, body);
-};
+const deleteChat = (id: string): Promise<AxiosResponse<void>> =>
+  api.delete(`chat/${id}`);
 
-const getAllChat = (): Promise<AxiosResponse> => {
-  return api.get(`chat/`);
-};
+const renameChat = (
+  body: RenameChatTypes,
+): Promise<AxiosResponse<ChatsDataTypes>> => api.put('chat/update', body);
 
-const useCreateChat = () => {
-  return useMutation({
+const getAllChat = (): Promise<AxiosResponse<ChatsDataTypes[]>> =>
+  api.get('chat');
+
+const useCreateChat = () =>
+  useMutation({
     mutationFn: async (usersIds: string[]) => {
       const response = await createChat(usersIds);
-      return response?.data;
+      return response.data;
     },
   });
-};
 
 export {
   createChat,

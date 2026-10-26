@@ -1,12 +1,15 @@
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { loginPage } from '@/routes/routePaths';
 
 import Input from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/providers/useAuth.ts';
 
+import { getApiErrorMessage } from '@/api/errors.ts';
 import { createUser } from '@/components/Auth/api';
 
 import styles from './registration.module.scss';
@@ -15,6 +18,7 @@ const Registration: FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
   const { login } = useAuth();
 
@@ -22,10 +26,15 @@ const Registration: FC = () => {
 
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
+    setError(null);
 
-    createUser({ email, password, userName }).then((res) => {
-      login({ user: res.data.userData, access_token: res.data.access_token });
-    });
+    createUser({ email, password, userName })
+      .then((res) => {
+        login({ user: res.data.userData, access_token: res.data.access_token });
+      })
+      .catch((registrationError: unknown) => {
+        setError(getApiErrorMessage(registrationError, 'Could not sign up'));
+      });
   };
 
   const onChangeEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -63,14 +72,19 @@ const Registration: FC = () => {
           placeholder="Enter your email"
         />
         <Input
-          id="pasword"
+          id="password"
           type="password"
           name="password"
           value={password}
           label="Your password"
           onChange={onChangePassword}
-          placeholder="Enter your pasword"
+          placeholder="Enter your password"
         />
+        {error && (
+          <p className={styles.error} role="alert">
+            {error}
+          </p>
+        )}
         <Button isDisabled={isDisabled} type="submit">
           Submit
         </Button>

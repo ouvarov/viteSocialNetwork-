@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import type { FC } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 
 import styles from './layout.module.scss';

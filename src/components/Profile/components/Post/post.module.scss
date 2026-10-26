@@ -4,11 +4,11 @@
 }
 
 .text {
-  @include font-styles($body-18R, $text-color);
+  @include font-styles($body-18-regular, $text-color);
 
   padding: 16px;
 }
 
 .likes {
-  @include font-styles($body-12R, $text-color);
+  @include font-styles($body-12-regular, $text-color);
 }
