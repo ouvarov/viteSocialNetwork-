@@ -1,22 +1,18 @@
 import type { FC } from 'react';
-import { useQuery } from 'react-query';
-import type { ChatsDataTypes } from '@/types/chat.ts';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/api/query-keys.ts';
 import { getAllChat } from '@/components/Chat/api';
 import { Loader } from '@/components/common/Loader';
 import { Link } from 'react-router-dom';
 import { chatPage } from '@/routes/routePaths.ts';
 
 const Chats: FC = () => {
-  const { data: resData, isLoading } = useQuery<ChatsDataTypes[]>({
-    queryKey: ['chats'],
-    queryFn: async () => {
-      const response = await getAllChat();
-
-      return response?.data;
-    },
+  const { data: resData, isPending } = useQuery({
+    queryKey: queryKeys.chats(),
+    queryFn: async () => (await getAllChat()).data,
   });
 
-  if (isLoading) return <Loader />;
+  if (isPending) return <Loader />;
 
   return (
     <div>

@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import pluginQuery from '@tanstack/eslint-plugin-query';
 import prettier from 'eslint-config-prettier';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import react from 'eslint-plugin-react';
@@ -17,6 +18,7 @@ export default tseslint.config(
       react.configs.flat.recommended,
       react.configs.flat['jsx-runtime'],
       jsxA11y.flatConfigs.recommended,
+      ...pluginQuery.configs['flat/recommended'],
     ],
     languageOptions: {
       globals: globals.browser,

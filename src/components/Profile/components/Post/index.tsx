@@ -2,12 +2,13 @@ import type { ChangeEvent, FC } from 'react';
 import type React from 'react';
 import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 
 import { upload } from '@/api';
 
-import type { PostPageTypes, PostTypes } from '@/types/post.ts';
+import { queryKeys } from '@/api/query-keys.ts';
+import type { PostTypes } from '@/types/post.ts';
 import Textarea from '@/components/common/Textarea';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/providers/useAuth.ts';
@@ -29,38 +30,35 @@ const Post: FC = () => {
   const { user } = useAuth();
   const { userId } = useParams();
 
-  const { data: resData, isLoading } = useQuery<PostPageTypes>({
-    queryKey: [`posts${userId}`],
-    queryFn: async () => {
-      const response = await getPosts(userId || '');
-      return response.data;
-    },
+  const postsKey = queryKeys.posts(String(userId));
+
+  const { data: resData, isPending } = useQuery({
+    queryKey: postsKey,
+    queryFn: async () => (await getPosts(String(userId))).data,
+    enabled: Boolean(userId),
   });
 
   const queryClient = useQueryClient();
 
-  const { mutate: createNewPost } = useMutation(createPost, {
+  const { mutate: createNewPost } = useMutation({
+    mutationFn: createPost,
     onSuccess: () => {
       setText('');
       setImage('');
-      return queryClient.invalidateQueries([`posts${userId}`]);
+      return queryClient.invalidateQueries({ queryKey: postsKey });
     },
   });
 
-  const { mutate: toggleLike } = useMutation(
-    ({ id, likedByMe }: PostTypes) =>
+  const { mutate: toggleLike } = useMutation({
+    mutationFn: ({ id, likedByMe }: PostTypes) =>
       likedByMe ? unlikePost(id) : likePost(id),
-    {
-      onSuccess: () => queryClient.invalidateQueries([`posts${userId}`]),
-    },
-  );
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: postsKey }),
+  });
 
-  const { mutate: removePostItem } = useMutation(
-    (id: string) => removePost(id),
-    {
-      onSuccess: () => queryClient.invalidateQueries([`posts${userId}`]),
-    },
-  );
+  const { mutate: removePostItem } = useMutation({
+    mutationFn: removePost,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: postsKey }),
+  });
   const uploadImage = async ([file]: File[]) => {
     if (!file) return;
 
@@ -127,7 +125,7 @@ const Post: FC = () => {
         </div>
       )}
       <div>
-        {isLoading && <Loader />}
+        {isPending && <Loader />}
         {resData?.items.map((post) => (
           <div key={post.id}>
             {post.imageUrl && (

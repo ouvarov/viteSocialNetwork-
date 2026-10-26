@@ -1,16 +1,13 @@
 import type { ChangeEvent, FC } from 'react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { deleteChat, getChat, renameChat } from '@/components/Chat/api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Loader } from '@/components/common/Loader';
-import type {
-  ChatDataTypes,
-  MessagesDataTypes,
-  NewMessageTypes,
-} from '@/types/chat.ts';
+import type { MessagesDataTypes, NewMessageTypes } from '@/types/chat.ts';
+import { queryKeys } from '@/api/query-keys.ts';
 import Textarea from '@/components/common/Textarea';
 import { Button } from '@/components/common/Button';
 import { socket } from '@/api';
@@ -32,31 +29,25 @@ const Chat: FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const { data: resData, isLoading } = useQuery<ChatDataTypes>({
-    queryKey: [`chat${chatId}`],
-    queryFn: async () => {
-      const response = await getChat(String(chatId));
-
-      return response?.data;
-    },
+  const { data: resData, isPending } = useQuery({
+    queryKey: queryKeys.chat(String(chatId)),
+    queryFn: async () => (await getChat(String(chatId))).data,
+    enabled: Boolean(chatId),
   });
 
-  const { mutate: deleteChatMutate } = useMutation(deleteChat, {
+  const { mutate: deleteChatMutate } = useMutation({
+    mutationFn: deleteChat,
     onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.chat(String(chatId)) });
       navigate(profilePage(String(user?.id)));
-      return Promise.all([
-        queryClient.invalidateQueries([`chat${chatId}`]),
-        queryClient.invalidateQueries([`chats`]),
-      ]);
+      return queryClient.invalidateQueries({ queryKey: queryKeys.chats() });
     },
   });
 
-  const { mutate: renameChatMutate } = useMutation(renameChat, {
+  const { mutate: renameChatMutate } = useMutation({
+    mutationFn: renameChat,
     onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries([`chat${chatId}`]),
-        queryClient.invalidateQueries([`chats`]),
-      ]),
+      queryClient.invalidateQueries({ queryKey: queryKeys.chats() }),
   });
 
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -121,7 +112,7 @@ const Chat: FC = () => {
     };
   }, [chatId]);
 
-  if (isLoading) return <Loader />;
+  if (isPending) return <Loader />;
 
   return (
     <div>
