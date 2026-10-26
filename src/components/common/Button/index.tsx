@@ -1,30 +1,37 @@
-import type { ButtonHTMLAttributes, FC } from 'react';
-import type React from 'react';
+import type { ComponentProps, FC, MouseEvent } from 'react';
 import classNames from 'classnames';
 
 import styles from './button.module.scss';
 
-type ButtonOptionalPropsType = {
-  className?: string;
-  isDisabled?: boolean;
-  children?: React.ReactNode;
-} & ButtonHTMLAttributes<HTMLButtonElement>;
-
-const Button: FC<ButtonOptionalPropsType> = ({
-  className = '',
-  children = null,
-  isDisabled = false,
-  ...props
-}) => {
-  const buttonClassnames = classNames(styles.button, className, {
-    [styles.button__disable]: isDisabled,
-  });
-
-  return (
-    <button {...props} disabled={isDisabled} className={buttonClassnames}>
-      {children}
-    </button>
-  );
+type ButtonProps = ComponentProps<'button'> & {
+  isLoading?: boolean;
 };
 
+const blockClick = (event: MouseEvent<HTMLButtonElement>) =>
+  event.preventDefault();
+
+const Button: FC<ButtonProps> = ({
+  type = 'button',
+  className,
+  isLoading = false,
+  onClick,
+  children,
+  ...rest
+}) => (
+  <button
+    {...rest}
+    type={type}
+    className={classNames(styles.button, className, {
+      [styles.button__loading]: isLoading,
+    })}
+    aria-busy={isLoading || undefined}
+    aria-disabled={isLoading || rest['aria-disabled']}
+    onClick={isLoading ? blockClick : onClick}
+  >
+    <span className={styles.button__label}>{children}</span>
+    {isLoading && <span className={styles.button__spinner} aria-hidden />}
+  </button>
+);
+
 export { Button };
+export type { ButtonProps };

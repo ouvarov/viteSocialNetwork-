@@ -28,7 +28,7 @@ const ProfileInfo: FC = () => {
   return (
     <div>
       <div>
-        <UserIcon imageUrl={profile.imageUrl ?? undefined} />
+        <UserIcon imageUrl={profile.imageUrl} />
         <div>{profile.userName}</div>
       </div>
       {isOwnerProfile && <Button onClick={logout}>Logout</Button>}

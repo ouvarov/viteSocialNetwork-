@@ -1,42 +1,48 @@
-import type { FC, ChangeEvent } from 'react';
+import type { ComponentProps, FC } from 'react';
+import { useId } from 'react';
+import classNames from 'classnames';
 
 import styles from './input.module.scss';
 
-type InputPropsType = {
-  id: string;
-  name: string;
-  value?: string;
-  placeholder?: string;
-  type?: 'text' | 'email' | 'password';
-  className?: string;
-  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
-  label?: string;
+type InputProps = ComponentProps<'input'> & {
+  label: string;
+  error?: string;
 };
 
-const Input: FC<InputPropsType> = ({
-  type = 'text',
+const Input: FC<InputProps> = ({
   id,
-  name,
-  value = '',
-  placeholder = '',
-  className = '',
   label,
-  onChange,
-}) => (
-  <div className={className}>
-    <label htmlFor={id}>
-      {label && <p className={styles.input__label}>{label}</p>}
-      <input
-        onChange={onChange}
-        type={type}
-        id={id}
-        name={name}
-        value={value}
-        placeholder={placeholder}
-        className={styles.input__control}
-      />
-    </label>
-  </div>
-);
+  error,
+  className,
+  'aria-describedby': describedBy,
+  ...rest
+}) => {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const errorId = `${inputId}-error`;
 
-export default Input;
+  return (
+    <div className={classNames(styles.input, className)}>
+      <label htmlFor={inputId} className={styles.input__label}>
+        {label}
+      </label>
+      <input
+        {...rest}
+        id={inputId}
+        className={styles.input__control}
+        aria-invalid={error ? true : rest['aria-invalid']}
+        aria-describedby={
+          classNames(describedBy, { [errorId]: error }) || undefined
+        }
+      />
+      {error && (
+        <p id={errorId} className={styles.input__error}>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
+
+export { Input };
+export type { InputProps };

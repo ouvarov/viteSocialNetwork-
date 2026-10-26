@@ -2,19 +2,24 @@
   padding-bottom: 16px;
 
   &__control {
-    @include placeholder-color($text-color);
-    @include font-styles($body-14-regular, $them-color);
+    @include placeholder-color(rgba($text-color, 0.6));
+    @include font-styles($body-14-regular, $text-color);
     @include placeholder-font-family('Lato, sans-serif');
 
     background-color: $bg-color;
     border: 1px solid rgba($them-color, 0.6);
-    color: $text-color;
     width: 100%;
     min-height: 50px;
     padding: 16px;
     border-radius: 16px;
 
-    &:focus {
+    &:focus-visible {
+      border-color: $them-color;
+      outline: 2px solid $second-them-color;
+      outline-offset: 2px;
+    }
+
+    &[aria-invalid='true'] {
       border-color: $them-color;
     }
   }
@@ -22,6 +27,13 @@
   &__label {
     @include font-styles($body-12-regular, $text-color);
 
+    display: block;
     margin-bottom: 4px;
+  }
+
+  &__error {
+    @include font-styles($body-12-regular, $them-color);
+
+    margin-top: 4px;
   }
 }

@@ -1,41 +1,48 @@
-import type { SyntheticEvent, ChangeEvent } from 'react';
+import type { ComponentProps, FC } from 'react';
+import { useId } from 'react';
 import classNames from 'classnames';
 
 import styles from './textarea.module.scss';
 
-type TextareaPropsType = {
-  id: string;
-  name: string;
-  value?: string;
-  placeholder?: string;
-  className?: string;
-  onFocus?: (e: SyntheticEvent<HTMLTextAreaElement>) => void;
-  onBlur?: (e: SyntheticEvent<HTMLTextAreaElement>) => void;
-  onChange?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+type TextareaProps = ComponentProps<'textarea'> & {
+  label: string;
+  error?: string;
 };
 
-const Textarea: React.FC<TextareaPropsType> = ({
+const Textarea: FC<TextareaProps> = ({
   id,
-  name,
-  value = '',
-  placeholder = '',
-  className = '',
-  onFocus,
-  onBlur,
-  onChange,
-}) => (
-  <div className={classNames(styles.textarea, className)}>
-    <textarea
-      onFocus={onFocus}
-      onBlur={onBlur}
-      onChange={onChange}
-      id={id}
-      name={name}
-      value={value}
-      placeholder={placeholder}
-      className={styles.textarea__control}
-    />
-  </div>
-);
+  label,
+  error,
+  className,
+  'aria-describedby': describedBy,
+  ...rest
+}) => {
+  const generatedId = useId();
+  const textareaId = id ?? generatedId;
+  const errorId = `${textareaId}-error`;
 
-export default Textarea;
+  return (
+    <div className={classNames(styles.textarea, className)}>
+      <label htmlFor={textareaId} className={styles.textarea__label}>
+        {label}
+      </label>
+      <textarea
+        {...rest}
+        id={textareaId}
+        className={styles.textarea__control}
+        aria-invalid={error ? true : rest['aria-invalid']}
+        aria-describedby={
+          classNames(describedBy, { [errorId]: error }) || undefined
+        }
+      />
+      {error && (
+        <p id={errorId} className={styles.textarea__error}>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
+
+export { Textarea };
+export type { TextareaProps };

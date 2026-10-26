@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 
 import { loginPage } from '@/routes/routePaths';
 
-import Input from '@/components/common/Input';
+import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/features/auth/useAuth.ts';
 
@@ -19,6 +19,7 @@ const Registration: FC = () => {
   const [password, setPassword] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { login } = useAuth();
 
@@ -27,12 +28,14 @@ const Registration: FC = () => {
   const handleOneSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setError(null);
+    setIsSubmitting(true);
 
     registerUser({ email, password, userName })
       .then(login)
       .catch((registrationError: unknown) => {
         setError(getApiErrorMessage(registrationError, 'Could not sign up'));
-      });
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   const onChangeEmail = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -55,6 +58,8 @@ const Registration: FC = () => {
         <Input
           id="userName"
           name="userName"
+          autoComplete="name"
+          required
           value={userName}
           label="Your name"
           onChange={onChangeName}
@@ -65,6 +70,8 @@ const Registration: FC = () => {
           name="email"
           value={email}
           type="email"
+          autoComplete="email"
+          required
           label="Your email"
           onChange={onChangeEmail}
           placeholder="Enter your email"
@@ -72,6 +79,8 @@ const Registration: FC = () => {
         <Input
           id="password"
           type="password"
+          autoComplete="new-password"
+          required
           name="password"
           value={password}
           label="Your password"
@@ -83,7 +92,7 @@ const Registration: FC = () => {
             {error}
           </p>
         )}
-        <Button isDisabled={isDisabled} type="submit">
+        <Button disabled={isDisabled} isLoading={isSubmitting} type="submit">
           Submit
         </Button>
       </form>

@@ -7,7 +7,7 @@ import { useParams } from 'react-router';
 import { getApiErrorMessage } from '@/api/errors.ts';
 import { Button } from '@/components/common/Button';
 import { Loader } from '@/components/common/Loader';
-import Textarea from '@/components/common/Textarea';
+import { Textarea } from '@/components/common/Textarea';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import {
   useCreatePost,
@@ -90,11 +90,13 @@ const Posts: FC = () => {
           )}
           <form onSubmit={handleOneSubmit}>
             <Textarea
-              id={'text'}
+              id="text"
               name="text"
+              label="New post"
+              required
               value={text}
               onChange={onChangeText}
-              placeholder={'enter post text'}
+              placeholder="What's new?"
             />
             <Button type="submit">Submit</Button>
           </form>

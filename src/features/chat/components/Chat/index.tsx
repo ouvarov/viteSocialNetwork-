@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
 import { Button } from '@/components/common/Button';
-import Input from '@/components/common/Input';
+import { Input } from '@/components/common/Input';
 import { Loader } from '@/components/common/Loader';
-import Textarea from '@/components/common/Textarea';
+import { Textarea } from '@/components/common/Textarea';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { Message } from '@/features/chat/components/Message';
 import {
@@ -67,6 +67,7 @@ const Chat: FC = () => {
           <Input
             id="nameChat"
             name="nameChat"
+            label="Chat name"
             value={nameChat}
             onChange={(e) => setNameChat(e.target.value)}
           />
@@ -81,6 +82,8 @@ const Chat: FC = () => {
         <Textarea
           name="message"
           id="message"
+          label="Message"
+          required
           onChange={handleOnChange}
           value={message}
         />

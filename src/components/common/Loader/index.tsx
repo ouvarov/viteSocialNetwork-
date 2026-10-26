@@ -2,18 +2,20 @@ import type { FC } from 'react';
 
 import styles from './loader.module.scss';
 
-const Loader: FC = () => {
-  const loaderItem = Array.from({ length: 10 }, (_, idx) => idx);
+const LOADER_DOTS = Array.from({ length: 10 }, (_, index) => index);
 
-  return (
-    <div className={styles.loader}>
-      <div className={styles.loader__wrap}>
-        {loaderItem.map((item) => (
-          <div key={item} className={styles.loader__item} />
-        ))}
-      </div>
-    </div>
-  );
+type LoaderProps = {
+  label?: string;
 };
+
+const Loader: FC<LoaderProps> = ({ label = 'Loading' }) => (
+  <div className={styles.loader} role="status" aria-label={label}>
+    <div className={styles.loader__wrap} aria-hidden>
+      {LOADER_DOTS.map((dot) => (
+        <div key={dot} className={styles.loader__item} />
+      ))}
+    </div>
+  </div>
+);
 
 export { Loader };
