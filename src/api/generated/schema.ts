@@ -326,7 +326,7 @@ export interface components {
             password: string;
         };
         CreatePostDto: {
-            /** @example https://picsum.photos/seed/pulse/800/600 */
+            /** @description A URL returned by POST /api/upload for the caller */
             imageUrl?: string;
             /** @example Shipping a new release this weekend. */
             text: string;
@@ -854,7 +854,7 @@ export interface operations {
             content: {
                 "multipart/form-data": {
                     /** Format: binary */
-                    image: string;
+                    image: Blob;
                 };
             };
         };

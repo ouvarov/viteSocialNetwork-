@@ -1,7 +1,7 @@
 import type { ReactNode, FC } from 'react';
 
 import { Navigate } from 'react-router';
-import { useAuth } from '@/providers/useAuth.ts';
+import { useAuth } from '@/features/auth/useAuth.ts';
 import { profilePage } from '@/routes/routePaths.ts';
 import { Loader } from '@/components/common/Loader';
 

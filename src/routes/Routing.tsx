@@ -8,10 +8,10 @@ import {
 import { RouterProvider } from 'react-router/dom';
 
 import { Layout } from '@/components/Layout';
-import { Registration } from '@/components/Auth/Registration';
-import { Login } from '@/components/Auth/Login';
+import { Registration } from '@/features/auth/components/Registration';
+import { Login } from '@/features/auth/components/Login';
 import { AnonymousRoute } from '@/routes/AnonymousRoute.tsx';
-import { Profile } from '@/components/Profile';
+import { Profile } from '@/features/profile/components/Profile';
 import {
   loginPage,
   signUpPage,
@@ -21,9 +21,9 @@ import {
   chatsPage,
 } from '@/routes/routePaths.ts';
 import { PrivateRoute } from '@/routes/PrivateRoute.tsx';
-import { Users } from '@/components/Users';
-import { Chat } from '@/components/Chat';
-import { Chats } from '@/components/Chat/Chats';
+import { Users } from '@/features/users/components/Users';
+import { Chat } from '@/features/chat/components/Chat';
+import { Chats } from '@/features/chat/components/Chats';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
