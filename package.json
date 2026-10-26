@@ -17,7 +17,7 @@
     "prepare": "simple-git-hooks",
     "preview": "vite preview",
     "api:pull": "node scripts/api-pull.mjs && npm run api:generate",
-    "api:generate": "openapi-typescript src/api/generated/openapi.json -o src/api/generated/schema.ts",
+    "api:generate": "node scripts/api-generate.mjs",
     "api:check": "npm run api:pull && git diff --exit-code src/api/generated"
   },
   "simple-git-hooks": {
@@ -36,9 +36,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.105.0",
-    "axios": "^1.7.7",
     "classnames": "^2.5.1",
-    "path": "^0.12.7",
+    "openapi-fetch": "^0.17.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-dropzone": "^14.3.5",
@@ -48,8 +47,6 @@
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@tanstack/eslint-plugin-query": "^5.105.0",
-    "@types/axios": "^0.14.0",
-    "@types/classnames": "^2.3.1",
     "@types/node": "^22.5.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

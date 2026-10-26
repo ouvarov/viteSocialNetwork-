@@ -1,4 +1,6 @@
-import type { NewMessageTypes } from '@/types/chat.ts';
+import type { Schemas } from './schemas.ts';
+
+type SocketMessage = Schemas['ChatMessageDto'] & { chatId: string };
 
 type ChatRoomPayload = { chatId: string };
 
@@ -11,7 +13,7 @@ type SocketExceptionPayload = {
 };
 
 type ServerToClientEvents = {
-  newMessage: (message: NewMessageTypes) => void;
+  newMessage: (message: SocketMessage) => void;
   exception: (error: SocketExceptionPayload) => void;
 };
 
@@ -26,11 +28,12 @@ type ClientToServerEvents = {
   ) => void;
   createMessage: (
     payload: CreateMessagePayload,
-    ack?: (message: NewMessageTypes) => void,
+    ack?: (message: SocketMessage) => void,
   ) => void;
 };
 
 export type {
+  SocketMessage,
   ChatRoomPayload,
   ClientToServerEvents,
   CreateMessagePayload,

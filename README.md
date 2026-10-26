@@ -4,19 +4,19 @@ React + Vite client for **Pulse**, a small social network: profiles, posts with 
 
 The API lives in a separate repo: [ouvarov/nestSocialNetwork](https://github.com/ouvarov/nestSocialNetwork) (NestJS, PostgreSQL, Redis, Socket.IO).
 
-> Work in progress. The plan: React 19, TanStack Query v5, React Router 7, feature folders, a typed API layer and a live demo.
+> Work in progress. Next: auth with an in-memory token, UI primitives, design tokens and a live demo.
 
 ## Stack
 
-- React 18, TypeScript (strict), Vite
-- react-query, react-router, axios, socket.io-client
+- React 19, TypeScript (strict), Vite
+- TanStack Query v5, React Router 8, socket.io-client
+- `openapi-fetch` client typed by the backend OpenAPI spec
 - SCSS modules
-- API types generated from the backend OpenAPI spec with `openapi-typescript`
 - ESLint (type-checked, React, hooks, a11y), Stylelint, Prettier, pre-commit hooks
 
 ## Getting started
 
-Requires Node.js 24 and a running [API](https://github.com/ouvarov/nestSocialNetwork).
+Requires Node.js 22.22+ and a running [API](https://github.com/ouvarov/nestSocialNetwork).
 
 ```bash
 npm ci
@@ -36,7 +36,24 @@ npm run api:check    # fail if the committed types are out of date
 OPENAPI_SOURCE=../nestSocialNetwork/openapi.json npm run api:pull   # use a local API checkout
 ```
 
-Hand-written types in `src/types` are aliases of the generated schemas, so a renamed API field fails `tsc` instead of breaking the UI. Socket.IO events, which OpenAPI does not describe, are typed in `src/api/socket-events.ts`.
+Feature types (`src/features/*/types.ts`) are aliases of the generated schemas, so a renamed API field fails `tsc` instead of breaking the UI. Socket.IO events, which OpenAPI does not describe, are typed in `src/api/socket-events.ts`.
+
+## Structure
+
+```text
+src/
+  api/          openapi-fetch client, errors, query keys, socket, generated types
+  features/
+    auth/       session provider, login and sign-up, auth requests
+    users/      users list, profile query
+    posts/      feed, likes, image upload
+    chat/       chats, chat room over Socket.IO
+    profile/    profile page composed from users, posts and chat
+  components/   shared UI and layout
+  routes/       router, guards, paths
+```
+
+Components don't call HTTP directly: every request lives in a feature's `queries.ts` as a TanStack Query hook (`usePosts`, `useToggleLike`, `useChat`…), built on the typed client.
 
 ## Scripts
 
