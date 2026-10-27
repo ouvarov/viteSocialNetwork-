@@ -4,7 +4,7 @@ React + Vite client for **Pulse**, a small social network: profiles, posts with 
 
 The API lives in a separate repo: [ouvarov/nestSocialNetwork](https://github.com/ouvarov/nestSocialNetwork) (NestJS, PostgreSQL, Redis, Socket.IO).
 
-> Work in progress. Next: auth with an in-memory token, UI primitives, design tokens and a live demo.
+> Work in progress. Next: CI and a live demo.
 
 ## Stack
 
@@ -38,6 +38,31 @@ OPENAPI_SOURCE=../nestSocialNetwork/openapi.json npm run api:pull   # use a loca
 
 Feature types (`src/features/*/types.ts`) are aliases of the generated schemas, so a renamed API field fails `tsc` instead of breaking the UI. Socket.IO events, which OpenAPI does not describe, are typed in `src/api/socket-events.ts`.
 
+## End-to-end tests
+
+Playwright tests in `e2e/` run the production build (`vite preview` on port 3001) against a real API. Each test creates its own users through the API, so the API has to run with rate limiting switched off:
+
+```bash
+# in the API repo
+RATE_LIMIT_DISABLED=true npm run start
+
+# here
+npx playwright install chromium   # once
+npm run test:e2e
+```
+
+`E2E_API_ORIGIN` points the tests at another API (default `http://localhost:5000`). The global setup stops early with a hint if the API is down or still rate limited.
+
+| Spec          | Covers                                                                              |
+| ------------- | ----------------------------------------------------------------------------------- |
+| `auth.spec`   | sign-up and sign-in validation, logout cache reset, shared token refresh            |
+| `posts.spec`  | image upload, publishing, likes, post validation                                    |
+| `feed.spec`   | infinite scroll, optimistic likes with rollback and race handling, next-page errors |
+| `chat.spec`   | live messages, offline gaps, rejected token, delete confirmation, chat forms        |
+| `shell.spec`  | titles, focus management, empty and error states, layout at 360px and 1280px        |
+| `a11y.spec`   | themes, reduced motion, axe on every page in both themes                            |
+| `routes.spec` | lazy chunks, 404, route error boundaries, failed and slow chunks                    |
+
 ## Structure
 
 ```text
@@ -64,3 +89,4 @@ Components don't call HTTP directly: every request lives in a feature's `queries
 | `npm run check`    | Type-check, ESLint, Stylelint and Prettier |
 | `npm run lint:fix` | ESLint with autofix                        |
 | `npm run api:pull` | Pull the OpenAPI spec and regenerate types |
+| `npm run test:e2e` | Playwright end-to-end tests                |
