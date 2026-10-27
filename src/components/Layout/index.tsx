@@ -1,6 +1,12 @@
 import type { FC } from 'react';
 import { useEffect, useRef } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router';
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigation,
+} from 'react-router';
 import classNames from 'classnames';
 
 import { Button } from '@/components/common/Button';
@@ -18,6 +24,7 @@ const Layout: FC = () => {
   const { pathname } = useLocation();
   const mainRef = useRef<HTMLElement>(null);
   const previousPathname = useRef(pathname);
+  const isNavigating = useNavigation().state === 'loading';
 
   useEffect(() => {
     if (previousPathname.current === pathname) return;
@@ -30,6 +37,7 @@ const Layout: FC = () => {
 
   return (
     <div className={styles.shell}>
+      {isNavigating && <div className={styles.progress} aria-hidden />}
       <a href="#main" className={styles.skip_link}>
         Skip to content
       </a>
@@ -57,7 +65,13 @@ const Layout: FC = () => {
           </div>
         </div>
       </header>
-      <main id="main" ref={mainRef} tabIndex={-1} className={styles.main}>
+      <main
+        id="main"
+        ref={mainRef}
+        tabIndex={-1}
+        className={styles.main}
+        aria-busy={isNavigating || undefined}
+      >
         <Outlet />
       </main>
     </div>

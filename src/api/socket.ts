@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 
 import { readAccessToken } from './access-token.ts';
-import { expireSession, refreshSession } from './session.ts';
+import { endSession, onSessionEnd, refreshSession } from './session.ts';
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
@@ -26,7 +26,9 @@ socket.on('disconnect', (reason) => {
   if (Date.now() - lastTokenRefreshAt < TOKEN_REFRESH_INTERVAL_MS) return;
 
   lastTokenRefreshAt = Date.now();
-  refreshSession().then(() => socket.connect(), expireSession);
+  refreshSession().then(() => socket.connect(), endSession);
 });
+
+onSessionEnd(() => socket.disconnect());
 
 export { socket };

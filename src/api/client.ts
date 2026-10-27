@@ -2,7 +2,7 @@ import createClient from 'openapi-fetch';
 
 import { readAccessToken } from './access-token.ts';
 import type { paths } from './generated/schema.ts';
-import { expireSession, refreshSession } from './session.ts';
+import { endSession, refreshSession } from './session.ts';
 
 const UNAUTHORIZED = 401;
 const AUTH_PATH_PREFIX = '/api/auth/';
@@ -29,7 +29,7 @@ const fetchWithSession = async (request: Request): Promise<Response> => {
   try {
     await refreshSession();
   } catch {
-    expireSession();
+    endSession();
     return response;
   }
 

@@ -1,20 +1,13 @@
 import type { FC } from 'react';
-import {
-  Navigate,
-  Route,
-  createBrowserRouter,
-  createRoutesFromElements,
-} from 'react-router';
+import type { RouteObject } from 'react-router';
+import { Navigate, createBrowserRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
 import { AuthLayout } from '@/components/AuthLayout';
+import { Loader } from '@/components/common/Loader';
 import { Layout } from '@/components/Layout';
-import { Login } from '@/features/auth/components/Login';
-import { Registration } from '@/features/auth/components/Registration';
-import { Chat } from '@/features/chat/components/Chat';
-import { Chats } from '@/features/chat/components/Chats';
-import { Profile } from '@/features/profile/components/Profile';
-import { Users } from '@/features/users/components/Users';
+import { NotFound } from '@/components/NotFound';
+import { RouteError } from '@/components/RouteError';
 import { AnonymousRoute } from '@/routes/AnonymousRoute.tsx';
 import { PrivateRoute } from '@/routes/PrivateRoute.tsx';
 import {
@@ -26,35 +19,88 @@ import {
   usersPage,
 } from '@/routes/routePaths.ts';
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path="/">
-      <Route index element={<Navigate to={loginPage()} replace />} />
-      <Route
-        element={
+const PageLoader: FC = () => <Loader fullScreen />;
+
+const RootError: FC = () => (
+  <AuthLayout>
+    <RouteError />
+  </AuthLayout>
+);
+
+const anonymousPages: RouteObject[] = [
+  {
+    path: loginPage(),
+    lazy: async () => ({
+      Component: (await import('@/features/auth/components/Login')).Login,
+    }),
+  },
+  {
+    path: signUpPage(),
+    lazy: async () => ({
+      Component: (await import('@/features/auth/components/Registration'))
+        .Registration,
+    }),
+  },
+];
+
+const privatePages: RouteObject[] = [
+  {
+    path: profilePage(':userId'),
+    lazy: async () => ({
+      Component: (await import('@/features/profile/components/Profile'))
+        .Profile,
+    }),
+  },
+  {
+    path: usersPage(),
+    lazy: async () => ({
+      Component: (await import('@/features/users/components/Users')).Users,
+    }),
+  },
+  {
+    path: chatsPage(),
+    lazy: async () => ({
+      Component: (await import('@/features/chat/components/Chats')).Chats,
+    }),
+  },
+  {
+    path: chatPage(':chatId'),
+    lazy: async () => ({
+      Component: (await import('@/features/chat/components/Chat')).Chat,
+    }),
+  },
+];
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    ErrorBoundary: RootError,
+    HydrateFallback: PageLoader,
+    children: [
+      { index: true, element: <Navigate to={loginPage()} replace /> },
+      {
+        element: (
           <AnonymousRoute>
             <AuthLayout />
           </AnonymousRoute>
-        }
-      >
-        <Route path={loginPage()} element={<Login />} />
-        <Route path={signUpPage()} element={<Registration />} />
-      </Route>
-      <Route
-        element={
+        ),
+        children: [{ ErrorBoundary: RouteError, children: anonymousPages }],
+      },
+      {
+        element: (
           <PrivateRoute>
             <Layout />
           </PrivateRoute>
-        }
-      >
-        <Route path={profilePage(':userId')} element={<Profile />} />
-        <Route path={usersPage()} element={<Users />} />
-        <Route path={chatsPage()} element={<Chats />} />
-        <Route path={chatPage(':chatId')} element={<Chat />} />
-      </Route>
-    </Route>,
-  ),
-);
+        ),
+        children: [{ ErrorBoundary: RouteError, children: privatePages }],
+      },
+      {
+        element: <AuthLayout />,
+        children: [{ path: '*', Component: NotFound }],
+      },
+    ],
+  },
+]);
 
 const Routing: FC = () => <RouterProvider router={router} />;
 

@@ -1,0 +1,19 @@
+.not_found {
+  display: grid;
+  gap: space(3);
+  justify-items: center;
+  text-align: center;
+
+  &__title {
+    @include text(title, bold);
+  }
+
+  &__text {
+    color: theme(muted, color);
+  }
+
+  &__link {
+    color: theme(link, color);
+    text-decoration: underline;
+  }
+}
