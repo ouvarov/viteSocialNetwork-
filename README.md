@@ -12,7 +12,7 @@
 
 **Live demo:** https://pulse-social-henna.vercel.app. Sign in as `ada@example.com` / `pulse-demo-password`. To chat with yourself, open a second window as `linus@example.com`.
 
-> The free API host sleeps after 15 minutes idle. The app shows a "waking up" notice, and the first load can take about a minute. Demo data resets nightly at 03:00 UTC.
+> The free API host sleeps after 15 minutes idle. The app shows a "waking up" notice, and the first load can take about a minute.
 
 The API lives in [ouvarov/nestSocialNetwork](https://github.com/ouvarov/nestSocialNetwork) (NestJS, PostgreSQL, Redis, Socket.IO).
 
