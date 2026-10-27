@@ -1,10 +1,12 @@
 # Pulse — web
 
+[![CI](https://github.com/ouvarov/viteSocialNetwork-/actions/workflows/ci.yml/badge.svg)](https://github.com/ouvarov/viteSocialNetwork-/actions/workflows/ci.yml)
+
 React + Vite client for **Pulse**, a small social network: profiles, posts with images, likes and real-time chat.
 
 The API lives in a separate repo: [ouvarov/nestSocialNetwork](https://github.com/ouvarov/nestSocialNetwork) (NestJS, PostgreSQL, Redis, Socket.IO).
 
-> Work in progress. Next: CI and a live demo.
+> Work in progress. Next: a live demo.
 
 ## Stack
 
@@ -62,6 +64,16 @@ npm run test:e2e
 | `shell.spec`  | titles, focus management, empty and error states, layout at 360px and 1280px        |
 | `a11y.spec`   | themes, reduced motion, axe on every page in both themes                            |
 | `routes.spec` | lazy chunks, 404, route error boundaries, failed and slow chunks                    |
+
+## CI
+
+`.github/workflows/ci.yml` runs on every pull request and push to `main`:
+
+| Job     | What it checks                                                                                                                                       |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Quality | type-check, ESLint, Stylelint, Prettier; generated API types match the API `main` branch                                                             |
+| Build   | production build                                                                                                                                     |
+| E2E     | checks out the API `main` branch, starts it on Postgres and Redis service containers and runs the Playwright suite; uploads the report when it fails |
 
 ## Structure
 
