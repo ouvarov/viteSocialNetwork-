@@ -7,9 +7,8 @@
     "jsx": "react-jsx",
     "allowJs": true,
     "skipLibCheck": true,
-    "baseUrl": "src",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     },
 
     /* Bundler mode */

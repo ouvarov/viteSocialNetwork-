@@ -100,22 +100,14 @@ $required-keys: (
     border-color,
     color,
   ),
-  muted: (
-    color,
-  ),
+  muted: (color),
   accent: (
     background-color,
     color,
   ),
-  link: (
-    color,
-  ),
-  focus: (
-    outline-color,
-  ),
-  danger: (
-    color,
-  ),
+  link: (color),
+  focus: (outline-color),
+  danger: (color),
   message-own: (
     background-color,
     color,
@@ -124,9 +116,7 @@ $required-keys: (
     background-color,
     color,
   ),
-  backdrop: (
-    background-color,
-  ),
+  backdrop: (background-color),
 );
 
 @each $theme-name, $components in $themes {
