@@ -6,6 +6,7 @@ import { expect } from '@playwright/test';
 
 const API_ORIGIN = process.env.E2E_API_ORIGIN ?? 'http://localhost:5000';
 const API = `${API_ORIGIN}/api`;
+const SOCKET_ORIGIN = process.env.E2E_SOCKET_ORIGIN ?? 'http://localhost:5000';
 const PASSWORD = 'correct-horse-battery';
 const UNAUTHORIZED_BODY = '{"statusCode":401,"message":"Unauthorized"}';
 
@@ -129,7 +130,7 @@ const collectPageErrors = (page: Page) => {
 
 export {
   API,
-  API_ORIGIN,
+  SOCKET_ORIGIN,
   PASSWORD,
   UNAUTHORIZED_BODY,
   apiCall,

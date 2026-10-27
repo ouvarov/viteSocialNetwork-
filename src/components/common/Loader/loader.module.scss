@@ -53,6 +53,19 @@ $dots: 10;
     animation: rotate-preloader 2s infinite ease-in;
   }
 
+  &__message {
+    @include text(body);
+
+    position: absolute;
+    top: calc(50% + #{rem(56px)});
+    left: 50%;
+    width: min(#{rem(360px)}, 100% - #{space(8)});
+    margin: 0;
+    color: theme(muted, color);
+    text-align: center;
+    transform: translateX(-50%);
+  }
+
   &__item {
     @include size(100%);
 

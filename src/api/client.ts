@@ -1,6 +1,7 @@
 import createClient from 'openapi-fetch';
 
 import { readAccessToken } from './access-token.ts';
+import { API_ORIGIN } from './origins.ts';
 import type { paths } from './generated/schema.ts';
 import { endSession, refreshSession } from './session.ts';
 
@@ -37,7 +38,7 @@ const fetchWithSession = async (request: Request): Promise<Response> => {
 };
 
 const client = createClient<paths>({
-  baseUrl: import.meta.env.VITE_API_ORIGIN,
+  baseUrl: API_ORIGIN,
   credentials: 'include',
   fetch: fetchWithSession,
 });

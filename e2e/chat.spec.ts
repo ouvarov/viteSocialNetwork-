@@ -5,7 +5,7 @@ import type { Socket } from 'socket.io-client';
 
 import type { TestUser } from './support.ts';
 import {
-  API_ORIGIN,
+  SOCKET_ORIGIN,
   axeViolations,
   collectPageErrors,
   countRequests,
@@ -76,7 +76,7 @@ const controlSocket = async (page: Page): Promise<SocketControl> => {
 };
 
 const connectAs = async (user: TestUser, chatId: string) => {
-  const socket: Socket = io(`${API_ORIGIN}/chat`, {
+  const socket: Socket = io(`${SOCKET_ORIGIN}/chat`, {
     transports: ['websocket'],
     auth: { token: user.token },
   });

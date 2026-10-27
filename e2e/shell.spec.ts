@@ -19,6 +19,38 @@ test('the sign-in page has a title and fits a small phone', async ({
   expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
 });
 
+test('a sleeping API shows the wake-up notice and the session waits for it', async ({
+  page,
+  request,
+}) => {
+  const user = await registerUser(request, 'Sleepy');
+  let release = () => {};
+  const isAwake = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const refreshesBeforeWake: string[] = [];
+  let isWaking = true;
+  page.on('request', (sent) => {
+    if (isWaking && sent.url().endsWith('/api/auth/refresh')) {
+      refreshesBeforeWake.push(sent.url());
+    }
+  });
+  await page.route('**/api/health/live', async (route) => {
+    await isAwake;
+    isWaking = false;
+    await route.continue();
+  });
+
+  await signIn(page, user);
+  const notice = page.getByText(/Waking up the server/);
+  await expect(notice).toBeVisible({ timeout: 6000 });
+  expect(refreshesBeforeWake).toEqual([]);
+
+  release();
+  await expect(page.getByText('No posts yet')).toBeVisible();
+  await expect(notice).toHaveCount(0);
+});
+
 test('own profile: empty state, title, active link and a long post on a phone', async ({
   page,
   request,

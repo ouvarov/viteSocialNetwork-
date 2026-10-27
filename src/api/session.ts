@@ -1,10 +1,11 @@
 import { clearAccessToken, saveAccessToken } from './access-token.ts';
 import { ApiError } from './errors.ts';
+import { API_ORIGIN } from './origins.ts';
 import type { Schemas } from './schemas.ts';
 
 type Session = Schemas['AuthResponseDto'];
 
-const REFRESH_URL = `${import.meta.env.VITE_API_ORIGIN}/api/auth/refresh`;
+const REFRESH_URL = `${API_ORIGIN}/api/auth/refresh`;
 
 let pendingRefresh: Promise<Session> | null = null;
 const endListeners = new Set<() => void>();

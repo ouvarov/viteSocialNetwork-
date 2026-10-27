@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { saveAccessToken } from '@/api/access-token.ts';
 import { endSession, onSessionEnd, refreshSession } from '@/api/session.ts';
+import { wakeApi } from '@/api/wake.ts';
 import type { UserDataTypes } from '@/features/users/types.ts';
 
 import { logoutUser } from './api.ts';
@@ -45,7 +46,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => onSessionEnd(resetSession), [resetSession]);
 
   useEffect(() => {
-    refreshSession()
+    wakeApi()
+      .then(refreshSession)
       .then(({ userData }) => setUser(userData))
       .catch(() => setUser(null))
       .finally(() => setIsLoading(false));
