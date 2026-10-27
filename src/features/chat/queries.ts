@@ -4,7 +4,8 @@ import { client } from '@/api/client.ts';
 import { unwrap } from '@/api/errors.ts';
 import { queryKeys } from '@/api/query-keys.ts';
 
-import type { RenameChatTypes } from './types.ts';
+import { mergeMessages } from './messages.ts';
+import type { ChatDataTypes, RenameChatTypes } from './types.ts';
 
 const useChats = () =>
   useQuery({
@@ -15,12 +16,19 @@ const useChats = () =>
 const useChat = (chatId: string | undefined) =>
   useQuery({
     queryKey: queryKeys.chat(String(chatId)),
-    queryFn: () =>
-      unwrap(
+    queryFn: async ({ client: queryClient, queryKey, signal }) => {
+      const chat = await unwrap(
         client.GET('/api/chat/find/{id}', {
           params: { path: { id: String(chatId) } },
+          signal,
         }),
-      ),
+      );
+      const cached = queryClient.getQueryData<ChatDataTypes>(queryKey);
+
+      return cached
+        ? { ...chat, messages: mergeMessages(cached.messages, chat.messages) }
+        : chat;
+    },
     enabled: Boolean(chatId),
   });
 
