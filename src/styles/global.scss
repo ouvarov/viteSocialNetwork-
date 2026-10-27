@@ -11,6 +11,14 @@
   }
 }
 
+:root {
+  --card-padding: #{space(4)};
+
+  @include media-up(sm) {
+    --card-padding: #{space(5)};
+  }
+}
+
 :root,
 :root[data-theme='dark'] {
   @include theme-variables(dark);

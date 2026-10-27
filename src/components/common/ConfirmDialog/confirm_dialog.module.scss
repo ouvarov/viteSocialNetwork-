@@ -1,8 +1,8 @@
 .confirm_dialog {
+  @include card;
+
   width: min(100% - #{space(4) * 2}, #{rem(420px)});
   color: theme(page, color);
-
-  @include card;
 
   &::backdrop {
     background-color: theme(backdrop, background-color);
