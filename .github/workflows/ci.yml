@@ -35,6 +35,19 @@ jobs:
       - name: API types match the API main branch
         run: npm run api:check
 
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
   build:
     name: Build
     runs-on: ubuntu-latest
