@@ -1,14 +1,13 @@
 import { useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { queryKeys } from '@/api/query-keys.ts';
 import { socket } from '@/api/socket.ts';
 import type {
   CreateMessagePayload,
   SocketExceptionPayload,
 } from '@/api/socket-events.ts';
 
-import { saveMessage } from './messages.ts';
+import { reloadHistory, saveMessage } from './messages.ts';
 import type { NewMessageTypes } from './types.ts';
 
 const SOCKET_TIMEOUT_MS = 5000;
@@ -54,11 +53,7 @@ const useChatRoom = (chatId: string | undefined) => {
     const joinChat = async () => {
       await joinRoom(chatId);
 
-      if (isActive) {
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.chat(chatId),
-        });
-      }
+      if (isActive) await reloadHistory(queryClient, chatId);
     };
     const onConnect = () => void joinChat();
 
@@ -78,7 +73,11 @@ const useChatRoom = (chatId: string | undefined) => {
     if (!chatId) return;
 
     const onNewMessage = (message: NewMessageTypes) => {
-      if (message.chatId === chatId) saveMessage(queryClient, chatId, message);
+      if (message.chatId !== chatId) return;
+
+      if (!saveMessage(queryClient, chatId, message)) {
+        void reloadHistory(queryClient, chatId);
+      }
     };
 
     socket.on('newMessage', onNewMessage);

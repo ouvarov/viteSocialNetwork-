@@ -27,4 +27,11 @@ const saveMessage = (
       : chat,
   );
 
-export { mergeMessages, saveMessage };
+const reloadHistory = async (queryClient: QueryClient, chatId: string) => {
+  const queryKey = queryKeys.chat(chatId);
+
+  await queryClient.cancelQueries({ queryKey });
+  await queryClient.invalidateQueries({ queryKey });
+};
+
+export { mergeMessages, reloadHistory, saveMessage };

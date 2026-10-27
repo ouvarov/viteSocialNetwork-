@@ -53,6 +53,26 @@ export default tseslint.config(
     },
   },
   {
+    files: ['e2e/**/*.ts'],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
+    ],
+    languageOptions: {
+      globals: globals.node,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-floating-promises': 'error',
+      eqeqeq: ['error', 'always'],
+    },
+  },
+  {
     files: ['src/**/*.d.ts'],
     rules: { '@typescript-eslint/consistent-type-definitions': 'off' },
   },
