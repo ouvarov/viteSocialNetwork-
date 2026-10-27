@@ -14,6 +14,7 @@ export default defineConfig((env) =>
       },
       css: { modules: { classNameStrategy: 'non-scoped' } },
       restoreMocks: true,
+      unstubEnvs: true,
     },
   }),
 );

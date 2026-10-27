@@ -12,8 +12,10 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
 import { loginUser } from '@/features/auth/api.ts';
+import { readDemoAccount } from '@/features/auth/demo-account.ts';
 import { loginSchema } from '@/features/auth/schemas.ts';
 import type { LoginFormValues } from '@/features/auth/schemas.ts';
+import type { LoginTypes } from '@/features/auth/types.ts';
 
 import styles from './login.module.scss';
 
@@ -24,6 +26,7 @@ const Login: FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
@@ -31,6 +34,8 @@ const Login: FC = () => {
     mode: 'onTouched',
     defaultValues: { email: '', password: '' },
   });
+
+  const demoAccount = readDemoAccount();
 
   const onSubmit = async (values: LoginFormValues): Promise<void> => {
     try {
@@ -40,6 +45,12 @@ const Login: FC = () => {
         message: getApiErrorMessage(loginError, 'Could not log in'),
       });
     }
+  };
+
+  const handleDemoSignIn = ({ email, password }: LoginTypes) => {
+    setValue('email', email);
+    setValue('password', password);
+    void handleSubmit(onSubmit)();
   };
 
   return (
@@ -80,6 +91,16 @@ const Login: FC = () => {
         >
           Sign in
         </Button>
+        {demoAccount && (
+          <Button
+            className={styles.demo}
+            variant="secondary"
+            disabled={isSubmitting}
+            onClick={() => handleDemoSignIn(demoAccount)}
+          >
+            Try the demo account
+          </Button>
+        )}
       </form>
       <p className={styles.switch}>
         New here? <Link to={signUpPage()}>Create an account</Link>

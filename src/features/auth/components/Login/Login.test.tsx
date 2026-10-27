@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '@/test/render.tsx';
 import { API, http, HttpResponse, server, session } from '@/test/server.ts';
@@ -97,5 +97,30 @@ describe('Login', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Could not log in',
     );
+  });
+
+  it('offers no demo account unless one is configured', () => {
+    renderWithProviders(<Login />);
+
+    expect(
+      screen.queryByRole('button', { name: 'Try the demo account' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('signs in with the configured demo account in one click', async () => {
+    vi.stubEnv('VITE_DEMO_EMAIL', 'ada@example.com');
+    vi.stubEnv('VITE_DEMO_PASSWORD', 'pulse-demo-password');
+    const requests = loginAnswering(200, session('demo'));
+    const { user, auth } = renderWithProviders(<Login />);
+
+    await user.click(
+      screen.getByRole('button', { name: 'Try the demo account' }),
+    );
+
+    expect(requests).toEqual([
+      { email: 'ada@example.com', password: 'pulse-demo-password' },
+    ]);
+    expect(auth.login).toHaveBeenCalledWith(session('demo'));
+    expect(screen.getByLabelText('Your email')).toHaveValue('ada@example.com');
   });
 });
