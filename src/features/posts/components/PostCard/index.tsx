@@ -8,6 +8,7 @@ import styles from './post_card.module.scss';
 type PostCardProps = {
   post: PostTypes;
   canDelete: boolean;
+  isDeleting: boolean;
   onToggleLike: (post: PostTypes) => void;
   onDelete: (postId: string) => void;
 };
@@ -20,6 +21,7 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 const PostCard: FC<PostCardProps> = ({
   post,
   canDelete,
+  isDeleting,
   onToggleLike,
   onDelete,
 }) => (
@@ -44,7 +46,12 @@ const PostCard: FC<PostCardProps> = ({
           Like <span className={styles.post__count}>{post.likeCount}</span>
         </button>
         {canDelete && (
-          <Button variant="danger" size="sm" onClick={() => onDelete(post.id)}>
+          <Button
+            variant="danger"
+            size="sm"
+            isLoading={isDeleting}
+            onClick={() => onDelete(post.id)}
+          >
             Delete
           </Button>
         )}
