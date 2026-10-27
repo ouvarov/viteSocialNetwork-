@@ -6,7 +6,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://pulse-api.onrender.com/api/$1",
+      "dest": "https://pulse-api-044q.onrender.com/api/$1",
       "headers": { "x-vercel-enable-rewrite-caching": "0" },
       "transforms": [
         {
