@@ -21,7 +21,8 @@
     "api:check": "npm run api:pull && git diff --exit-code src/api/generated",
     "test:e2e": "playwright test",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:vercel": "npm run build && node scripts/vercel-output.mjs"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"
