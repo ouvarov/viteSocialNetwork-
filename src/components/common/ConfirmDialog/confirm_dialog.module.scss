@@ -1,0 +1,31 @@
+.confirm_dialog {
+  width: min(100% - #{space(4) * 2}, #{rem(420px)});
+  color: theme(page, color);
+
+  @include card;
+
+  &::backdrop {
+    background-color: theme(backdrop, background-color);
+  }
+
+  &__title {
+    @include text(lead, bold);
+  }
+
+  &__text {
+    margin-top: space(2);
+    color: theme(muted, color);
+  }
+
+  &__error {
+    margin-top: space(3);
+    color: theme(danger, color);
+  }
+
+  &__actions {
+    @include flex(flex-end);
+
+    gap: space(3);
+    margin-top: space(5);
+  }
+}

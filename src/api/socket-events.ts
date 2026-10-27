@@ -20,7 +20,7 @@ type ServerToClientEvents = {
 type ClientToServerEvents = {
   joinChat: (
     payload: ChatRoomPayload,
-    ack?: (room: ChatRoomPayload) => void,
+    ack: (room: ChatRoomPayload) => void,
   ) => void;
   leaveChat: (
     payload: ChatRoomPayload,
@@ -28,7 +28,7 @@ type ClientToServerEvents = {
   ) => void;
   createMessage: (
     payload: CreateMessagePayload,
-    ack?: (message: SocketMessage) => void,
+    ack: (message: SocketMessage) => void,
   ) => void;
 };
 

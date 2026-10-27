@@ -39,6 +39,9 @@ $themes: (
       background-color: #3a2f63,
       color: #f4f2f8,
     ),
+    backdrop: (
+      background-color: #000000a6,
+    ),
   ),
   light: (
     page: (
@@ -77,6 +80,9 @@ $themes: (
     message-other: (
       background-color: #e6e0f8,
       color: #1b1824,
+    ),
+    backdrop: (
+      background-color: #1b182466,
     ),
   ),
 );
@@ -117,6 +123,9 @@ $required-keys: (
   message-other: (
     background-color,
     color,
+  ),
+  backdrop: (
+    background-color,
   ),
 );
 

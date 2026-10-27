@@ -6,6 +6,20 @@
     color: theme(danger, color);
   }
 
+  &__send_error {
+    grid-column: 1 / -1;
+    margin-top: calc(-1 * #{space(3)});
+    color: theme(danger, color);
+  }
+
+  &__status {
+    color: theme(muted, color);
+
+    &:empty {
+      @include visually-hidden;
+    }
+  }
+
   &__rename {
     @include card;
   }
