@@ -11,7 +11,6 @@ export type AuthContextType = {
   user: UserDataTypes | null;
   login: (session: AuthResponseTypes) => void;
   logout: () => void;
-  checkUser: () => void;
   isLoading: boolean;
   hasSignedOut: boolean;
 };

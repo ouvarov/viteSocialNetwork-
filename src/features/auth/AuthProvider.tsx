@@ -42,24 +42,18 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
   }, []);
 
-  const checkUser = useCallback(() => {
-    setIsLoading(true);
+  useEffect(() => onSessionEnd(resetSession), [resetSession]);
 
+  useEffect(() => {
     refreshSession()
       .then(({ userData }) => setUser(userData))
       .catch(() => setUser(null))
       .finally(() => setIsLoading(false));
   }, []);
 
-  useEffect(() => onSessionEnd(resetSession), [resetSession]);
-
-  useEffect(() => {
-    checkUser();
-  }, [checkUser]);
-
   const value = useMemo(
-    () => ({ user, login, logout, checkUser, isLoading, hasSignedOut }),
-    [user, login, logout, checkUser, isLoading, hasSignedOut],
+    () => ({ user, login, logout, isLoading, hasSignedOut }),
+    [user, login, logout, isLoading, hasSignedOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

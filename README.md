@@ -10,7 +10,7 @@ The API lives in a separate repo: [ouvarov/nestSocialNetwork](https://github.com
 
 ## Stack
 
-- React 19, TypeScript (strict), Vite
+- React 19, TypeScript 6 (strict), Vite 8
 - TanStack Query v5, React Router 8, socket.io-client
 - `openapi-fetch` client typed by the backend OpenAPI spec
 - SCSS modules

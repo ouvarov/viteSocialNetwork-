@@ -23,7 +23,6 @@ const renderWithProviders = (
     user: null,
     login: vi.fn(),
     logout: vi.fn(),
-    checkUser: vi.fn(),
     isLoading: false,
     hasSignedOut: false,
     ...auth,
