@@ -40,6 +40,17 @@ OPENAPI_SOURCE=../nestSocialNetwork/openapi.json npm run api:pull   # use a loca
 
 Feature types (`src/features/*/types.ts`) are aliases of the generated schemas, so a renamed API field fails `tsc` instead of breaking the UI. Socket.IO events, which OpenAPI does not describe, are typed in `src/api/socket-events.ts`.
 
+## Unit and component tests
+
+Vitest with jsdom, Testing Library and MSW. Tests sit next to the code (`*.test.ts(x)`); MSW answers the HTTP calls, so the real `openapi-fetch` client, TanStack Query cache and forms run unchanged. Shared setup is in `src/test/`.
+
+```bash
+npm test
+npm run test:watch
+```
+
+They cover the session logic in the API client (one shared refresh, retry with the original body, ending the session), error messages and retry rules, chat message merging, the sign-in and sign-up forms, and the feed: paging, optimistic likes with rollback, deleting and its error states.
+
 ## End-to-end tests
 
 Playwright tests in `e2e/` run the production build (`vite preview` on port 3001) against a real API. Each test creates its own users through the API, so the API has to run with rate limiting switched off:
@@ -72,6 +83,7 @@ npm run test:e2e
 | Job     | What it checks                                                                                                                                       |
 | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Quality | type-check, ESLint, Stylelint, Prettier; generated API types match the API `main` branch                                                             |
+| Unit    | Vitest                                                                                                                                               |
 | Build   | production build                                                                                                                                     |
 | E2E     | checks out the API `main` branch, starts it on Postgres and Redis service containers and runs the Playwright suite; uploads the report when it fails |
 
@@ -101,4 +113,5 @@ Components don't call HTTP directly: every request lives in a feature's `queries
 | `npm run check`    | Type-check, ESLint, Stylelint and Prettier |
 | `npm run lint:fix` | ESLint with autofix                        |
 | `npm run api:pull` | Pull the OpenAPI spec and regenerate types |
+| `npm test`         | Unit and component tests                   |
 | `npm run test:e2e` | Playwright end-to-end tests                |
