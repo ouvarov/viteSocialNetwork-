@@ -26,7 +26,7 @@ cp .env.example .env
 npm run dev
 ```
 
-The app runs on http://localhost:3001 and expects the API on http://localhost:5000 (see `.env.example`).
+The app runs on http://localhost:3001 and expects the API on http://localhost:5000 (see `.env.example`). Like on Vercel, the browser sends REST calls to its own origin: Vite proxies `/api/*` to the API in `dev` and `preview`. Socket.IO connects to the API directly.
 
 ## API contract
 
@@ -64,7 +64,18 @@ npx playwright install chromium   # once
 npm run test:e2e
 ```
 
-`E2E_API_ORIGIN` points the tests at another API (default `http://localhost:5000`). The global setup stops early with a hint if the API is down or still rate limited.
+`E2E_API_ORIGIN` is where the test helpers send REST calls (default `http://localhost:5000`), and `E2E_SOCKET_ORIGIN` is where their Socket.IO clients connect (same default). The global setup stops early with a hint if the API is down or still rate limited.
+
+To run the suite the way production works, set `ORIGIN_SECRET` on the API and point the helpers at the proxy. The preview proxy then adds the secret header, the way Vercel does:
+
+```bash
+# API repo
+RATE_LIMIT_DISABLED=true ORIGIN_SECRET=<secret> npm run start
+# here
+ORIGIN_SECRET=<secret> E2E_API_ORIGIN=http://localhost:3001 npm run test:e2e
+```
+
+CI runs it this way.
 
 | Spec          | Covers                                                                              |
 | ------------- | ----------------------------------------------------------------------------------- |
@@ -86,6 +97,24 @@ npm run test:e2e
 | Unit    | Vitest                                                                                                                                               |
 | Build   | production build                                                                                                                                     |
 | E2E     | checks out the API `main` branch, starts it on Postgres and Redis service containers and runs the Playwright suite; uploads the report when it fails |
+
+## Deploy
+
+The web app is deployed on Vercel; the API on Render ([how the pieces fit](https://github.com/ouvarov/nestSocialNetwork#deploy)).
+
+- **`vercel.json`** proxies `/api/*` to the Render service and adds `x-origin-secret` from the `ORIGIN_SECRET` environment variable. Every other path falls back to `index.html` for client-side routes.
+- **The browser makes REST calls to its own origin**, so the refresh cookie is first-party.
+- **Socket.IO and the wake-up ping go to Render directly** (`VITE_SOCKET_URL`).
+- **While the free Render instance starts**, the loader explains the wait (after 3 s). The session restore starts only after the API answers, so the proxy never waits on a sleeping instance.
+
+Vercel project settings:
+
+| Variable          | Value                            |
+| ----------------- | -------------------------------- |
+| `VITE_SOCKET_URL` | `https://<service>.onrender.com` |
+| `ORIGIN_SECRET`   | the same value as on Render      |
+
+If the Render service name is not `pulse-api`, update the `dest` host in `vercel.json`.
 
 ## Structure
 

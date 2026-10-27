@@ -2,6 +2,7 @@ import io from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 
 import { readAccessToken } from './access-token.ts';
+import { DIRECT_API_ORIGIN } from './origins.ts';
 import { endSession, onSessionEnd, refreshSession } from './session.ts';
 import type {
   ClientToServerEvents,
@@ -9,7 +10,7 @@ import type {
 } from './socket-events.ts';
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-  `${import.meta.env.VITE_SOCKET_URL}/chat`,
+  `${DIRECT_API_ORIGIN}/chat`,
   {
     transports: ['websocket'],
     autoConnect: false,
