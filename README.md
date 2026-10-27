@@ -114,7 +114,7 @@ Vercel project settings:
 | `VITE_SOCKET_URL` | `https://<service>.onrender.com` |
 | `ORIGIN_SECRET`   | the same value as on Render      |
 
-If the Render service name is not `pulse-api`, update the `dest` host in `vercel.json`.
+The Render service is `pulse-api-044q.onrender.com`; if it ever moves, update the `dest` host in `vercel.json`.
 
 ## Structure
 
