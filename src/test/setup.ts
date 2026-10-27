@@ -18,7 +18,7 @@ class IdleIntersectionObserver {
 beforeAll(() => {
   globalThis.IntersectionObserver ??=
     IdleIntersectionObserver as unknown as typeof IntersectionObserver;
-  server.listen({ onUnhandledRequest: 'error' });
+  server.listen({ onUnhandledFrame: 'error' });
 });
 
 afterEach(() => {

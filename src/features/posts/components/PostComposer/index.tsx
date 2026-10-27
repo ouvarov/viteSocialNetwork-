@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDropzone } from 'react-dropzone';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
 import { Button } from '@/components/common/Button';
@@ -28,7 +28,7 @@ const PostComposer: FC<PostComposerProps> = ({ userId }) => {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     reset,
     setError,
     formState: { errors, isSubmitting },
@@ -37,7 +37,7 @@ const PostComposer: FC<PostComposerProps> = ({ userId }) => {
     defaultValues: { text: '', imageUrl: undefined },
   });
 
-  const image = watch('imageUrl');
+  const image = useWatch({ control, name: 'imageUrl' });
 
   const { getRootProps, getInputProps } = useDropzone({
     multiple: false,
