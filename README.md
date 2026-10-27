@@ -102,7 +102,12 @@ CI runs it this way.
 
 The web app is deployed on Vercel; the API on Render ([how the pieces fit](https://github.com/ouvarov/nestSocialNetwork#deploy)).
 
-- **`vercel.json`** proxies `/api/*` to the Render service and adds `x-origin-secret` from the `ORIGIN_SECRET` environment variable. Every other path falls back to `index.html` for client-side routes.
+- **`npm run build:vercel`** builds the app, then `scripts/vercel-output.mjs` writes the [Build Output API](https://vercel.com/docs/build-output-api) routes from the environment:
+  - `/api/*` is proxied to `VITE_SOCKET_URL`, with `x-origin-secret` set from `ORIGIN_SECRET`;
+  - every other path falls back to `index.html` for client-side routes.
+
+  `vercel.json` can't read environment variables in a route destination, so no URL lives in the repo. The build fails if either variable is missing.
+
 - **The browser makes REST calls to its own origin**, so the refresh cookie is first-party.
 - **Socket.IO and the wake-up ping go to Render directly** (`VITE_SOCKET_URL`).
 - **While the free Render instance starts**, the loader explains the wait (after 3 s). The session restore starts only after the API answers, so the proxy never waits on a sleeping instance.
@@ -113,8 +118,6 @@ Vercel project settings:
 | ----------------- | -------------------------------- |
 | `VITE_SOCKET_URL` | `https://<service>.onrender.com` |
 | `ORIGIN_SECRET`   | the same value as on Render      |
-
-The Render service is `pulse-api-044q.onrender.com`; if it ever moves, update the `dest` host in `vercel.json`.
 
 ## Structure
 
