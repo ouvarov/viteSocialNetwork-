@@ -108,3 +108,25 @@
     padding: space(6) space(5);
   }
 }
+
+.progress {
+  position: fixed;
+  z-index: z(overlay);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: rem(3px);
+  background-color: theme(accent, background-color);
+  transform-origin: left;
+  animation: progress 1.5s ease-out forwards;
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(0.9);
+  }
+}

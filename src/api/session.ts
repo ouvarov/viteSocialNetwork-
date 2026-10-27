@@ -7,7 +7,7 @@ type Session = Schemas['AuthResponseDto'];
 const REFRESH_URL = `${import.meta.env.VITE_API_ORIGIN}/api/auth/refresh`;
 
 let pendingRefresh: Promise<Session> | null = null;
-const expiryListeners = new Set<() => void>();
+const endListeners = new Set<() => void>();
 
 const requestRefresh = async (): Promise<Session> => {
   const response = await fetch(REFRESH_URL, {
@@ -38,17 +38,17 @@ const refreshSession = (): Promise<Session> => {
   return pendingRefresh;
 };
 
-const onSessionExpired = (listener: () => void) => {
-  expiryListeners.add(listener);
+const onSessionEnd = (listener: () => void) => {
+  endListeners.add(listener);
 
   return () => {
-    expiryListeners.delete(listener);
+    endListeners.delete(listener);
   };
 };
 
-const expireSession = (): void => {
+const endSession = (): void => {
   clearAccessToken();
-  expiryListeners.forEach((listener) => listener());
+  endListeners.forEach((listener) => listener());
 };
 
-export { expireSession, onSessionExpired, refreshSession };
+export { endSession, onSessionEnd, refreshSession };

@@ -2,9 +2,8 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { clearAccessToken, saveAccessToken } from '@/api/access-token.ts';
-import { onSessionExpired, refreshSession } from '@/api/session.ts';
-import { socket } from '@/api/socket.ts';
+import { saveAccessToken } from '@/api/access-token.ts';
+import { endSession, onSessionEnd, refreshSession } from '@/api/session.ts';
 import type { UserDataTypes } from '@/features/users/types.ts';
 
 import { logoutUser } from './api.ts';
@@ -30,8 +29,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const resetSession = useCallback(() => {
-    clearAccessToken();
-    socket.disconnect();
     queryClient.clear();
     setUser(null);
   }, [queryClient]);
@@ -41,9 +38,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       .catch(() => undefined)
       .finally(() => {
         setHasSignedOut(true);
-        resetSession();
+        endSession();
       });
-  }, [resetSession]);
+  }, []);
 
   const checkUser = useCallback(() => {
     setIsLoading(true);
@@ -54,7 +51,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       .finally(() => setIsLoading(false));
   }, []);
 
-  useEffect(() => onSessionExpired(resetSession), [resetSession]);
+  useEffect(() => onSessionEnd(resetSession), [resetSession]);
 
   useEffect(() => {
     checkUser();
