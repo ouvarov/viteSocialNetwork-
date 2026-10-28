@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import { getApiErrorMessage } from '@/api/errors.ts';
 import { Button } from '@/components/common/Button';
 import { UserIcon } from '@/components/common/UserIcon';
+import { DeleteAccount } from '@/features/auth/components/DeleteAccount';
 import { useCreateChat } from '@/features/chat/queries.ts';
 import type { UserDataTypes } from '@/features/users/types.ts';
 import { chatPage } from '@/routes/routePaths.ts';
@@ -24,7 +25,7 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ profile, isOwnProfile }) => {
   } = useCreateChat();
 
   const handleStartChat = () => {
-    createChat([profile.id], {
+    createChat(profile.id, {
       onSuccess: ({ chatId }) => void navigate(chatPage(chatId)),
     });
   };
@@ -40,7 +41,9 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ profile, isOwnProfile }) => {
           </p>
         )}
       </div>
-      {!isOwnProfile && (
+      {isOwnProfile ? (
+        <DeleteAccount />
+      ) : (
         <Button isLoading={isPending} onClick={handleStartChat}>
           Send message
         </Button>

@@ -95,7 +95,7 @@ for (const theme of ['dark', 'light']) {
   }) => {
     const user = await registerUser(request, 'Axe');
     const other = await registerUser(request, 'Other');
-    const chatId = await createChat(request, user, [other]);
+    const chatId = await createChat(request, user, other);
     await page.addInitScript((value) => {
       localStorage.setItem('pulse-theme', value);
     }, theme);

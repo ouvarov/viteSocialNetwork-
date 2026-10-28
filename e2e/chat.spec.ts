@@ -5,7 +5,9 @@ import type { Socket } from 'socket.io-client';
 
 import type { TestUser } from './support.ts';
 import {
+  PASSWORD,
   SOCKET_ORIGIN,
+  apiCall,
   axeViolations,
   collectPageErrors,
   countRequests,
@@ -90,10 +92,10 @@ const connectAs = async (user: TestUser, chatId: string) => {
   };
 };
 
-const setUpChat = async (request: APIRequestContext, name?: string) => {
+const setUpChat = async (request: APIRequestContext) => {
   const ada = await registerUser(request, 'Ada');
   const bob = await registerUser(request, 'Bob');
-  const chatId = await createChat(request, ada, [bob], name);
+  const chatId = await createChat(request, ada, bob);
 
   return { ada, bob, chatId };
 };
@@ -122,7 +124,7 @@ test.describe('realtime chat', () => {
     await bobSocket.say('history from bob');
     const errors = collectPageErrors(page);
     const chatLoads = countRequests(page, (url) =>
-      url.pathname.startsWith('/api/chat/find/'),
+      url.pathname.endsWith('/messages'),
     );
 
     await signIn(page, ada, `/chat/${chatId}`);
@@ -200,7 +202,7 @@ test.describe('realtime chat', () => {
     const fetched = new Promise<void>((resolve) => {
       markFetched = resolve;
     });
-    await page.route(`**/api/chat/find/${chatId}`, async (route) => {
+    await page.route(`**/api/chat/${chatId}/messages**`, async (route) => {
       const response = await route.fetch();
       markFetched();
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -229,7 +231,7 @@ test.describe('realtime chat', () => {
     const gate = new Promise<void>((resolve) => {
       release = resolve;
     });
-    await page.route(`**/api/chat/find/${chatId}`, async (route) => {
+    await page.route(`**/api/chat/${chatId}/messages**`, async (route) => {
       const response = await route.fetch();
       fetchedCount += 1;
       await gate;
@@ -287,58 +289,86 @@ test.describe('realtime chat', () => {
   });
 });
 
-test('starting a chat from a profile, renaming it and messaging', async ({
+test('starting a chat from a profile and messaging', async ({
   page,
   request,
 }) => {
   const ada = await registerUser(request, 'Ada');
-  const bob = await registerUser(request, 'Bob');
-  const renames = countRequests(page, (url) =>
-    url.pathname.endsWith('/chat/update'),
-  );
+  const bob = await registerUser(request, `Bob ${Date.now()}`);
   await signIn(page, ada, `/profile/${bob.id}`);
 
   await page.getByRole('button', { name: 'Send message' }).click();
   await expect(page).toHaveURL(/\/chat\/[0-9a-f-]{36}$/);
+  await expect(page.getByRole('heading', { name: bob.name })).toBeVisible();
   await expect(page.getByText('No messages yet')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Rename' })).toHaveCount(0);
 
   await send(page, '  ');
   await expect(page.getByText('Write a message first')).toBeVisible();
   await send(page, 'hi bob');
   await expect(message(page, 'hi bob')).toBeVisible();
 
-  const rename = page.getByRole('button', { name: 'Rename' });
-  await rename.click();
-  await expect(rename).toHaveAttribute('aria-expanded', 'true');
-  const chatName = page.getByRole('textbox', { name: 'Chat name' });
-  await expect(chatName).toBeFocused();
-  await expect(
-    page.getByRole('button', { name: 'Delete chat' }),
-  ).toHaveAttribute('type', 'button');
-
-  await chatName.fill('   ');
-  await page.getByRole('button', { name: 'Save name' }).click();
-  await expect(page.getByText('Enter a chat name')).toBeVisible();
-  expect(renames).toHaveLength(0);
-
-  const name = `Plans ${Date.now()}`;
-  await chatName.fill(name);
-  await page.getByRole('button', { name: 'Save name' }).click();
-  await expect(page.getByRole('heading', { name })).toBeVisible();
-
   await page.getByRole('link', { name: 'Chats' }).click();
-  await expect(page.getByRole('link', { name })).toBeVisible();
+  await expect(page.getByRole('link', { name: bob.name })).toBeVisible();
 });
 
-test('deleting a chat asks for confirmation', async ({ page, request }) => {
-  const name = `Doomed ${Date.now()}`;
-  const { ada, chatId } = await setUpChat(request, name);
+test('your own profile has no Send message button', async ({
+  page,
+  request,
+}) => {
+  const ada = await registerUser(request, 'Ada');
+  await signIn(page, ada);
+
+  await expect(page.getByRole('heading', { name: 'Ada' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Send message' })).toHaveCount(
+    0,
+  );
+});
+
+test('older messages load when you scroll up, keeping your place', async ({
+  page,
+  request,
+}) => {
+  const { ada, bob, chatId } = await setUpChat(request);
+  const bobSocket = await connectAs(bob, chatId);
+  for (let index = 1; index <= 55; index += 1) {
+    await bobSocket.say(`message ${index}`);
+  }
+  bobSocket.close();
+
   await signIn(page, ada, `/chat/${chatId}`);
-  const deleteButton = page.getByRole('button', { name: 'Delete chat' });
-  const dialog = page.getByRole('dialog', { name: 'Delete this chat?' });
+  await expect(message(page, 'message 55')).toBeInViewport();
+  await expect(messages(page)).toHaveCount(50);
+
+  const anchor = message(page, 'message 6');
+  await page.getByRole('button', { name: 'Show earlier messages' }).click();
+  await expect(message(page, 'message 1')).toBeAttached();
+  await expect(messages(page)).toHaveCount(55);
+  await expect(anchor).toBeInViewport();
+  await expect(
+    page.getByRole('button', { name: 'Show earlier messages' }),
+  ).toHaveCount(0);
+});
+
+test('deleting a chat for yourself asks for confirmation and keeps it for the other person', async ({
+  page,
+  request,
+}) => {
+  const { ada, bob, chatId } = await setUpChat(request);
+  const bobSocket = await connectAs(bob, chatId);
+  await bobSocket.say('still here for bob');
+  bobSocket.close();
+  await signIn(page, ada, `/chat/${chatId}`);
+  const deleteButton = page.getByRole('button', { name: 'Delete for me' });
+  const dialog = page.getByRole('dialog', {
+    name: 'Delete this chat for you?',
+  });
 
   await deleteButton.click();
   await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText(
+    'The history disappears only for you. Bob still sees it.',
+  );
   await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
   expect(await axeViolations(page)).toEqual([]);
   await page.keyboard.press('Escape');
@@ -355,7 +385,7 @@ test('deleting a chat asks for confirmation', async ({ page, request }) => {
       : route.continue(),
   );
   await deleteButton.click();
-  await dialog.getByRole('button', { name: 'Delete chat' }).click();
+  await dialog.getByRole('button', { name: 'Delete for me' }).click();
   await expect(dialog.getByRole('alert')).toContainText(
     'Could not reach the database',
   );
@@ -364,8 +394,38 @@ test('deleting a chat asks for confirmation', async ({ page, request }) => {
 
   await deleteButton.click();
   await expect(dialog.getByRole('alert')).toHaveCount(0);
-  await dialog.getByRole('button', { name: 'Delete chat' }).click();
+  await dialog.getByRole('button', { name: 'Delete for me' }).click();
   await expect(page).toHaveURL(/\/chats$/);
   await expect(page.getByRole('heading', { name: 'Chats' })).toBeVisible();
-  await expect(page.getByRole('link', { name })).toHaveCount(0);
+  await expect(page.locator(`a[href="/chat/${chatId}"]`)).toHaveCount(0);
+
+  const bobChats = await apiCall<{ chatId: string }[]>(
+    request,
+    bob,
+    'GET',
+    '/chat',
+  );
+  expect(bobChats.map((chat) => chat.chatId)).toContain(chatId);
+});
+
+test('a chat with a deleted account shows Deleted user and cannot be answered', async ({
+  page,
+  request,
+}) => {
+  const { ada, bob, chatId } = await setUpChat(request);
+  const bobSocket = await connectAs(bob, chatId);
+  await bobSocket.say('goodbye from bob');
+  bobSocket.close();
+  await apiCall(request, bob, 'DELETE', '/users/me', { password: PASSWORD });
+
+  await signIn(page, ada, '/chats');
+  await expect(page.getByRole('link', { name: 'Deleted user' })).toBeVisible();
+  await page.locator(`a[href="/chat/${chatId}"]`).click();
+
+  await expect(
+    page.getByRole('heading', { name: 'Deleted user' }),
+  ).toBeVisible();
+  await expect(message(page, 'goodbye from bob')).toContainText('Deleted user');
+  await expect(page.getByRole('textbox', { name: 'Message' })).toBeDisabled();
+  await expect(page.getByText('This account was deleted')).toBeVisible();
 });

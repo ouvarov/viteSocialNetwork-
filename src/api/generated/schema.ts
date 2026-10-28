@@ -100,6 +100,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["UserController_deleteMe"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/posts": {
         parameters: {
             query?: never;
@@ -212,15 +228,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/chat/update": {
+    "/api/chat/{id}/messages": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put: operations["ChatController_update"];
+        get: operations["ChatController_findMessages"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -299,7 +315,10 @@ export interface components {
         CreateAuthDto: {
             /** @example ada@example.com */
             email: string;
-            /** @example correct-horse-battery */
+            /**
+             * @description At most 72 bytes in UTF-8, the bcrypt limit
+             * @example correct-horse-battery
+             */
             password: string;
             /** @example Ada Lovelace */
             userName: string;
@@ -323,6 +342,16 @@ export interface components {
             /** @example ada@example.com */
             email: string;
             /** @example pulse-demo-password */
+            password: string;
+        };
+        UserPageDto: {
+            /** @description Newest members first */
+            items: components["schemas"]["UserResponseDto"][];
+            /** @description Pass as cursor to get the next page; null on the last page */
+            nextCursor: string | null;
+        };
+        DeleteAccountDto: {
+            /** @description The current password, to confirm */
             password: string;
         };
         CreatePostDto: {
@@ -351,37 +380,56 @@ export interface components {
             nextCursor: string | null;
         };
         CreateChatDto: {
-            /** @description Other members; the caller is always added */
-            userIds: string[];
+            /**
+             * Format: uuid
+             * @description The other person; a chat with yourself is rejected
+             */
+            userId: string;
         };
         ChatIdDto: {
             /** Format: uuid */
             chatId: string;
         };
+        ChatPeerDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Ada Lovelace */
+            userName: string;
+            imageUrl: string | null;
+        };
         ChatSummaryDto: {
             /** Format: uuid */
             chatId: string;
-            chatName: string | null;
+            /** @description null when the other person deleted their account */
+            peer: components["schemas"]["ChatPeerDto"] | null;
+            /** Format: date-time */
+            lastMessageAt: string | null;
+        };
+        ChatDto: {
+            /** Format: uuid */
+            chatId: string;
+            /** @description null when the other person deleted their account */
+            peer: components["schemas"]["ChatPeerDto"] | null;
+            /** @description false when the other person is gone */
+            canSend: boolean;
         };
         ChatMessageDto: {
             /** Format: uuid */
             messageId: string;
-            /** Format: uuid */
-            senderId: string;
+            /**
+             * Format: uuid
+             * @description null when the sender deleted their account
+             */
+            senderId: string | null;
             content: string;
             /** Format: date-time */
             sentAt: string;
         };
-        ChatDto: {
-            /** @description Empty string when the chat has no name */
-            chatName: string;
-            messages: components["schemas"]["ChatMessageDto"][];
-        };
-        UpdateChatDto: {
-            /** Format: uuid */
-            chatId: string;
-            /** @example Weekend plans */
-            newChatName: string;
+        MessagePageDto: {
+            /** @description Newest first; only messages after you cleared the chat */
+            items: components["schemas"]["ChatMessageDto"][];
+            /** @description Pass as cursor to get older messages; null on the last page */
+            nextCursor: string | null;
         };
         UploadResponseDto: {
             /** @example https://cdn.example.com/users/<id>/<uuid>.png */
@@ -527,7 +575,12 @@ export interface operations {
     };
     UserController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Each list has its own default page size */
+                limit?: number;
+                /** @description nextCursor from the previous page */
+                cursor?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -539,7 +592,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserResponseDto"][];
+                    "application/json": components["schemas"]["UserPageDto"];
                 };
             };
         };
@@ -565,6 +618,41 @@ export interface operations {
             };
             /** @description User not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UserController_deleteMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteAccountDto"];
+            };
+        };
+        responses: {
+            /** @description Deletes the account, its posts and likes; messages stay with the other person without a sender */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Wrong password */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -598,6 +686,7 @@ export interface operations {
     PostController_findPostsOfUser: {
         parameters: {
             query?: {
+                /** @description Each list has its own default page size */
                 limit?: number;
                 /** @description nextCursor from the previous page */
                 cursor?: string;
@@ -715,7 +804,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description The existing chat when one has exactly these members */
+            /** @description The existing chat when you already have one with this user */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -723,6 +812,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ChatIdDto"];
                 };
+            };
+            /** @description A chat with yourself */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Chat not found or not a member */
             404: {
@@ -742,6 +838,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Most recent first; chats you cleared come back on a new message */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -787,25 +884,28 @@ export interface operations {
             };
         };
     };
-    ChatController_update: {
+    ChatController_findMessages: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Each list has its own default page size */
+                limit?: number;
+                /** @description nextCursor from the previous page */
+                cursor?: string;
+            };
             header?: never;
-            path?: never;
+            path: {
+                id: string;
+            };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateChatDto"];
-            };
-        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ChatSummaryDto"];
+                    "application/json": components["schemas"]["MessagePageDto"];
                 };
             };
             /** @description Chat not found or not a member */
@@ -828,6 +928,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Clears the history for you only; the chat is removed once nobody sees it */
             204: {
                 headers: {
                     [name: string]: unknown;

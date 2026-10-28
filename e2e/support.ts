@@ -57,23 +57,15 @@ const apiCall = async <Body>(
 const createChat = async (
   request: APIRequestContext,
   owner: TestUser,
-  members: TestUser[],
-  name?: string,
+  peer: TestUser,
 ) => {
   const { chatId } = await apiCall<{ chatId: string }>(
     request,
     owner,
     'POST',
     '/chat/create',
-    { userIds: members.map(({ id }) => id) },
+    { userId: peer.id },
   );
-
-  if (name) {
-    await apiCall(request, owner, 'PUT', '/chat/update', {
-      chatId,
-      newChatName: name,
-    });
-  }
 
   return chatId;
 };

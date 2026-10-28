@@ -2,12 +2,7 @@
   display: grid;
   gap: space(4);
 
-  &__error {
-    color: theme(danger, color);
-  }
-
   &__send_error {
-    grid-column: 1 / -1;
     margin-top: calc(-1 * #{space(3)});
     color: theme(danger, color);
   }
@@ -20,16 +15,17 @@
     }
   }
 
-  &__rename {
-    @include card;
-  }
-
   &__log {
     @include card;
 
     overflow-y: auto;
     height: clamp(#{rem(240px)}, 100dvh - #{rem(420px)}, #{rem(560px)});
     overscroll-behavior: contain;
+  }
+
+  &__older {
+    display: flex;
+    margin: 0 auto space(3);
   }
 
   &__messages {
@@ -40,9 +36,18 @@
 
   &__composer {
     display: grid;
+    gap: space(1);
+  }
+
+  &__fields {
+    display: grid;
     grid-template-columns: 1fr auto;
     gap: space(3);
     align-items: end;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
 
     > button {
       margin-bottom: space(4);
@@ -51,5 +56,10 @@
 
   &__field {
     min-width: 0;
+  }
+
+  &__closed {
+    margin-top: calc(-1 * #{space(3)});
+    color: theme(muted, color);
   }
 }

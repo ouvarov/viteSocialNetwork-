@@ -107,6 +107,26 @@ describe('client', () => {
     expect(refreshCalls()).toBe(0);
   });
 
+  it('does not refresh when a wrong password is the reason for 401', async () => {
+    saveAccessToken('access-1');
+    const refreshCalls = refreshAnswering('access-2');
+    server.use(
+      http.delete(`${API}/users/me`, () =>
+        HttpResponse.json(
+          { statusCode: 401, message: 'Invalid credentials' },
+          { status: 401 },
+        ),
+      ),
+    );
+
+    const { response } = await client.DELETE('/api/users/me', {
+      body: { password: 'wrong' },
+    });
+
+    expect(response.status).toBe(401);
+    expect(refreshCalls()).toBe(0);
+  });
+
   it('sends the repeated request with its original body', async () => {
     saveAccessToken('expired');
     refreshAnswering('access-2');

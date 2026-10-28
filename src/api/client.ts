@@ -7,6 +7,7 @@ import { endSession, refreshSession } from './session.ts';
 
 const UNAUTHORIZED = 401;
 const AUTH_PATH_PREFIX = '/api/auth/';
+const INVALID_CREDENTIALS = 'Invalid credentials';
 
 const withAccessToken = (request: Request): Request => {
   const token = readAccessToken();
@@ -19,6 +20,17 @@ const withAccessToken = (request: Request): Request => {
 const isAuthRequest = (request: Request): boolean =>
   new URL(request.url).pathname.startsWith(AUTH_PATH_PREFIX);
 
+const isWrongPassword = async (response: Response): Promise<boolean> => {
+  const body: unknown = await response
+    .clone()
+    .json()
+    .catch(() => undefined);
+
+  return (
+    (body as { message?: unknown } | undefined)?.message === INVALID_CREDENTIALS
+  );
+};
+
 const fetchWithSession = async (request: Request): Promise<Response> => {
   const retry = request.clone();
   const response = await fetch(withAccessToken(request));
@@ -26,6 +38,8 @@ const fetchWithSession = async (request: Request): Promise<Response> => {
   if (response.status !== UNAUTHORIZED || isAuthRequest(request)) {
     return response;
   }
+
+  if (await isWrongPassword(response)) return response;
 
   try {
     await refreshSession();

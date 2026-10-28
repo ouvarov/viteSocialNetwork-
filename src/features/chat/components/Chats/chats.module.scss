@@ -5,14 +5,19 @@
 
 .item {
   @include card;
-  @include text(body-lg, bold);
+  @include flex(flex-start);
 
-  display: block;
+  gap: space(3);
   color: theme(page, color);
-  overflow-wrap: anywhere;
 
   &:hover {
     border-color: theme(field, border-color);
     text-decoration: none;
+  }
+
+  &__name {
+    @include text(body-lg, bold);
+
+    overflow-wrap: anywhere;
   }
 }

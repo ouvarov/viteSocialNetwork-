@@ -10,12 +10,20 @@ const Message: FC<MessagesDataTypes> = ({ senderId, content }) => {
   const { user } = useAuth();
 
   const isOwner = senderId === user?.id;
+  const isFromDeletedUser = senderId === null;
 
   const messageClassNames = classNames(styles.item, {
     [styles.item__owner]: isOwner,
   });
 
-  return <li className={messageClassNames}>{content}</li>;
+  return (
+    <li className={messageClassNames}>
+      {isFromDeletedUser && (
+        <span className={styles.item__sender}>Deleted user</span>
+      )}
+      {content}
+    </li>
+  );
 };
 
 export { Message };

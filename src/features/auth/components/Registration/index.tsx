@@ -10,12 +10,19 @@ import { Button } from '@/components/common/Button';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 
-import { getApiErrorMessage } from '@/api/errors.ts';
+import { ApiError, getApiErrorMessage } from '@/api/errors.ts';
 import { registerUser } from '@/features/auth/api.ts';
 import { signUpSchema } from '@/features/auth/schemas.ts';
 import type { SignUpFormValues } from '@/features/auth/schemas.ts';
 
 import styles from './registration.module.scss';
+
+const CONFLICT = 409;
+const EMAIL_TAKEN_ERROR = 'emailTaken';
+const EMAIL_TAKEN_MESSAGE = 'An account with this email already exists.';
+
+const isEmailTaken = (error: unknown): boolean =>
+  error instanceof ApiError && error.status === CONFLICT;
 
 const Registration: FC = () => {
   const { login } = useAuth();
@@ -36,6 +43,13 @@ const Registration: FC = () => {
     try {
       login(await registerUser(values));
     } catch (registrationError) {
+      if (isEmailTaken(registrationError)) {
+        setError('root.server', {
+          type: EMAIL_TAKEN_ERROR,
+          message: EMAIL_TAKEN_MESSAGE,
+        });
+        return;
+      }
       setError('root.server', {
         message: getApiErrorMessage(registrationError, 'Could not sign up'),
       });
@@ -80,6 +94,12 @@ const Registration: FC = () => {
         {errors.root?.server && (
           <p className={styles.error} role="alert">
             {errors.root.server.message}
+            {errors.root.server.type === EMAIL_TAKEN_ERROR && (
+              <>
+                {' '}
+                <Link to={loginPage()}>Sign in instead</Link>
+              </>
+            )}
           </p>
         )}
         <Button

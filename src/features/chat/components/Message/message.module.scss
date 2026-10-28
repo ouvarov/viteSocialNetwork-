@@ -9,6 +9,13 @@
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 
+  &__sender {
+    @include text(caption, bold);
+
+    display: block;
+    color: theme(muted, color);
+  }
+
   &__owner {
     @include use-theme(message-own);
 
