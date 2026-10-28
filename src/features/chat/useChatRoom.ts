@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { socket } from '@/api/socket.ts';
@@ -20,10 +20,15 @@ class ChatSocketError extends Error {
 }
 
 const joinRoom = (chatId: string) =>
-  new Promise<void>((resolve) => {
+  new Promise<void>((resolve, reject) => {
     socket
       .timeout(SOCKET_TIMEOUT_MS)
-      .emit('joinChat', { chatId }, () => resolve());
+      .emit('joinChat', { chatId }, (timeoutError, result) => {
+        if (timeoutError) return reject(timeoutError);
+        if (!result.ok) return reject(new ChatSocketError(result.error));
+
+        resolve();
+      });
   });
 
 const createMessage = (payload: CreateMessagePayload) =>
@@ -40,6 +45,8 @@ const createMessage = (payload: CreateMessagePayload) =>
 
 const useChatRoom = (chatId: string | undefined) => {
   const queryClient = useQueryClient();
+  const [isJoinFailed, setIsJoinFailed] = useState(false);
+  const [joinAttempt, setJoinAttempt] = useState(0);
 
   useEffect(() => {
     if (!chatId) return;
@@ -47,9 +54,16 @@ const useChatRoom = (chatId: string | undefined) => {
     let isActive = true;
 
     const joinChat = async () => {
-      await joinRoom(chatId);
+      try {
+        await joinRoom(chatId);
+      } catch {
+        if (isActive) setIsJoinFailed(true);
+        return;
+      }
 
-      if (isActive) await reloadHistory(queryClient, chatId);
+      if (!isActive) return;
+      setIsJoinFailed(false);
+      await reloadHistory(queryClient, chatId);
     };
     const onConnect = () => void joinChat();
 
@@ -63,7 +77,7 @@ const useChatRoom = (chatId: string | undefined) => {
       socket.off('connect', onConnect);
       socket.emit('leaveChat', { chatId });
     };
-  }, [chatId, queryClient]);
+  }, [chatId, queryClient, joinAttempt]);
 
   useEffect(() => {
     if (!chatId) return;
@@ -93,7 +107,12 @@ const useChatRoom = (chatId: string | undefined) => {
     [chatId, queryClient],
   );
 
-  return { sendMessage };
+  const retryJoin = useCallback(
+    () => setJoinAttempt((attempt) => attempt + 1),
+    [],
+  );
+
+  return { sendMessage, isJoinFailed, retryJoin };
 };
 
 export { ChatSocketError, useChatRoom };

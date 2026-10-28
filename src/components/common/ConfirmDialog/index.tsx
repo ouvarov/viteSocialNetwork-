@@ -10,7 +10,7 @@ type ConfirmDialogProps = {
   title: string;
   confirmLabel: string;
   children?: ReactNode;
-  body?: ReactNode;
+  fields?: ReactNode;
   error?: string;
   isConfirming?: boolean;
   onConfirm: () => void;
@@ -22,7 +22,7 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
   title,
   confirmLabel,
   children,
-  body,
+  fields,
   error,
   isConfirming = false,
   onConfirm,
@@ -61,7 +61,7 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
           {children}
         </p>
       )}
-      {body && <div className={styles.confirm_dialog__body}>{body}</div>}
+      {fields && <div className={styles.confirm_dialog__fields}>{fields}</div>}
       {error && (
         <p className={styles.confirm_dialog__error} role="alert">
           {error}

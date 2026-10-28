@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { ApiError, getApiErrorMessage } from '@/api/errors.ts';
+import { getApiErrorMessage } from '@/api/errors.ts';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Input } from '@/components/common/Input';
@@ -12,16 +12,10 @@ import { deleteAccountSchema } from '@/features/auth/schemas.ts';
 import type { DeleteAccountFormValues } from '@/features/auth/schemas.ts';
 import { useAuth } from '@/features/auth/useAuth.ts';
 
-const UNAUTHORIZED = 401;
-
-const toDeleteError = (error: unknown): string =>
-  error instanceof ApiError && error.status === UNAUTHORIZED
-    ? 'Wrong password'
-    : getApiErrorMessage(error, 'Could not delete the account');
-
 const DeleteAccount: FC = () => {
   const { logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const {
     register,
@@ -37,11 +31,19 @@ const DeleteAccount: FC = () => {
   const onSubmit = async ({
     password,
   }: DeleteAccountFormValues): Promise<void> => {
+    if (isSigningOut) return;
+
     try {
       await deleteAccount(password);
+      setIsSigningOut(true);
       logout();
     } catch (deleteError) {
-      setError('password', { message: toDeleteError(deleteError) });
+      setError('password', {
+        message: getApiErrorMessage(
+          deleteError,
+          'Could not delete the account',
+        ),
+      });
     }
   };
 
@@ -64,10 +66,10 @@ const DeleteAccount: FC = () => {
         isOpen={isOpen}
         title="Delete your account?"
         confirmLabel="Delete account"
-        isConfirming={isSubmitting}
+        isConfirming={isSubmitting || isSigningOut}
         onConfirm={() => void handleSubmit(onSubmit)()}
         onClose={() => setIsOpen(false)}
-        body={
+        fields={
           <form noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
             <Input
               {...register('password')}

@@ -4,7 +4,19 @@ import { queryKeys } from '@/api/query-keys.ts';
 
 import type { MessagePagesData, MessagesDataTypes } from './types.ts';
 
-const sentAtOf = ({ sentAt }: MessagesDataTypes) => Date.parse(sentAt);
+const liveMessageIds = new Map<string, Set<string>>();
+
+const compareOldestFirst = (
+  first: MessagesDataTypes,
+  second: MessagesDataTypes,
+): number =>
+  Date.parse(first.sentAt) - Date.parse(second.sentAt) ||
+  first.messageId.localeCompare(second.messageId);
+
+const compareNewestFirst = (
+  first: MessagesDataTypes,
+  second: MessagesDataTypes,
+): number => compareOldestFirst(second, first);
 
 const mergeMessages = (
   current: MessagesDataTypes[],
@@ -13,18 +25,18 @@ const mergeMessages = (
   const byId = new Map(current.map((message) => [message.messageId, message]));
   incoming.forEach((message) => byId.set(message.messageId, message));
 
-  return [...byId.values()].sort(
-    (first, second) => sentAtOf(second) - sentAtOf(first),
-  );
+  return [...byId.values()].sort(compareNewestFirst);
 };
 
-const messagesNewerThan = (
-  messages: MessagesDataTypes[],
-  newest: MessagesDataTypes | undefined,
-): MessagesDataTypes[] =>
-  newest
-    ? messages.filter((message) => sentAtOf(message) > sentAtOf(newest))
-    : messages;
+const collectLiveMessages = (chatId: string) => {
+  const ids = new Set<string>();
+  liveMessageIds.set(chatId, ids);
+
+  return (): Set<string> => {
+    if (liveMessageIds.get(chatId) === ids) liveMessageIds.delete(chatId);
+    return ids;
+  };
+};
 
 const toChronological = (data: MessagePagesData): MessagesDataTypes[] => {
   const byId = new Map(
@@ -33,17 +45,17 @@ const toChronological = (data: MessagePagesData): MessagesDataTypes[] => {
       .map((message) => [message.messageId, message]),
   );
 
-  return [...byId.values()].sort(
-    (first, second) => sentAtOf(first) - sentAtOf(second),
-  );
+  return [...byId.values()].sort(compareOldestFirst);
 };
 
 const saveMessage = (
   queryClient: QueryClient,
   chatId: string,
   message: MessagesDataTypes,
-) =>
-  queryClient.setQueryData<MessagePagesData>(
+) => {
+  liveMessageIds.get(chatId)?.add(message.messageId);
+
+  return queryClient.setQueryData<MessagePagesData>(
     queryKeys.chatMessages(chatId),
     (data) => {
       const [newestPage, ...olderPages] = data?.pages ?? [];
@@ -61,6 +73,7 @@ const saveMessage = (
       };
     },
   );
+};
 
 const reloadHistory = async (queryClient: QueryClient, chatId: string) => {
   const queryKey = queryKeys.chatMessages(chatId);
@@ -70,8 +83,8 @@ const reloadHistory = async (queryClient: QueryClient, chatId: string) => {
 };
 
 export {
+  collectLiveMessages,
   mergeMessages,
-  messagesNewerThan,
   reloadHistory,
   saveMessage,
   toChronological,

@@ -3,6 +3,7 @@ import classNames from 'classnames';
 
 import type { MessagesDataTypes } from '@/features/chat/types.ts';
 import { useAuth } from '@/features/auth/useAuth.ts';
+import { DELETED_USER_NAME } from '@/features/users/deleted-user.ts';
 
 import styles from './message.module.scss';
 
@@ -19,7 +20,7 @@ const Message: FC<MessagesDataTypes> = ({ senderId, content }) => {
   return (
     <li className={messageClassNames}>
       {isFromDeletedUser && (
-        <span className={styles.item__sender}>Deleted user</span>
+        <span className={styles.item__sender}>{DELETED_USER_NAME}</span>
       )}
       {content}
     </li>

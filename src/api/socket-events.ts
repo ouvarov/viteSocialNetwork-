@@ -13,6 +13,7 @@ type SocketAck<Data> =
 
 type ServerToClientEvents = {
   newMessage: (message: SocketMessage) => void;
+  chatsChanged: () => void;
 };
 
 type ClientToServerEvents = {

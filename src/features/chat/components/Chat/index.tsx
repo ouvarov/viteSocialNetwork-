@@ -1,10 +1,11 @@
-import type { FC, RefObject } from 'react';
-import { useId, useLayoutEffect, useRef, useState } from 'react';
+import type { FC } from 'react';
+import { useId, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
+import { HTTP_STATUS } from '@/api/http-status.ts';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -24,45 +25,16 @@ import type { MessageFormValues } from '@/features/chat/schemas.ts';
 import type { MessagesDataTypes } from '@/features/chat/types.ts';
 import { ChatSocketError, useChatRoom } from '@/features/chat/useChatRoom.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
+import { DELETED_USER_NAME } from '@/features/users/deleted-user.ts';
 import { useOnVisible } from '@/hooks/useOnVisible.ts';
+import { useScrollAnchor } from '@/hooks/useScrollAnchor.ts';
 import { useSocketConnected } from '@/hooks/useSocketConnected.ts';
 import { chatsPage } from '@/routes/routePaths.ts';
 
 import styles from './chat.module.scss';
 
-const DELETED_USER = 'Deleted user';
-const GONE = 410;
+const CHAT_TITLE_WHILE_LOADING = 'Chat';
 const NO_MESSAGES: MessagesDataTypes[] = [];
-
-type ScrollSnapshot = {
-  oldestId?: string;
-  newestId?: string;
-  scrollHeight: number;
-};
-
-const useScrollAnchor = (
-  logRef: RefObject<HTMLDivElement | null>,
-  messages: MessagesDataTypes[],
-) => {
-  const snapshot = useRef<ScrollSnapshot>({ scrollHeight: 0 });
-  const oldestId = messages[0]?.messageId;
-  const newestId = messages[messages.length - 1]?.messageId;
-
-  useLayoutEffect(() => {
-    const log = logRef.current;
-    if (!log) return;
-
-    const previous = snapshot.current;
-
-    if (newestId !== previous.newestId) {
-      log.scrollTop = log.scrollHeight;
-    } else if (oldestId !== previous.oldestId) {
-      log.scrollTop += log.scrollHeight - previous.scrollHeight;
-    }
-
-    snapshot.current = { oldestId, newestId, scrollHeight: log.scrollHeight };
-  });
-};
 
 const deleteForMeText = (peerName: string | undefined) =>
   peerName
@@ -94,7 +66,7 @@ const Chat: FC = () => {
     isFetchingNextPage,
     isFetchNextPageError,
   } = useChatMessages(chatId);
-  const { sendMessage } = useChatRoom(chatId);
+  const { sendMessage, isJoinFailed, retryJoin } = useChatRoom(chatId);
   const isConnected = useSocketConnected();
   const {
     mutate: deleteChat,
@@ -105,9 +77,15 @@ const Chat: FC = () => {
 
   const messages = history ? toChronological(history) : NO_MESSAGES;
   const peerName = chat?.peer?.userName;
-  const title = chat ? (peerName ?? DELETED_USER) : 'Chat';
+  const title = chat
+    ? (peerName ?? DELETED_USER_NAME)
+    : CHAT_TITLE_WHILE_LOADING;
   useDocumentTitle(title);
-  useScrollAnchor(logRef, messages);
+  useScrollAnchor(
+    logRef,
+    messages[0]?.messageId,
+    messages[messages.length - 1]?.messageId,
+  );
 
   const loadOlder = () => void fetchNextPage();
   const loadOlderRef = useOnVisible<HTMLButtonElement>(
@@ -129,7 +107,7 @@ const Chat: FC = () => {
     } catch (sendError) {
       if (
         sendError instanceof ChatSocketError &&
-        sendError.statusCode === GONE
+        sendError.statusCode === HTTP_STATUS.GONE
       ) {
         void refetchChat();
       }
@@ -199,6 +177,14 @@ const Chat: FC = () => {
       <p className={styles.chat__status} role="status">
         {isConnected ? '' : 'Connecting to the chat…'}
       </p>
+      {isJoinFailed && (
+        <p className={styles.chat__join_error} role="alert">
+          New messages are not arriving.{' '}
+          <Button variant="secondary" size="sm" onClick={retryJoin}>
+            Try again
+          </Button>
+        </p>
+      )}
 
       <div
         ref={logRef}

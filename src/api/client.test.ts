@@ -107,14 +107,14 @@ describe('client', () => {
     expect(refreshCalls()).toBe(0);
   });
 
-  it('does not refresh when a wrong password is the reason for 401', async () => {
+  it('does not refresh when a wrong password answers 403', async () => {
     saveAccessToken('access-1');
     const refreshCalls = refreshAnswering('access-2');
     server.use(
       http.delete(`${API}/users/me`, () =>
         HttpResponse.json(
-          { statusCode: 401, message: 'Invalid credentials' },
-          { status: 401 },
+          { statusCode: 403, message: 'Wrong password' },
+          { status: 403 },
         ),
       ),
     );
@@ -123,7 +123,7 @@ describe('client', () => {
       body: { password: 'wrong' },
     });
 
-    expect(response.status).toBe(401);
+    expect(response.status).toBe(403);
     expect(refreshCalls()).toBe(0);
   });
 

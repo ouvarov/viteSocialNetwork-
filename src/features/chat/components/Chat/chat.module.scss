@@ -7,6 +7,10 @@
     color: theme(danger, color);
   }
 
+  &__join_error {
+    color: theme(danger, color);
+  }
+
   &__status {
     color: theme(muted, color);
 

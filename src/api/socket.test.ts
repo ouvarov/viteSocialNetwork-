@@ -17,14 +17,23 @@ const fakeSocket = vi.hoisted(() => {
   };
 });
 
-const session = vi.hoisted(() => ({
-  refreshSession: vi.fn(),
-  endSession: vi.fn(),
-  onSessionEnd: vi.fn(),
-}));
+const session = vi.hoisted(() => {
+  const endListeners: (() => void)[] = [];
+
+  return {
+    refreshSession: vi.fn(),
+    endSession: vi.fn(),
+    onSessionEnd: vi.fn((listener: () => void) => endListeners.push(listener)),
+    fireSessionEnd: () => endListeners.forEach((listener) => listener()),
+  };
+});
 
 vi.mock('socket.io-client', () => ({ default: () => fakeSocket }));
-vi.mock('./session.ts', () => session);
+vi.mock('./session.ts', () => ({
+  refreshSession: session.refreshSession,
+  endSession: session.endSession,
+  onSessionEnd: session.onSessionEnd,
+}));
 
 const TOKEN_REFRESH_INTERVAL_MS = 30_000;
 
@@ -89,5 +98,33 @@ describe('socket', () => {
 
     await vi.advanceTimersByTimeAsync(1);
     expect(session.refreshSession).toHaveBeenCalledTimes(2);
+  });
+
+  it('stops after three reconnects that never connected', async () => {
+    session.refreshSession.mockResolvedValue({});
+
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      fakeSocket.fire('connect_error', new Error('Unauthorized'));
+      await vi.advanceTimersByTimeAsync(TOKEN_REFRESH_INTERVAL_MS);
+    }
+
+    expect(session.refreshSession).toHaveBeenCalledTimes(3);
+  });
+
+  it('does not reconnect when the session ended during the refresh', async () => {
+    let finishRefresh = () => {};
+    session.refreshSession.mockReturnValue(
+      new Promise<void>((resolve) => {
+        finishRefresh = resolve;
+      }),
+    );
+
+    fakeSocket.fire('disconnect', 'io server disconnect');
+    await vi.advanceTimersByTimeAsync(0);
+    session.fireSessionEnd();
+    finishRefresh();
+    await vi.runAllTimersAsync();
+
+    expect(fakeSocket.connect).not.toHaveBeenCalled();
   });
 });

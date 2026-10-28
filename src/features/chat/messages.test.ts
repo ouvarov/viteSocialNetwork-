@@ -5,7 +5,7 @@ import { queryKeys } from '@/api/query-keys.ts';
 
 import {
   mergeMessages,
-  messagesNewerThan,
+  collectLiveMessages,
   saveMessage,
   toChronological,
 } from './messages.ts';
@@ -52,20 +52,41 @@ describe('mergeMessages', () => {
   });
 });
 
-describe('messagesNewerThan', () => {
-  it('keeps only messages sent after the newest fetched one', () => {
-    const live = message('c', '2026-10-01T12:00:03Z');
+describe('collectLiveMessages', () => {
+  it('remembers only the messages saved while collecting', () => {
+    const queryClient = new QueryClient();
+    saveMessage(
+      queryClient,
+      CHAT_ID,
+      message('before', '2026-10-01T12:00:01Z'),
+    );
 
-    expect(
-      messagesNewerThan(
-        [live, message('b', '2026-10-01T12:00:02Z')],
-        message('b', '2026-10-01T12:00:02Z'),
-      ),
-    ).toEqual([live]);
+    const stopCollecting = collectLiveMessages(CHAT_ID);
+    saveMessage(
+      queryClient,
+      CHAT_ID,
+      message('during', '2026-10-01T12:00:02Z'),
+    );
+    const arrived = stopCollecting();
+    saveMessage(queryClient, CHAT_ID, message('after', '2026-10-01T12:00:03Z'));
+
+    expect([...arrived]).toEqual(['during']);
   });
 });
 
 describe('toChronological', () => {
+  it('orders messages sent in the same millisecond by id, like the API', () => {
+    const history = historyOf([
+      message('b', '2026-10-01T12:00:01Z'),
+      message('a', '2026-10-01T12:00:01Z'),
+    ]);
+
+    expect(toChronological(history).map(({ messageId }) => messageId)).toEqual([
+      'a',
+      'b',
+    ]);
+  });
+
   it('reads the pages oldest first without duplicates across pages', () => {
     const history = historyOf(
       [

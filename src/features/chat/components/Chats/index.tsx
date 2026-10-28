@@ -7,12 +7,12 @@ import { Loader } from '@/components/common/Loader';
 import { PageHeader } from '@/components/common/PageHeader';
 import { UserIcon } from '@/components/common/UserIcon';
 import { useChats } from '@/features/chat/queries.ts';
+import { DELETED_USER_NAME } from '@/features/users/deleted-user.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 import { chatPage, usersPage } from '@/routes/routePaths.ts';
 
 import styles from './chats.module.scss';
 
-const DELETED_USER = 'Deleted user';
 const AVATAR_SIZE = 40;
 
 const ChatsList: FC = () => {
@@ -48,7 +48,7 @@ const ChatsList: FC = () => {
           <Link className={styles.item} to={chatPage(chatId)}>
             <UserIcon imageUrl={peer?.imageUrl ?? null} size={AVATAR_SIZE} />
             <span className={styles.item__name}>
-              {peer?.userName ?? DELETED_USER}
+              {peer?.userName ?? DELETED_USER_NAME}
             </span>
           </Link>
         </li>

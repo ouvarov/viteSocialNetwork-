@@ -9,7 +9,7 @@ import { client } from '@/api/client.ts';
 import { unwrap } from '@/api/errors.ts';
 import { queryKeys } from '@/api/query-keys.ts';
 
-import { mergeMessages, messagesNewerThan } from './messages.ts';
+import { collectLiveMessages, mergeMessages } from './messages.ts';
 import type { MessagePagesData } from './types.ts';
 
 const MESSAGES_PAGE_SIZE = 50;
@@ -37,27 +37,33 @@ const useChatMessages = (chatId: string | undefined) =>
   useInfiniteQuery({
     queryKey: queryKeys.chatMessages(String(chatId)),
     queryFn: async ({ client: queryClient, queryKey, pageParam, signal }) => {
-      const page = await unwrap(
-        client.GET('/api/chat/{id}/messages', {
-          params: {
-            path: { id: String(chatId) },
-            query: { limit: MESSAGES_PAGE_SIZE, cursor: pageParam },
-          },
-          signal,
-        }),
-      );
-      if (pageParam) return page;
+      const fetchPage = () =>
+        unwrap(
+          client.GET('/api/chat/{id}/messages', {
+            params: {
+              path: { id: String(chatId) },
+              query: { limit: MESSAGES_PAGE_SIZE, cursor: pageParam },
+            },
+            signal,
+          }),
+        );
+      if (pageParam) return fetchPage();
 
+      const stopCollecting = collectLiveMessages(String(chatId));
+      const page = await fetchPage().finally(stopCollecting);
+      const arrivedDuringFetch = stopCollecting();
       const cachedNewest =
-        queryClient.getQueryData<MessagePagesData>(queryKey)?.pages[0]?.items;
-      const arrivedDuringFetch = messagesNewerThan(
-        cachedNewest ?? [],
-        page.items[0],
-      );
+        queryClient.getQueryData<MessagePagesData>(queryKey)?.pages[0]?.items ??
+        [];
 
       return {
         ...page,
-        items: mergeMessages(page.items, arrivedDuringFetch),
+        items: mergeMessages(
+          page.items,
+          cachedNewest.filter(({ messageId }) =>
+            arrivedDuringFetch.has(messageId),
+          ),
+        ),
       };
     },
     initialPageParam: undefined as string | undefined,

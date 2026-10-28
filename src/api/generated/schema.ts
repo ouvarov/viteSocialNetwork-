@@ -646,7 +646,7 @@ export interface operations {
                 content?: never;
             };
             /** @description Wrong password */
-            401: {
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

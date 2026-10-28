@@ -11,18 +11,18 @@ import { useAuth } from '@/features/auth/useAuth.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 
 import { ApiError, getApiErrorMessage } from '@/api/errors.ts';
+import { HTTP_STATUS } from '@/api/http-status.ts';
 import { registerUser } from '@/features/auth/api.ts';
 import { signUpSchema } from '@/features/auth/schemas.ts';
 import type { SignUpFormValues } from '@/features/auth/schemas.ts';
 
 import styles from './registration.module.scss';
 
-const CONFLICT = 409;
 const EMAIL_TAKEN_ERROR = 'emailTaken';
 const EMAIL_TAKEN_MESSAGE = 'An account with this email already exists.';
 
 const isEmailTaken = (error: unknown): boolean =>
-  error instanceof ApiError && error.status === CONFLICT;
+  error instanceof ApiError && error.status === HTTP_STATUS.CONFLICT;
 
 const Registration: FC = () => {
   const { login } = useAuth();
