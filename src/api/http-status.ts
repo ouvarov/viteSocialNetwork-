@@ -1,0 +1,8 @@
+const HTTP_STATUS = {
+  UNAUTHORIZED: 401,
+  CONFLICT: 409,
+  GONE: 410,
+  TOO_MANY_REQUESTS: 429,
+} as const;
+
+export { HTTP_STATUS };

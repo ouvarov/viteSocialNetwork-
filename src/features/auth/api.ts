@@ -13,4 +13,8 @@ const logoutUser = async (): Promise<void> => {
   await unwrap(client.POST('/api/auth/logout'));
 };
 
-export { loginUser, logoutUser, registerUser };
+const deleteAccount = async (password: string): Promise<void> => {
+  await unwrap(client.DELETE('/api/users/me', { body: { password } }));
+};
+
+export { deleteAccount, loginUser, logoutUser, registerUser };

@@ -9,6 +9,10 @@ import type {
   ServerToClientEvents,
 } from './socket-events.ts';
 
+const TOKEN_REFRESH_INTERVAL_MS = 30_000;
+const UNAUTHORIZED_HANDSHAKE = 'Unauthorized';
+const MAX_RECONNECTS_WITHOUT_SUCCESS = 3;
+
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
   `${DIRECT_API_ORIGIN}/chat`,
   {
@@ -18,18 +22,48 @@ const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
   },
 );
 
-const TOKEN_REFRESH_INTERVAL_MS = 30_000;
+let lastTokenRefreshAt = -TOKEN_REFRESH_INTERVAL_MS;
+let pendingReconnect: ReturnType<typeof setTimeout> | undefined;
+let failedReconnects = 0;
+let sessionGeneration = 0;
 
-let lastTokenRefreshAt = 0;
-
-socket.on('disconnect', (reason) => {
-  if (reason !== 'io server disconnect') return;
-  if (Date.now() - lastTokenRefreshAt < TOKEN_REFRESH_INTERVAL_MS) return;
-
+const reconnectWithFreshToken = () => {
+  const generation = sessionGeneration;
   lastTokenRefreshAt = Date.now();
-  refreshSession().then(() => socket.connect(), endSession);
+  pendingReconnect = undefined;
+  failedReconnects += 1;
+
+  refreshSession().then(() => {
+    if (generation === sessionGeneration) socket.connect();
+  }, endSession);
+};
+
+const scheduleReconnect = () => {
+  if (pendingReconnect) return;
+  if (failedReconnects >= MAX_RECONNECTS_WITHOUT_SUCCESS) return;
+
+  const delayMs = lastTokenRefreshAt + TOKEN_REFRESH_INTERVAL_MS - Date.now();
+  pendingReconnect = setTimeout(reconnectWithFreshToken, Math.max(0, delayMs));
+};
+
+socket.on('connect', () => {
+  failedReconnects = 0;
 });
 
-onSessionEnd(() => socket.disconnect());
+socket.on('disconnect', (reason) => {
+  if (reason === 'io server disconnect') scheduleReconnect();
+});
+
+socket.on('connect_error', ({ message }) => {
+  if (message === UNAUTHORIZED_HANDSHAKE) scheduleReconnect();
+});
+
+onSessionEnd(() => {
+  sessionGeneration += 1;
+  failedReconnects = 0;
+  clearTimeout(pendingReconnect);
+  pendingReconnect = undefined;
+  socket.disconnect();
+});
 
 export { socket };

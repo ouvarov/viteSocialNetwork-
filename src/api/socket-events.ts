@@ -6,37 +6,37 @@ type ChatRoomPayload = { chatId: string };
 
 type CreateMessagePayload = { chatId: string; content: string };
 
-type SocketExceptionPayload = {
-  status: 'error';
-  statusCode?: number;
-  message: string | string[];
-};
+type SocketError = { statusCode: number; message: string };
+
+type SocketAck<Data> =
+  { ok: true; data: Data } | { ok: false; error: SocketError };
 
 type ServerToClientEvents = {
   newMessage: (message: SocketMessage) => void;
-  exception: (error: SocketExceptionPayload) => void;
+  chatsChanged: () => void;
 };
 
 type ClientToServerEvents = {
   joinChat: (
     payload: ChatRoomPayload,
-    ack: (room: ChatRoomPayload) => void,
+    ack: (result: SocketAck<ChatRoomPayload>) => void,
   ) => void;
   leaveChat: (
     payload: ChatRoomPayload,
-    ack?: (room: ChatRoomPayload) => void,
+    ack?: (result: SocketAck<ChatRoomPayload>) => void,
   ) => void;
   createMessage: (
     payload: CreateMessagePayload,
-    ack: (message: SocketMessage) => void,
+    ack: (result: SocketAck<SocketMessage>) => void,
   ) => void;
 };
 
 export type {
-  SocketMessage,
   ChatRoomPayload,
   ClientToServerEvents,
   CreateMessagePayload,
   ServerToClientEvents,
-  SocketExceptionPayload,
+  SocketAck,
+  SocketError,
+  SocketMessage,
 };

@@ -117,7 +117,7 @@ test('the users list shows the API error and recovers with Try again', async ({
 }) => {
   const user = await registerUser(request, 'Viewer');
   const other = await registerUser(request, 'Listed');
-  await page.route('**/api/users', (route) =>
+  await page.route(/\/api\/users\?/, (route) =>
     route.fulfill({
       status: 500,
       contentType: 'application/json',
@@ -130,7 +130,7 @@ test('the users list shows the API error and recovers with Try again', async ({
     .getByRole('alert')
     .filter({ hasText: 'Could not load users' });
   await expect(error).toContainText('Database is down', { timeout: 15_000 });
-  await page.unroute('**/api/users');
+  await page.unroute(/\/api\/users\?/);
   await page.getByRole('button', { name: 'Try again' }).click();
   await expect(page.locator(`a[href="/profile/${other.id}"]`)).toBeVisible();
 });
@@ -173,7 +173,7 @@ test('every page fits 360px and 1280px', async ({ page, request }) => {
     request,
     'Maximilian-Alexander-Wolfeschlegelstein',
   );
-  const chatId = await createChat(request, user, [other]);
+  const chatId = await createChat(request, user, other);
   const pages = [
     `/profile/${user.id}`,
     `/profile/${other.id}`,

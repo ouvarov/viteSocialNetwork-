@@ -107,6 +107,26 @@ describe('client', () => {
     expect(refreshCalls()).toBe(0);
   });
 
+  it('does not refresh when a wrong password answers 403', async () => {
+    saveAccessToken('access-1');
+    const refreshCalls = refreshAnswering('access-2');
+    server.use(
+      http.delete(`${API}/users/me`, () =>
+        HttpResponse.json(
+          { statusCode: 403, message: 'Wrong password' },
+          { status: 403 },
+        ),
+      ),
+    );
+
+    const { response } = await client.DELETE('/api/users/me', {
+      body: { password: 'wrong' },
+    });
+
+    expect(response.status).toBe(403);
+    expect(refreshCalls()).toBe(0);
+  });
+
   it('sends the repeated request with its original body', async () => {
     saveAccessToken('expired');
     refreshAnswering('access-2');

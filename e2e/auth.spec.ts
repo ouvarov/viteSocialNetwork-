@@ -124,13 +124,13 @@ test('logging out clears the previous user from the cache', async ({
   page,
   request,
 }) => {
-  const ada = await registerUser(request, 'Ada');
-  const bob = await registerUser(request, 'Bob');
-  const carol = await registerUser(request, 'Carol');
   const secret = `Secret ${Date.now()}`;
   const shared = `Shared ${Date.now()}`;
-  await createChat(request, ada, [carol], secret);
-  await createChat(request, ada, [bob], shared);
+  const ada = await registerUser(request, shared);
+  const bob = await registerUser(request, 'Bob');
+  const carol = await registerUser(request, secret);
+  await createChat(request, ada, carol);
+  await createChat(request, ada, bob);
 
   await signIn(page, ada, '/chats');
   await expect(page.getByRole('link', { name: secret })).toBeVisible();

@@ -1,11 +1,11 @@
 import createClient from 'openapi-fetch';
 
 import { readAccessToken } from './access-token.ts';
+import { HTTP_STATUS } from './http-status.ts';
 import { API_ORIGIN } from './origins.ts';
 import type { paths } from './generated/schema.ts';
 import { endSession, refreshSession } from './session.ts';
 
-const UNAUTHORIZED = 401;
 const AUTH_PATH_PREFIX = '/api/auth/';
 
 const withAccessToken = (request: Request): Request => {
@@ -23,7 +23,7 @@ const fetchWithSession = async (request: Request): Promise<Response> => {
   const retry = request.clone();
   const response = await fetch(withAccessToken(request));
 
-  if (response.status !== UNAUTHORIZED || isAuthRequest(request)) {
+  if (response.status !== HTTP_STATUS.UNAUTHORIZED || isAuthRequest(request)) {
     return response;
   }
 

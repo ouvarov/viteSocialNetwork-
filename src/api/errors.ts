@@ -1,4 +1,4 @@
-const TOO_MANY_REQUESTS = 429;
+import { HTTP_STATUS } from './http-status.ts';
 
 type ApiErrorBody = { message?: string | string[] };
 
@@ -37,7 +37,7 @@ const unwrap = async <Data>(
 const getApiErrorMessage = (error: unknown, fallback: string): string => {
   if (!(error instanceof ApiError)) return fallback;
 
-  if (error.status === TOO_MANY_REQUESTS) {
+  if (error.status === HTTP_STATUS.TOO_MANY_REQUESTS) {
     return 'Too many attempts. Try again in a minute.';
   }
 

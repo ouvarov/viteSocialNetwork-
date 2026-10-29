@@ -21,3 +21,14 @@
     overflow-wrap: anywhere;
   }
 }
+
+.more {
+  display: flex;
+  margin: space(4) auto 0;
+}
+
+.error {
+  margin-top: space(4);
+  color: theme(danger, color);
+  text-align: center;
+}

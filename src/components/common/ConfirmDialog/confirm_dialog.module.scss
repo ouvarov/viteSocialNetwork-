@@ -17,6 +17,10 @@
     color: theme(muted, color);
   }
 
+  &__fields {
+    margin-top: space(4);
+  }
+
   &__error {
     margin-top: space(3);
     color: theme(danger, color);

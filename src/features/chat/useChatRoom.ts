@@ -1,11 +1,8 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { socket } from '@/api/socket.ts';
-import type {
-  CreateMessagePayload,
-  SocketExceptionPayload,
-} from '@/api/socket-events.ts';
+import type { CreateMessagePayload, SocketError } from '@/api/socket-events.ts';
 
 import { reloadHistory, saveMessage } from './messages.ts';
 import type { NewMessageTypes } from './types.ts';
@@ -13,37 +10,43 @@ import type { NewMessageTypes } from './types.ts';
 const SOCKET_TIMEOUT_MS = 5000;
 
 class ChatSocketError extends Error {
-  constructor({ message }: SocketExceptionPayload) {
-    super(Array.isArray(message) ? message.join('. ') : message);
+  readonly statusCode: number;
+
+  constructor({ statusCode, message }: SocketError) {
+    super(message);
     this.name = 'ChatSocketError';
+    this.statusCode = statusCode;
   }
 }
 
 const joinRoom = (chatId: string) =>
-  new Promise<void>((resolve) => {
+  new Promise<void>((resolve, reject) => {
     socket
       .timeout(SOCKET_TIMEOUT_MS)
-      .emit('joinChat', { chatId }, () => resolve());
+      .emit('joinChat', { chatId }, (timeoutError, result) => {
+        if (timeoutError) return reject(timeoutError);
+        if (!result.ok) return reject(new ChatSocketError(result.error));
+
+        resolve();
+      });
   });
 
 const createMessage = (payload: CreateMessagePayload) =>
   new Promise<NewMessageTypes>((resolve, reject) => {
-    const onException = (error: SocketExceptionPayload) =>
-      reject(new ChatSocketError(error));
-
-    socket.once('exception', onException);
     socket
       .timeout(SOCKET_TIMEOUT_MS)
-      .emit('createMessage', payload, (timeoutError, message) => {
-        socket.off('exception', onException);
+      .emit('createMessage', payload, (timeoutError, result) => {
+        if (timeoutError) return reject(timeoutError);
+        if (!result.ok) return reject(new ChatSocketError(result.error));
 
-        if (timeoutError) reject(timeoutError);
-        else resolve(message);
+        resolve(result.data);
       });
   });
 
 const useChatRoom = (chatId: string | undefined) => {
   const queryClient = useQueryClient();
+  const [isJoinFailed, setIsJoinFailed] = useState(false);
+  const [joinAttempt, setJoinAttempt] = useState(0);
 
   useEffect(() => {
     if (!chatId) return;
@@ -51,9 +54,16 @@ const useChatRoom = (chatId: string | undefined) => {
     let isActive = true;
 
     const joinChat = async () => {
-      await joinRoom(chatId);
+      try {
+        await joinRoom(chatId);
+      } catch {
+        if (isActive) setIsJoinFailed(true);
+        return;
+      }
 
-      if (isActive) await reloadHistory(queryClient, chatId);
+      if (!isActive) return;
+      setIsJoinFailed(false);
+      await reloadHistory(queryClient, chatId);
     };
     const onConnect = () => void joinChat();
 
@@ -67,7 +77,7 @@ const useChatRoom = (chatId: string | undefined) => {
       socket.off('connect', onConnect);
       socket.emit('leaveChat', { chatId });
     };
-  }, [chatId, queryClient]);
+  }, [chatId, queryClient, joinAttempt]);
 
   useEffect(() => {
     if (!chatId) return;
@@ -97,7 +107,12 @@ const useChatRoom = (chatId: string | undefined) => {
     [chatId, queryClient],
   );
 
-  return { sendMessage };
+  const retryJoin = useCallback(
+    () => setJoinAttempt((attempt) => attempt + 1),
+    [],
+  );
+
+  return { sendMessage, isJoinFailed, retryJoin };
 };
 
 export { ChatSocketError, useChatRoom };

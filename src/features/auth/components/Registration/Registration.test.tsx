@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { renderWithProviders } from '@/test/render.tsx';
@@ -26,15 +26,45 @@ describe('Registration', () => {
     );
   });
 
-  it('rejects a password bcrypt would cut short', async () => {
+  it.each([
+    ['73 ascii characters', 'a'.repeat(73)],
+    ['37 two-byte characters', 'ж'.repeat(37)],
+  ])(
+    'rejects a password bcrypt would cut short: %s',
+    async (_case, password) => {
+      const { user } = renderWithProviders(<Registration />);
+
+      await user.click(screen.getByLabelText('Your password'));
+      await user.paste(password);
+      await user.tab();
+
+      expect(
+        screen.getByLabelText('Your password'),
+      ).toHaveAccessibleDescription('Password is too long');
+    },
+  );
+
+  it('accepts a password of exactly 72 bytes', async () => {
     const { user } = renderWithProviders(<Registration />);
 
     await user.click(screen.getByLabelText('Your password'));
-    await user.paste('a'.repeat(73));
+    await user.paste('ж'.repeat(36));
     await user.tab();
 
-    expect(screen.getByLabelText('Your password')).toHaveAccessibleDescription(
-      'Use at most 72 characters',
+    expect(
+      screen.getByLabelText('Your password'),
+    ).not.toHaveAccessibleDescription();
+  });
+
+  it('rejects a name longer than 50 characters', async () => {
+    const { user } = renderWithProviders(<Registration />);
+
+    await user.click(screen.getByLabelText('Your name'));
+    await user.paste('a'.repeat(51));
+    await user.tab();
+
+    expect(screen.getByLabelText('Your name')).toHaveAccessibleDescription(
+      'Use at most 50 characters',
     );
   });
 
@@ -54,9 +84,13 @@ describe('Registration', () => {
     await user.type(screen.getByLabelText('Your password'), 'correct-horse');
     await user.click(screen.getByRole('button', { name: 'Sign up' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Email is already registered',
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(
+      'An account with this email already exists.',
     );
+    expect(
+      within(alert).getByRole('link', { name: 'Sign in instead' }),
+    ).toBeInTheDocument();
     expect(auth.login).not.toHaveBeenCalled();
   });
 

@@ -52,7 +52,7 @@ test('an unknown URL shows the 404 page without loading feature code', async ({
 test('the socket code loads only with the chat', async ({ page, request }) => {
   const user = await registerUser(request, 'Lazy');
   const other = await registerUser(request, 'Other');
-  const chatId = await createChat(request, user, [other]);
+  const chatId = await createChat(request, user, other);
   const scripts = trackScripts(page);
 
   await page.goto('/sign-in');
