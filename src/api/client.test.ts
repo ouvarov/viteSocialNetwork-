@@ -91,6 +91,25 @@ describe('client', () => {
     expect(readAccessToken()).toBeNull();
   });
 
+  it('keeps the session when the refresh fails for another reason', async () => {
+    saveAccessToken('expired');
+    usersAnsweringByToken('never');
+    server.use(
+      http.post(`${API}/auth/refresh`, () =>
+        HttpResponse.json({ statusCode: 503 }, { status: 503 }),
+      ),
+    );
+    const onEnd = vi.fn();
+    const unsubscribe = onSessionEnd(onEnd);
+
+    const { response } = await client.GET('/api/users');
+    unsubscribe();
+
+    expect(response.status).toBe(401);
+    expect(onEnd).not.toHaveBeenCalled();
+    expect(readAccessToken()).toBe('expired');
+  });
+
   it('does not refresh when a sign-in request answers 401', async () => {
     const refreshCalls = refreshAnswering('access-2');
     server.use(

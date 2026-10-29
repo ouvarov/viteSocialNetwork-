@@ -1,6 +1,7 @@
 import createClient from 'openapi-fetch';
 
 import { readAccessToken } from './access-token.ts';
+import { isUnauthorizedError } from './errors.ts';
 import { HTTP_STATUS } from './http-status.ts';
 import { API_ORIGIN } from './origins.ts';
 import type { paths } from './generated/schema.ts';
@@ -29,8 +30,8 @@ const fetchWithSession = async (request: Request): Promise<Response> => {
 
   try {
     await refreshSession();
-  } catch {
-    endSession();
+  } catch (error) {
+    if (isUnauthorizedError(error)) endSession();
     return response;
   }
 

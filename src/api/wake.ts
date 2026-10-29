@@ -1,13 +1,35 @@
 import { DIRECT_API_ORIGIN } from './origins.ts';
 
 const WAKE_TIMEOUT_MS = 90_000;
+const WAKE_RETRY_DELAY_MS = 2_000;
 
-const wakeApi = (): Promise<void> =>
+const wait = (delayMs: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, delayMs));
+
+const isApiLive = (timeoutMs: number): Promise<boolean> =>
   fetch(`${DIRECT_API_ORIGIN}/api/health/live`, {
-    signal: AbortSignal.timeout(WAKE_TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   }).then(
-    () => undefined,
-    () => undefined,
+    (response) => response.ok,
+    () => false,
   );
 
-export { wakeApi };
+class ApiAsleepError extends Error {
+  constructor() {
+    super('The API did not wake up in time');
+    this.name = 'ApiAsleepError';
+  }
+}
+
+const wakeApi = async (): Promise<void> => {
+  const deadline = Date.now() + WAKE_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    if (await isApiLive(deadline - Date.now())) return;
+    await wait(WAKE_RETRY_DELAY_MS);
+  }
+
+  throw new ApiAsleepError();
+};
+
+export { ApiAsleepError, wakeApi };

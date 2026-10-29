@@ -44,4 +44,7 @@ const getApiErrorMessage = (error: unknown, fallback: string): string => {
   return readMessage(error.body) ?? fallback;
 };
 
-export { ApiError, getApiErrorMessage, unwrap };
+const isUnauthorizedError = (error: unknown): boolean =>
+  error instanceof ApiError && error.status === HTTP_STATUS.UNAUTHORIZED;
+
+export { ApiError, getApiErrorMessage, isUnauthorizedError, unwrap };

@@ -2,6 +2,7 @@
   @include card;
 
   width: min(100% - #{space(4) * 2}, #{rem(420px)});
+  margin: auto;
   color: theme(page, color);
 
   &::backdrop {

@@ -3,8 +3,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { saveAccessToken } from '@/api/access-token.ts';
+import { isUnauthorizedError } from '@/api/errors.ts';
 import { endSession, onSessionEnd, refreshSession } from '@/api/session.ts';
 import { wakeApi } from '@/api/wake.ts';
+import { SessionError } from '@/components/SessionError';
 import type { UserDataTypes } from '@/features/users/types.ts';
 
 import { logoutUser } from './api.ts';
@@ -16,6 +18,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<UserDataTypes | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isServerUnreachable, setIsServerUnreachable] = useState(false);
   const [hasSignedOut, setHasSignedOut] = useState(false);
   const queryClient = useQueryClient();
 
@@ -43,22 +46,41 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
   }, []);
 
+  const restoreSession = useCallback(
+    () =>
+      wakeApi()
+        .then(refreshSession)
+        .then(({ userData }) => setUser(userData))
+        .catch((error: unknown) => {
+          if (isUnauthorizedError(error)) setUser(null);
+          else setIsServerUnreachable(true);
+        })
+        .finally(() => setIsLoading(false)),
+    [],
+  );
+
+  const retrySession = () => {
+    setIsServerUnreachable(false);
+    setIsLoading(true);
+    void restoreSession();
+  };
+
   useEffect(() => onSessionEnd(resetSession), [resetSession]);
 
   useEffect(() => {
-    wakeApi()
-      .then(refreshSession)
-      .then(({ userData }) => setUser(userData))
-      .catch(() => setUser(null))
-      .finally(() => setIsLoading(false));
-  }, []);
+    void restoreSession();
+  }, [restoreSession]);
 
   const value = useMemo(
     () => ({ user, login, logout, isLoading, hasSignedOut }),
     [user, login, logout, isLoading, hasSignedOut],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {isServerUnreachable ? <SessionError onRetry={retrySession} /> : children}
+    </AuthContext.Provider>
+  );
 };
 
 export { AuthProvider };

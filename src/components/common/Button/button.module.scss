@@ -51,7 +51,7 @@
   }
 
   &__loading &__label {
-    visibility: hidden;
+    opacity: 0;
   }
 
   &__spinner {

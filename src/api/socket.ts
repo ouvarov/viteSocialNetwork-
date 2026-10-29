@@ -2,6 +2,7 @@ import io from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 
 import { readAccessToken } from './access-token.ts';
+import { isUnauthorizedError } from './errors.ts';
 import { DIRECT_API_ORIGIN } from './origins.ts';
 import { endSession, onSessionEnd, refreshSession } from './session.ts';
 import type {
@@ -33,9 +34,16 @@ const reconnectWithFreshToken = () => {
   pendingReconnect = undefined;
   failedReconnects += 1;
 
-  refreshSession().then(() => {
-    if (generation === sessionGeneration) socket.connect();
-  }, endSession);
+  refreshSession().then(
+    () => {
+      if (generation === sessionGeneration) socket.connect();
+    },
+    (error: unknown) => {
+      if (generation !== sessionGeneration) return;
+      if (isUnauthorizedError(error)) endSession();
+      else scheduleReconnect();
+    },
+  );
 };
 
 const scheduleReconnect = () => {
