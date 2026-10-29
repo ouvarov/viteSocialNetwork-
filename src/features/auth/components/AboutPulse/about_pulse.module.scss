@@ -1,0 +1,42 @@
+.about {
+  width: 100%;
+  max-width: rem(420px);
+}
+
+.title {
+  @include text(title, bold);
+}
+
+.text {
+  margin-top: space(3);
+  color: theme(muted, color);
+}
+
+.stack {
+  @include flex(flex-start);
+
+  flex-wrap: wrap;
+  gap: space(2);
+  margin-top: space(4);
+  padding: 0;
+  list-style: none;
+}
+
+.stack_item {
+  @include text(caption, bold);
+
+  padding: space(1) space(3);
+  border: 1px solid theme(field, border-color);
+  border-radius: radius(full);
+}
+
+.links {
+  @include flex(flex-start);
+
+  gap: space(4);
+  margin-top: space(4);
+
+  a {
+    text-decoration: underline;
+  }
+}

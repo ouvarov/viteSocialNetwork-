@@ -1,0 +1,6 @@
+.session_error {
+  @include flex;
+
+  min-height: 100vh;
+  padding: space(4);
+}

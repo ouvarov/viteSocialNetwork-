@@ -7,6 +7,7 @@ import { signUpPage } from '@/routes/routePaths';
 
 import { Input } from '@/components/common/Input';
 import { Button } from '@/components/common/Button';
+import { AboutPulse } from '@/features/auth/components/AboutPulse';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 
@@ -54,58 +55,65 @@ const Login: FC = () => {
   };
 
   return (
-    <section className={styles.section}>
-      <h1 className={styles.title}>Sign in</h1>
-      <p className={styles.subtitle}>Welcome back to Pulse.</p>
+    <div className={styles.page}>
+      <AboutPulse />
+      <section className={styles.section}>
+        <h2 className={styles.title}>Sign in</h2>
+        <p className={styles.subtitle}>Welcome back to Pulse.</p>
 
-      <form noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
-        <Input
-          {...register('email')}
-          id="email"
-          type="email"
-          autoComplete="email"
-          required
-          label="Your email"
-          placeholder="Enter your email"
-          error={errors.email?.message}
-        />
-        <Input
-          {...register('password')}
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          label="Your password"
-          placeholder="Enter your password"
-          error={errors.password?.message}
-        />
-        {errors.root?.server && (
-          <p className={styles.error} role="alert">
-            {errors.root.server.message}
-          </p>
-        )}
-        <Button
-          className={styles.submit}
-          isLoading={isSubmitting}
-          type="submit"
-        >
-          Sign in
-        </Button>
         {demoAccount && (
-          <Button
-            className={styles.demo}
-            variant="secondary"
-            disabled={isSubmitting}
-            onClick={() => handleDemoSignIn(demoAccount)}
-          >
-            Try the demo account
-          </Button>
+          <>
+            <Button
+              className={styles.demo}
+              disabled={isSubmitting}
+              onClick={() => handleDemoSignIn(demoAccount)}
+            >
+              Try the demo account
+            </Button>
+            <p className={styles.divider}>or sign in with email</p>
+          </>
         )}
-      </form>
-      <p className={styles.switch}>
-        New here? <Link to={signUpPage()}>Create an account</Link>
-      </p>
-    </section>
+
+        <form noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
+          <Input
+            {...register('email')}
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            label="Your email"
+            placeholder="Enter your email"
+            error={errors.email?.message}
+          />
+          <Input
+            {...register('password')}
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            label="Your password"
+            placeholder="Enter your password"
+            error={errors.password?.message}
+          />
+          {errors.root?.server && (
+            <p className={styles.error} role="alert">
+              {errors.root.server.message}
+            </p>
+          )}
+          <Button
+            className={styles.submit}
+            variant={demoAccount ? 'secondary' : 'primary'}
+            isLoading={isSubmitting}
+            type="submit"
+          >
+            Sign in
+          </Button>
+        </form>
+        <p className={styles.switch}>
+          New here? <Link to={signUpPage()}>Create an account</Link>
+        </p>
+      </section>
+    </div>
   );
 };
 

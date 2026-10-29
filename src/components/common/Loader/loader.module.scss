@@ -94,3 +94,14 @@ $dots: 10;
     animation-delay: -1s * math.div($i, $dots);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .loader__wrap {
+    animation: none;
+  }
+
+  .loader__item:nth-child(n) {
+    opacity: 1;
+    animation: none;
+  }
+}

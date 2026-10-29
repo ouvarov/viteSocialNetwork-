@@ -1,5 +1,5 @@
 import { clearAccessToken, saveAccessToken } from './access-token.ts';
-import { ApiError } from './errors.ts';
+import { ApiError, isUnauthorizedError } from './errors.ts';
 import { API_ORIGIN } from './origins.ts';
 import type { Schemas } from './schemas.ts';
 
@@ -29,7 +29,7 @@ const refreshSession = (): Promise<Session> => {
       return session;
     })
     .catch((error: unknown) => {
-      clearAccessToken();
+      if (isUnauthorizedError(error)) clearAccessToken();
       throw error;
     })
     .finally(() => {

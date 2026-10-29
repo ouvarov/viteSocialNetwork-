@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { ApiError as ApiErrorClass } from './errors.ts';
+
 type Listener = (payload: unknown) => void;
 
 const fakeSocket = vi.hoisted(() => {
@@ -38,11 +40,14 @@ vi.mock('./session.ts', () => ({
 const TOKEN_REFRESH_INTERVAL_MS = 30_000;
 
 describe('socket', () => {
+  let ApiError: typeof ApiErrorClass;
+
   beforeEach(async () => {
     fakeSocket.removeAllListeners();
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.resetModules();
+    ({ ApiError } = await import('./errors.ts'));
     await import('./socket.ts');
   });
 
@@ -69,14 +74,27 @@ describe('socket', () => {
     expect(fakeSocket.connect).toHaveBeenCalledOnce();
   });
 
-  it('ends the session when the refresh fails', async () => {
-    session.refreshSession.mockRejectedValue(new Error('401'));
+  it('ends the session when the refresh is rejected', async () => {
+    session.refreshSession.mockRejectedValue(new ApiError(401, undefined));
 
     fakeSocket.fire('disconnect', 'io server disconnect');
     await vi.runAllTimersAsync();
 
     expect(session.endSession).toHaveBeenCalledOnce();
     expect(fakeSocket.connect).not.toHaveBeenCalled();
+  });
+
+  it('tries again later when the refresh fails for another reason', async () => {
+    session.refreshSession
+      .mockRejectedValueOnce(new ApiError(503, undefined))
+      .mockResolvedValue({});
+
+    fakeSocket.fire('disconnect', 'io server disconnect');
+    await vi.advanceTimersByTimeAsync(TOKEN_REFRESH_INTERVAL_MS);
+
+    expect(session.endSession).not.toHaveBeenCalled();
+    expect(session.refreshSession).toHaveBeenCalledTimes(2);
+    expect(fakeSocket.connect).toHaveBeenCalledOnce();
   });
 
   it('ignores a disconnect the client asked for', async () => {
