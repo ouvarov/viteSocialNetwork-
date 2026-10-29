@@ -75,7 +75,7 @@ const config = {
       ],
     },
     { handle: 'filesystem' },
-    { src: '^/(.*)$', dest: '/index.html' },
+    { src: '^/(?!assets/).*$', dest: '/index.html' },
   ],
 };
 

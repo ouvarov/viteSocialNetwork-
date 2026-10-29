@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { wakeApi } from './wake.ts';
+import { ApiAsleepError, wakeApi } from './wake.ts';
 
 const WAKE_TIMEOUT_MS = 90_000;
 const WAKE_RETRY_DELAY_MS = 2_000;
@@ -42,8 +42,9 @@ describe('wakeApi', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     const waking = wakeApi();
+    const outcome = expect(waking).rejects.toBeInstanceOf(ApiAsleepError);
     await vi.runAllTimersAsync();
-    await waking;
+    await outcome;
 
     expect(fetchMock).toHaveBeenCalledTimes(
       WAKE_TIMEOUT_MS / WAKE_RETRY_DELAY_MS,

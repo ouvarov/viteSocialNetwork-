@@ -11,7 +11,9 @@ import { API, http, HttpResponse, server, session } from '@/test/server.ts';
 import { AuthProvider } from './AuthProvider.tsx';
 import { useAuth } from './useAuth.ts';
 
-vi.mock('@/api/wake.ts', () => ({ wakeApi: () => Promise.resolve() }));
+const wake = vi.hoisted(() => ({ wakeApi: vi.fn(() => Promise.resolve()) }));
+
+vi.mock('@/api/wake.ts', () => wake);
 
 const SessionProbe: FC = () => {
   const { user, isLoading } = useAuth();
@@ -75,6 +77,30 @@ describe('AuthProvider', () => {
       ).toBeInTheDocument();
     },
   );
+
+  it('does not refresh through the proxy when the API never woke up', async () => {
+    let refreshCalls = 0;
+    server.use(
+      http.post(`${API}/auth/refresh`, () => {
+        refreshCalls += 1;
+        return HttpResponse.json(session('access-2'));
+      }),
+    );
+    wake.wakeApi.mockRejectedValueOnce(new Error('asleep'));
+    renderProvider();
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "Pulse can't reach its server",
+    );
+    expect(refreshCalls).toBe(0);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+
+    expect(
+      await screen.findByText('Signed in as Ada Lovelace'),
+    ).toBeInTheDocument();
+    expect(refreshCalls).toBe(1);
+  });
 
   it('offers a retry when the network is down', async () => {
     server.use(http.post(`${API}/auth/refresh`, () => HttpResponse.error()));

@@ -14,6 +14,13 @@ const isApiLive = (timeoutMs: number): Promise<boolean> =>
     () => false,
   );
 
+class ApiAsleepError extends Error {
+  constructor() {
+    super('The API did not wake up in time');
+    this.name = 'ApiAsleepError';
+  }
+}
+
 const wakeApi = async (): Promise<void> => {
   const deadline = Date.now() + WAKE_TIMEOUT_MS;
 
@@ -21,6 +28,8 @@ const wakeApi = async (): Promise<void> => {
     if (await isApiLive(deadline - Date.now())) return;
     await wait(WAKE_RETRY_DELAY_MS);
   }
+
+  throw new ApiAsleepError();
 };
 
-export { wakeApi };
+export { ApiAsleepError, wakeApi };
