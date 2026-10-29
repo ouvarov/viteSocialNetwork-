@@ -7,6 +7,7 @@ import { Loader } from '@/components/common/Loader';
 import { PageHeader } from '@/components/common/PageHeader';
 import { UserIcon } from '@/components/common/UserIcon';
 import { useChats } from '@/features/chat/queries.ts';
+import { useChatListUpdates } from '@/features/chat/useChatListUpdates.ts';
 import { DELETED_USER_NAME } from '@/features/users/deleted-user.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 import { chatPage, usersPage } from '@/routes/routePaths.ts';
@@ -17,6 +18,7 @@ const AVATAR_SIZE = 40;
 
 const ChatsList: FC = () => {
   const { data: chats, isPending, isError, error, refetch } = useChats();
+  useChatListUpdates();
 
   if (isPending) return <Loader label="Loading chats" />;
 

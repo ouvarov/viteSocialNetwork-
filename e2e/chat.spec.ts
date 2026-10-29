@@ -342,7 +342,9 @@ test('older messages load when you scroll up, keeping your place', async ({
 
   const anchor = message(page, 'message 6');
   await page.getByRole('button', { name: 'Show earlier messages' }).click();
-  await expect(message(page, 'message 1')).toBeAttached();
+  await expect(
+    messages(page).filter({ hasText: /^message 1$/ }),
+  ).toBeAttached();
   await expect(messages(page)).toHaveCount(55);
   await expect(anchor).toBeInViewport();
   await expect(

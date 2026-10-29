@@ -18,6 +18,7 @@ const useChats = () =>
   useQuery({
     queryKey: queryKeys.chats(),
     queryFn: () => unwrap(client.GET('/api/chat')),
+    refetchOnMount: 'always',
   });
 
 const useChat = (chatId: string | undefined) =>

@@ -23,6 +23,7 @@ import {
 import { messageSchema } from '@/features/chat/schemas.ts';
 import type { MessageFormValues } from '@/features/chat/schemas.ts';
 import type { MessagesDataTypes } from '@/features/chat/types.ts';
+import { useChatListUpdates } from '@/features/chat/useChatListUpdates.ts';
 import { ChatSocketError, useChatRoom } from '@/features/chat/useChatRoom.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 import { DELETED_USER_NAME } from '@/features/users/deleted-user.ts';
@@ -68,6 +69,7 @@ const Chat: FC = () => {
   } = useChatMessages(chatId);
   const { sendMessage, isJoinFailed, retryJoin } = useChatRoom(chatId);
   const isConnected = useSocketConnected();
+  useChatListUpdates();
   const {
     mutate: deleteChat,
     reset: resetDelete,

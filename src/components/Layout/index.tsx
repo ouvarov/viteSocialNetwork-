@@ -11,7 +11,6 @@ import classNames from 'classnames';
 
 import { Button } from '@/components/common/Button';
 import { useAuth } from '@/features/auth/useAuth.ts';
-import { useChatListUpdates } from '@/features/chat/useChatListUpdates.ts';
 import { ThemeToggle } from '@/features/theme/components/ThemeToggle';
 import { chatsPage, profilePage, usersPage } from '@/routes/routePaths.ts';
 
@@ -26,7 +25,6 @@ const Layout: FC = () => {
   const mainRef = useRef<HTMLElement>(null);
   const previousPathname = useRef(pathname);
   const isNavigating = useNavigation().state === 'loading';
-  useChatListUpdates();
 
   useEffect(() => {
     if (previousPathname.current === pathname) return;
