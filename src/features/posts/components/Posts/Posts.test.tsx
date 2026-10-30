@@ -11,6 +11,8 @@ const post = (id: string, overrides: Partial<PostTypes> = {}): PostTypes => ({
   id,
   ownerId: USER.id,
   imageUrl: null,
+  imageWidth: null,
+  imageHeight: null,
   text: `Post ${id}`,
   created: '2026-10-01T12:00:00.000Z',
   likeCount: 0,

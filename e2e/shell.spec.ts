@@ -96,8 +96,8 @@ test('keyboard: skip link, focus ring and focus moving to main on navigation', a
     ),
   ).not.toBe('none');
 
-  await page.getByRole('link', { name: 'Users' }).click();
-  await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
+  await page.getByRole('link', { name: 'People' }).click();
+  await expect(page.getByRole('heading', { name: 'People' })).toBeVisible();
   await expect(page.locator('main')).toBeFocused();
   await expect(page).toHaveTitle('Users · Pulse');
 });

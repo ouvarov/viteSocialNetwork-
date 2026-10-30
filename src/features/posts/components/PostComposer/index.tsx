@@ -1,12 +1,14 @@
 import type { FC } from 'react';
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDropzone } from 'react-dropzone';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
+import { useUploadImage } from '@/api/upload.ts';
 import { Button } from '@/components/common/Button';
 import { Textarea } from '@/components/common/Textarea';
-import { useCreatePost, useUploadImage } from '@/features/posts/queries.ts';
+import { useCreatePost } from '@/features/posts/queries.ts';
 import { postSchema } from '@/features/posts/schemas.ts';
 import type { PostFormValues } from '@/features/posts/schemas.ts';
 
@@ -24,20 +26,24 @@ const PostComposer: FC<PostComposerProps> = ({ userId }) => {
     error: uploadError,
   } = useUploadImage();
 
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
     setValue,
-    control,
     reset,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
-    defaultValues: { text: '', imageUrl: undefined },
+    defaultValues: { text: '', imageUploadId: undefined },
   });
 
-  const image = useWatch({ control, name: 'imageUrl' });
+  const removeImage = () => {
+    setValue('imageUploadId', undefined);
+    setImagePreviewUrl(null);
+  };
 
   const { getRootProps, getInputProps } = useDropzone({
     multiple: false,
@@ -45,7 +51,10 @@ const PostComposer: FC<PostComposerProps> = ({ userId }) => {
       if (!file) return;
 
       uploadImage(file, {
-        onSuccess: ({ url }) => setValue('imageUrl', url),
+        onSuccess: ({ id, url }) => {
+          setValue('imageUploadId', id);
+          setImagePreviewUrl(url);
+        },
       });
     },
   });
@@ -54,6 +63,7 @@ const PostComposer: FC<PostComposerProps> = ({ userId }) => {
     try {
       await createPost(values);
       reset();
+      setImagePreviewUrl(null);
     } catch (createError) {
       setError('root.server', {
         message: getApiErrorMessage(createError, 'Could not publish the post'),
@@ -72,14 +82,14 @@ const PostComposer: FC<PostComposerProps> = ({ userId }) => {
           placeholder="What's new?"
           error={errors.text?.message}
         />
-        {image ? (
+        {imagePreviewUrl ? (
           <figure className={styles.composer__preview}>
-            <img className={styles.composer__image} src={image} alt="" />
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setValue('imageUrl', undefined)}
-            >
+            <img
+              className={styles.composer__image}
+              src={imagePreviewUrl}
+              alt=""
+            />
+            <Button variant="secondary" size="sm" onClick={removeImage}>
               Remove image
             </Button>
           </figure>

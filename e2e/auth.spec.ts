@@ -152,7 +152,7 @@ test('parallel requests with an expired token share one refresh', async ({
   const viewer = await registerUser(request, 'Viewer');
   const author = await registerUser(request, 'Author');
   await signIn(page, viewer, '/users');
-  await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'People' })).toBeVisible();
 
   const refreshes = countRequests(page, (url) =>
     url.pathname.endsWith('/auth/refresh'),
@@ -186,7 +186,7 @@ test('a failed refresh signs out, and signing in returns to the wanted page', as
   const viewer = await registerUser(request, 'Viewer');
   const other = await registerUser(request, 'Other');
   await signIn(page, viewer, '/users');
-  await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'People' })).toBeVisible();
 
   await page.route('**/api/auth/refresh', (route) =>
     route.fulfill({ status: 401, contentType: 'application/json', body: '{}' }),

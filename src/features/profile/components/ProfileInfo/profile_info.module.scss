@@ -2,6 +2,7 @@
   @include card;
   @include flex(flex-start, center, column);
 
+  flex-wrap: wrap;
   gap: space(4);
   text-align: center;
 
@@ -22,11 +23,31 @@
   }
 
   &__description {
+    @include text(body-lg);
+
+    max-width: rem(544px);
     margin-top: space(1);
+    overflow-wrap: anywhere;
+  }
+
+  &__stats {
+    margin-top: space(2);
     color: theme(muted, color);
+
+    strong {
+      color: theme(page, color);
+    }
+  }
+
+  &__actions {
+    @include flex(center, flex-start);
+
+    flex-wrap: wrap;
+    gap: space(2);
   }
 
   &__error {
+    flex-basis: 100%;
     color: theme(danger, color);
   }
 }

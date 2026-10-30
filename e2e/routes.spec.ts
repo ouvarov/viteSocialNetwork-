@@ -107,9 +107,9 @@ test('a crashing page keeps the shell and clears on navigation', async ({
   expect(await axeViolations(page)).toEqual([]);
 
   await page.unroute('**/api/chat');
-  await page.getByRole('link', { name: 'Users' }).click();
+  await page.getByRole('link', { name: 'People' }).click();
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Users' }),
+    page.getByRole('heading', { level: 1, name: 'People' }),
   ).toBeVisible();
   await expect(pageError(page)).toHaveCount(0);
 });
@@ -122,7 +122,7 @@ test('a page chunk that fails to load shows the error, and Reload page recovers'
   const scripts = trackScripts(page);
   await signIn(page, user, '/users');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Users' }),
+    page.getByRole('heading', { level: 1, name: 'People' }),
   ).toBeVisible();
 
   const loaded = scripts.urls();
@@ -151,7 +151,7 @@ test('a slow page chunk shows the progress bar and marks main busy', async ({
   const scripts = trackScripts(page);
   await signIn(page, user, '/users');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Users' }),
+    page.getByRole('heading', { level: 1, name: 'People' }),
   ).toBeVisible();
 
   const loaded = scripts.urls();

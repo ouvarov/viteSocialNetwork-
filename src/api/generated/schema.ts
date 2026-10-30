@@ -84,6 +84,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["UserController_deleteMe"];
+        options?: never;
+        head?: never;
+        patch: operations["UserController_updateMe"];
+        trace?: never;
+    };
     "/api/users/{id}": {
         parameters: {
             query?: never;
@@ -100,7 +116,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/me": {
+    "/api/users/{id}/follow": {
         parameters: {
             query?: never;
             header?: never;
@@ -108,9 +124,9 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
+        put: operations["FollowController_follow"];
         post?: never;
-        delete: operations["UserController_deleteMe"];
+        delete: operations["FollowController_unfollow"];
         options?: never;
         head?: never;
         patch?: never;
@@ -324,10 +340,10 @@ export interface components {
             userName: string;
         };
         UserResponseDto: {
-            /** @example Ada Lovelace */
-            userName: string;
             /** Format: uuid */
             id: string;
+            /** @example Ada Lovelace */
+            userName: string;
             imageUrl: string | null;
             description: string;
             /** Format: date-time */
@@ -344,19 +360,71 @@ export interface components {
             /** @example pulse-demo-password */
             password: string;
         };
+        PersonResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Ada Lovelace */
+            userName: string;
+            imageUrl: string | null;
+            description: string;
+            /** Format: date-time */
+            created: string;
+            /** @example 41 */
+            followersCount: number;
+            /** @description Whether the caller follows this user */
+            isFollowedByMe: boolean;
+        };
         UserPageDto: {
             /** @description Newest members first */
-            items: components["schemas"]["UserResponseDto"][];
+            items: components["schemas"]["PersonResponseDto"][];
             /** @description Pass as cursor to get the next page; null on the last page */
             nextCursor: string | null;
+        };
+        UpdateProfileDto: {
+            /** @example Ada Lovelace */
+            userName?: string;
+            description?: string;
+            /**
+             * Format: uuid
+             * @description An id from POST /api/upload by the caller; null removes the avatar
+             */
+            avatarUploadId?: string | null;
+        };
+        ProfileResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Ada Lovelace */
+            userName: string;
+            imageUrl: string | null;
+            description: string;
+            /** Format: date-time */
+            created: string;
+            /** @example 24 */
+            followersCount: number;
+            /** @example 2 */
+            followingCount: number;
+            /** @description Whether the caller follows this user */
+            isFollowedByMe: boolean;
         };
         DeleteAccountDto: {
             /** @description The current password, to confirm */
             password: string;
         };
+        FollowStateDto: {
+            /** Format: uuid */
+            userId: string;
+            isFollowedByMe: boolean;
+            /** @example 24 */
+            followersCount: number;
+            /** @example 2 */
+            followingCount: number;
+        };
         CreatePostDto: {
-            /** @description A URL returned by POST /api/upload for the caller */
-            imageUrl?: string;
+            /**
+             * Format: uuid
+             * @description An id returned by POST /api/upload for the caller
+             */
+            imageUploadId?: string;
             /** @example Shipping a new release this weekend. */
             text: string;
         };
@@ -366,6 +434,9 @@ export interface components {
             /** Format: uuid */
             ownerId: string;
             imageUrl: string | null;
+            /** @description Null for posts without an image or from before sizes were stored */
+            imageWidth: number | null;
+            imageHeight: number | null;
             text: string;
             /** Format: date-time */
             created: string;
@@ -432,8 +503,17 @@ export interface components {
             nextCursor: string | null;
         };
         UploadResponseDto: {
+            /**
+             * Format: uuid
+             * @description Pass as imageUploadId or avatarUploadId
+             */
+            id: string;
             /** @example https://cdn.example.com/users/<id>/<uuid>.png */
             url: string;
+            /** @example 1200 */
+            width: number;
+            /** @example 800 */
+            height: number;
         };
         LivenessDto: {
             /** @enum {string} */
@@ -597,34 +677,6 @@ export interface operations {
             };
         };
     };
-    UserController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserResponseDto"];
-                };
-            };
-            /** @description User not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     UserController_deleteMe: {
         parameters: {
             query?: never;
@@ -647,6 +699,154 @@ export interface operations {
             };
             /** @description Wrong password */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UserController_updateMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponseDto"];
+                };
+            };
+            /** @description Invalid field, or an avatar upload that is not yours */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UserController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileResponseDto"];
+                };
+            };
+            /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FollowController_follow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Idempotent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowStateDto"];
+                };
+            };
+            /** @description You cannot follow yourself */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FollowController_unfollow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Idempotent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowStateDto"];
+                };
+            };
+            /** @description You cannot follow yourself */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -975,8 +1175,14 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Not a PNG, JPEG, WebP or GIF */
+            /** @description Not a readable PNG, JPEG, WebP or GIF */
             415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

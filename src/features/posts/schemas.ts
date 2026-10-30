@@ -13,7 +13,7 @@ const postSchema = z.object({
       MAX_POST_TEXT_LENGTH,
       `Keep it under ${MAX_POST_TEXT_LENGTH} characters`,
     ),
-  imageUrl: z.url().optional(),
+  imageUploadId: z.uuid().optional(),
 }) satisfies z.ZodType<ResPostTypes>;
 
 type PostFormValues = z.infer<typeof postSchema>;
