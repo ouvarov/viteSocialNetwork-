@@ -12,6 +12,7 @@ import { Loader } from '@/components/common/Loader';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { FollowButton } from '@/features/follows/components/FollowButton';
+import { followersLabel } from '@/features/follows/followers-label.ts';
 import type { PersonTypes } from '@/features/follows/types.ts';
 import { useUsers } from '@/features/users/queries.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
@@ -24,9 +25,6 @@ const matchesQuery = (person: PersonTypes, query: string): boolean =>
   person.userName
     .toLocaleLowerCase()
     .includes(query.trim().toLocaleLowerCase());
-
-const formatFollowers = (count: number): string =>
-  `${count} ${count === 1 ? 'follower' : 'followers'}`;
 
 type PersonRowProps = {
   person: PersonTypes;
@@ -51,7 +49,7 @@ const PersonRow: FC<PersonRowProps> = ({ person, isMe }) => (
         <p className={styles.person__bio}>{person.description}</p>
       )}
       <p className={styles.person__stats}>
-        {formatFollowers(person.followersCount)}
+        {person.followersCount} {followersLabel(person.followersCount)}
       </p>
     </div>
     {isMe ? (
@@ -102,27 +100,29 @@ const UsersList: FC<{ query: string }> = ({ query }) => {
     .flatMap((page) => page.items)
     .filter((person) => matchesQuery(person, query));
 
-  if (people.length === 0) {
-    return query.trim() ? (
-      <EmptyState title={`No one matches "${query.trim()}"`}>
-        Check the spelling or try a shorter name.
-      </EmptyState>
-    ) : (
-      <EmptyState title="No users yet">Invite a friend to Pulse.</EmptyState>
-    );
-  }
+  const emptyState = query.trim() ? (
+    <EmptyState title={`No one matches "${query.trim()}"`}>
+      Check the spelling or try a shorter name.
+    </EmptyState>
+  ) : (
+    <EmptyState title="No users yet">Invite a friend to Pulse.</EmptyState>
+  );
 
   return (
     <>
-      <ul className={styles.list}>
-        {people.map((person) => (
-          <PersonRow
-            key={person.id}
-            person={person}
-            isMe={person.id === user?.id}
-          />
-        ))}
-      </ul>
+      {people.length === 0 ? (
+        emptyState
+      ) : (
+        <ul className={styles.list}>
+          {people.map((person) => (
+            <PersonRow
+              key={person.id}
+              person={person}
+              isMe={person.id === user?.id}
+            />
+          ))}
+        </ul>
+      )}
       {isFetchNextPageError && (
         <p className={styles.error} role="alert">
           {getApiErrorMessage(error, 'Could not load more people')}

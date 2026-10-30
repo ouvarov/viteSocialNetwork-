@@ -8,6 +8,7 @@ import { Button } from '@/components/common/Button';
 import { DeleteAccount } from '@/features/auth/components/DeleteAccount';
 import { useCreateChat } from '@/features/chat/queries.ts';
 import { FollowButton } from '@/features/follows/components/FollowButton';
+import { followersLabel } from '@/features/follows/followers-label.ts';
 import type { ProfileTypes } from '@/features/follows/types.ts';
 import { EditProfileDialog } from '@/features/profile/components/EditProfileDialog';
 import { chatPage } from '@/routes/routePaths.ts';
@@ -18,9 +19,6 @@ type ProfileInfoProps = {
   profile: ProfileTypes;
   isOwnProfile: boolean;
 };
-
-const formatFollowers = (count: number): string =>
-  count === 1 ? 'follower' : 'followers';
 
 const ProfileInfo: FC<ProfileInfoProps> = ({ profile, isOwnProfile }) => {
   const navigate = useNavigate();
@@ -55,7 +53,7 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ profile, isOwnProfile }) => {
         <p className={styles.profile_info__stats}>
           <span>
             <strong>{profile.followersCount}</strong>{' '}
-            {formatFollowers(profile.followersCount)}
+            {followersLabel(profile.followersCount)}
           </span>
           {' · '}
           <span>

@@ -55,6 +55,16 @@ const validateImageFile = (file: File): string | null => {
   return null;
 };
 
+const toAvatarUrl = (
+  avatar: AvatarChange,
+  currentUrl: string | null,
+  previewUrl: string | null,
+): string | null => {
+  if (avatar.kind === 'keep') return currentUrl;
+  if (avatar.kind === 'replace') return previewUrl;
+  return null;
+};
+
 const useObjectUrl = () => {
   const [url, setUrl] = useState<string | null>(null);
 
@@ -104,12 +114,7 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({
   });
   const description = useWatch({ control, name: 'description' });
 
-  const avatarUrl =
-    avatar.kind === 'keep'
-      ? profile.imageUrl
-      : avatar.kind === 'replace'
-        ? previewUrl
-        : null;
+  const avatarUrl = toAvatarUrl(avatar, profile.imageUrl, previewUrl);
   const hasChanges = isDirty || avatar.kind !== 'keep';
 
   const keepOpenWhileSaving = (event: SyntheticEvent) => {
@@ -143,7 +148,12 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({
     }
   };
 
-  const onSubmit = (values: ProfileFormValues) => {
+  const handleRemovePhoto = () => {
+    setAvatar({ kind: 'remove' });
+    setFileError(null);
+  };
+
+  const handleSave = (values: ProfileFormValues) => {
     updateProfile(
       {
         fields: {
@@ -176,7 +186,10 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({
           />
         </Suspense>
       ) : (
-        <form noValidate onSubmit={(e) => void handleSubmit(onSubmit)(e)}>
+        <form
+          noValidate
+          onSubmit={(event) => void handleSubmit(handleSave)(event)}
+        >
           <div className={styles.dialog__avatar}>
             <Avatar
               userId={profile.id}
@@ -196,7 +209,7 @@ const EditProfileDialog: FC<EditProfileDialogProps> = ({
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => setAvatar({ kind: 'remove' })}
+                  onClick={handleRemovePhoto}
                 >
                   Remove photo
                 </Button>

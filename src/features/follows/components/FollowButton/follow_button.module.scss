@@ -11,15 +11,24 @@
     display: none;
   }
 
-  &__button--following:hover &__label,
   &__button--following:focus-visible &__label {
     display: none;
   }
 
-  &__button--following:hover &__unfollow,
   &__button--following:focus-visible &__unfollow {
     display: inline;
     color: theme(danger, color);
+  }
+
+  @media (hover: hover) {
+    &__button--following:hover &__label {
+      display: none;
+    }
+
+    &__button--following:hover &__unfollow {
+      display: inline;
+      color: theme(danger, color);
+    }
   }
 
   &__error {

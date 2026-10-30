@@ -121,4 +121,60 @@ describe('Users', () => {
 
     expect(screen.getByText('No one matches "linus"')).toBeInTheDocument();
   });
+
+  it('keeps loading pages while a search finds no one yet', async () => {
+    server.use(
+      http.get(`${API}/users`, ({ request }) =>
+        new URL(request.url).searchParams.get('cursor') === 'page-2'
+          ? HttpResponse.json({ items: [GRACE], nextCursor: null })
+          : HttpResponse.json({ items: [ME], nextCursor: 'page-2' }),
+      ),
+    );
+    const { user } = renderWithProviders(<Users />, { auth: { user: USER } });
+    await screen.findByRole('link', { name: 'Ada Lovelace' });
+
+    await user.type(screen.getByLabelText('Search people'), 'grace');
+    await user.click(screen.getByRole('button', { name: 'Show more people' }));
+
+    expect(
+      await screen.findByRole('link', { name: 'Grace Hopper' }),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps one person's follow when another one fails", async () => {
+    const LINUS: PersonTypes = {
+      ...GRACE,
+      id: '44444444-4444-4444-8444-444444444444',
+      userName: 'Linus Torvalds',
+      followersCount: 40,
+    };
+    servePeople(GRACE, LINUS, ME);
+    const graceRequest = deferred();
+    server.use(
+      http.put(`${API}/users/${GRACE.id}/follow`, () => graceRequest.response),
+      http.put(`${API}/users/${LINUS.id}/follow`, () => new Promise(() => {})),
+    );
+    const { user } = renderWithProviders(<Users />, { auth: { user: USER } });
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Follow Grace Hopper' }),
+    );
+    await user.click(
+      screen.getByRole('button', { name: 'Follow Linus Torvalds' }),
+    );
+    graceRequest.release(
+      HttpResponse.json({ message: 'Server error' }, { status: 500 }),
+    );
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Follow Linus Torvalds' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(
+      within(rowOf('Linus Torvalds')).getByText('41 followers'),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Follow Grace Hopper' }),
+    ).toHaveAttribute('aria-pressed', 'false');
+  });
 });

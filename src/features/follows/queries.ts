@@ -14,9 +14,24 @@ import type {
 
 type PeopleData = InfiniteData<PeoplePageTypes, string | undefined>;
 type FollowView = Pick<FollowStateTypes, 'isFollowedByMe' | 'followersCount'>;
-type FollowSnapshot = {
-  profile: ProfileTypes | undefined;
-  people: PeopleData | undefined;
+
+const findFollowView = (
+  queryClient: QueryClient,
+  userId: string,
+): FollowView | undefined => {
+  const source =
+    queryClient.getQueryData<ProfileTypes>(queryKeys.user(userId)) ??
+    queryClient
+      .getQueryData<PeopleData>(queryKeys.users())
+      ?.pages.flatMap((page) => page.items)
+      .find((person) => person.id === userId);
+
+  return (
+    source && {
+      isFollowedByMe: source.isFollowedByMe,
+      followersCount: source.followersCount,
+    }
+  );
 };
 
 const updateFollowView = (
@@ -69,7 +84,7 @@ const useToggleFollow = (userId: string) => {
   return useMutation({
     scope: { id: `follow:${userId}` },
     mutationFn: (shouldFollow: boolean) => requestFollow(userId, shouldFollow),
-    onMutate: async (shouldFollow): Promise<FollowSnapshot> => {
+    onMutate: async (shouldFollow) => {
       await Promise.all([
         queryClient.cancelQueries({
           queryKey: queryKeys.user(userId),
@@ -78,19 +93,16 @@ const useToggleFollow = (userId: string) => {
         queryClient.cancelQueries({ queryKey: queryKeys.users(), exact: true }),
       ]);
 
-      const snapshot = {
-        profile: queryClient.getQueryData<ProfileTypes>(queryKeys.user(userId)),
-        people: queryClient.getQueryData<PeopleData>(queryKeys.users()),
-      };
+      const previousView = findFollowView(queryClient, userId);
       updateFollowView(queryClient, userId, toggledView(shouldFollow));
 
-      return snapshot;
+      return { previousView };
     },
-    onError: (_error, _shouldFollow, snapshot) => {
-      if (!snapshot) return;
+    onError: (_error, _shouldFollow, context) => {
+      const previousView = context?.previousView;
+      if (!previousView) return;
 
-      queryClient.setQueryData(queryKeys.user(userId), snapshot.profile);
-      queryClient.setQueryData(queryKeys.users(), snapshot.people);
+      updateFollowView(queryClient, userId, () => previousView);
     },
     onSuccess: ({ isFollowedByMe, followersCount }) => {
       updateFollowView(queryClient, userId, () => ({
