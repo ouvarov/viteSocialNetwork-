@@ -5,7 +5,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
 import { Loader } from '@/components/common/Loader';
 import { PageHeader } from '@/components/common/PageHeader';
-import { UserIcon } from '@/components/common/UserIcon';
+import { Avatar } from '@/components/common/Avatar';
 import { useChats } from '@/features/chat/queries.ts';
 import { useChatListUpdates } from '@/features/chat/useChatListUpdates.ts';
 import { DELETED_USER_NAME } from '@/features/users/deleted-user.ts';
@@ -13,8 +13,6 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 import { chatPage, usersPage } from '@/routes/routePaths.ts';
 
 import styles from './chats.module.scss';
-
-const AVATAR_SIZE = 40;
 
 const ChatsList: FC = () => {
   const { data: chats, isPending, isError, error, refetch } = useChats();
@@ -48,7 +46,11 @@ const ChatsList: FC = () => {
       {chats.map(({ chatId, peer }) => (
         <li key={chatId}>
           <Link className={styles.item} to={chatPage(chatId)}>
-            <UserIcon imageUrl={peer?.imageUrl ?? null} size={AVATAR_SIZE} />
+            <Avatar
+              userId={peer?.id ?? chatId}
+              userName={peer?.userName ?? DELETED_USER_NAME}
+              imageUrl={peer?.imageUrl ?? null}
+            />
             <span className={styles.item__name}>
               {peer?.userName ?? DELETED_USER_NAME}
             </span>

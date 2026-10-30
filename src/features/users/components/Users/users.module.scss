@@ -1,24 +1,59 @@
-.list {
-  display: grid;
-  gap: space(2);
+.subtitle {
+  margin-bottom: space(4);
+  color: theme(muted, color);
 }
 
-.item {
+.search {
+  margin-bottom: space(4);
+}
+
+.list {
   @include card;
+
+  padding: 0;
+}
+
+.person {
   @include flex(flex-start);
 
   gap: space(3);
-  color: theme(page, color);
+  padding: space(3) space(4);
 
-  &:hover {
-    border-color: theme(field, border-color);
-    text-decoration: none;
+  & + & {
+    border-top: 1px solid theme(surface, border-color);
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
   }
 
   &__name {
-    @include text(body-lg, bold);
+    @include text(body, bold);
 
+    color: theme(page, color);
     overflow-wrap: anywhere;
+  }
+
+  &__bio {
+    overflow: hidden;
+    color: theme(muted, color);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__stats {
+    @include text(caption);
+
+    color: theme(muted, color);
+  }
+
+  &__badge {
+    @include text(caption, bold);
+
+    padding: space(1) space(3);
+    border: 1px solid theme(field, border-color);
+    border-radius: radius(full);
   }
 }
 

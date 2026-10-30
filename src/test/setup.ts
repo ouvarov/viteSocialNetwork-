@@ -15,9 +15,22 @@ class IdleIntersectionObserver {
   }
 }
 
+const openDialog = function (this: HTMLDialogElement) {
+  this.open = true;
+};
+
+const closeDialog = function (this: HTMLDialogElement) {
+  this.open = false;
+  this.dispatchEvent(new Event('close'));
+};
+
 beforeAll(() => {
   globalThis.IntersectionObserver ??=
     IdleIntersectionObserver as unknown as typeof IntersectionObserver;
+  Object.assign(HTMLDialogElement.prototype, {
+    showModal: openDialog,
+    close: closeDialog,
+  });
   server.listen({ onUnhandledFrame: 'error' });
 });
 

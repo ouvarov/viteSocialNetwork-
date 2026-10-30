@@ -51,7 +51,7 @@ const Layout: FC = () => {
               Profile
             </NavLink>
             <NavLink to={usersPage()} className={navLinkClassName}>
-              Users
+              People
             </NavLink>
             <NavLink to={chatsPage()} className={navLinkClassName}>
               Chats

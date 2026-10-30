@@ -148,25 +148,4 @@ const useRemovePost = (userId: string) => {
   });
 };
 
-const useUploadImage = () =>
-  useMutation({
-    mutationFn: (image: File) =>
-      unwrap(
-        client.POST('/api/upload', {
-          body: { image },
-          bodySerializer: (body) => {
-            const formData = new FormData();
-            formData.append('image', body.image);
-            return formData;
-          },
-        }),
-      ),
-  });
-
-export {
-  useCreatePost,
-  usePosts,
-  useRemovePost,
-  useToggleLike,
-  useUploadImage,
-};
+export { useCreatePost, usePosts, useRemovePost, useToggleLike };

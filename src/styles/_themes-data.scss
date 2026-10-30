@@ -42,6 +42,30 @@ $themes: (
     backdrop: (
       background-color: #000000a6,
     ),
+    avatar-1: (
+      background-color: #3a2f63,
+      color: #e6e0f8,
+    ),
+    avatar-2: (
+      background-color: #5c2716,
+      color: #ffd2c2,
+    ),
+    avatar-3: (
+      background-color: #17463a,
+      color: #c4f2df,
+    ),
+    avatar-4: (
+      background-color: #1f3a63,
+      color: #d3e3ff,
+    ),
+    avatar-5: (
+      background-color: #54440f,
+      color: #fbe8a6,
+    ),
+    avatar-6: (
+      background-color: #57203f,
+      color: #ffd3ec,
+    ),
   ),
   light: (
     page: (
@@ -84,6 +108,30 @@ $themes: (
     backdrop: (
       background-color: #1b182466,
     ),
+    avatar-1: (
+      background-color: #e6e0f8,
+      color: #3a2f63,
+    ),
+    avatar-2: (
+      background-color: #ffe1d5,
+      color: #7a2c12,
+    ),
+    avatar-3: (
+      background-color: #d3f1e4,
+      color: #1b5140,
+    ),
+    avatar-4: (
+      background-color: #dce8ff,
+      color: #1f3f73,
+    ),
+    avatar-5: (
+      background-color: #f8ecc2,
+      color: #634b05,
+    ),
+    avatar-6: (
+      background-color: #fadcec,
+      color: #74204f,
+    ),
   ),
 );
 $required-keys: (
@@ -117,6 +165,30 @@ $required-keys: (
     color,
   ),
   backdrop: (background-color),
+  avatar-1: (
+    background-color,
+    color,
+  ),
+  avatar-2: (
+    background-color,
+    color,
+  ),
+  avatar-3: (
+    background-color,
+    color,
+  ),
+  avatar-4: (
+    background-color,
+    color,
+  ),
+  avatar-5: (
+    background-color,
+    color,
+  ),
+  avatar-6: (
+    background-color,
+    color,
+  ),
 );
 
 @each $theme-name, $components in $themes {

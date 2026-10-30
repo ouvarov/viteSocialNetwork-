@@ -1,23 +1,30 @@
 import type { FC } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
+import { Avatar } from '@/components/common/Avatar';
 import { Button } from '@/components/common/Button';
-import { UserIcon } from '@/components/common/UserIcon';
 import { DeleteAccount } from '@/features/auth/components/DeleteAccount';
 import { useCreateChat } from '@/features/chat/queries.ts';
-import type { UserDataTypes } from '@/features/users/types.ts';
+import { FollowButton } from '@/features/follows/components/FollowButton';
+import type { ProfileTypes } from '@/features/follows/types.ts';
+import { EditProfileDialog } from '@/features/profile/components/EditProfileDialog';
 import { chatPage } from '@/routes/routePaths.ts';
 
 import styles from './profile_info.module.scss';
 
 type ProfileInfoProps = {
-  profile: UserDataTypes;
+  profile: ProfileTypes;
   isOwnProfile: boolean;
 };
 
+const formatFollowers = (count: number): string =>
+  count === 1 ? 'follower' : 'followers';
+
 const ProfileInfo: FC<ProfileInfoProps> = ({ profile, isOwnProfile }) => {
   const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
   const {
     mutate: createChat,
     isPending,
@@ -32,7 +39,12 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ profile, isOwnProfile }) => {
 
   return (
     <section className={styles.profile_info}>
-      <UserIcon imageUrl={profile.imageUrl} size={96} />
+      <Avatar
+        userId={profile.id}
+        userName={profile.userName}
+        imageUrl={profile.imageUrl}
+        size="xl"
+      />
       <div className={styles.profile_info__body}>
         <h1 className={styles.profile_info__name}>{profile.userName}</h1>
         {profile.description && (
@@ -40,18 +52,57 @@ const ProfileInfo: FC<ProfileInfoProps> = ({ profile, isOwnProfile }) => {
             {profile.description}
           </p>
         )}
+        <p className={styles.profile_info__stats}>
+          <span>
+            <strong>{profile.followersCount}</strong>{' '}
+            {formatFollowers(profile.followersCount)}
+          </span>
+          {' · '}
+          <span>
+            <strong>{profile.followingCount}</strong> following
+          </span>
+        </p>
       </div>
-      {isOwnProfile ? (
-        <DeleteAccount />
-      ) : (
-        <Button isLoading={isPending} onClick={handleStartChat}>
-          Send message
-        </Button>
-      )}
+      <div className={styles.profile_info__actions}>
+        {isOwnProfile ? (
+          <>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+            >
+              Edit profile
+            </Button>
+            <DeleteAccount />
+          </>
+        ) : (
+          <>
+            <FollowButton
+              userId={profile.id}
+              userName={profile.userName}
+              isFollowedByMe={profile.isFollowedByMe}
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              isLoading={isPending}
+              onClick={handleStartChat}
+            >
+              Send message
+            </Button>
+          </>
+        )}
+      </div>
       {createChatError && (
         <p className={styles.profile_info__error} role="alert">
           {getApiErrorMessage(createChatError, 'Could not start a chat')}
         </p>
+      )}
+      {isEditing && (
+        <EditProfileDialog
+          profile={profile}
+          onClose={() => setIsEditing(false)}
+        />
       )}
     </section>
   );

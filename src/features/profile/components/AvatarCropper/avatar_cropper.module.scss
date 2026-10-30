@@ -1,0 +1,36 @@
+.cropper {
+  @include flex(flex-start, stretch, column);
+
+  gap: space(3);
+
+  &__area {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: radius(md);
+    background-color: theme(page, background-color);
+  }
+
+  &__zoom {
+    @include flex(flex-start);
+    @include text(caption, bold);
+
+    gap: space(3);
+
+    input {
+      flex: 1;
+    }
+  }
+
+  &__hint {
+    @include text(caption);
+
+    color: theme(muted, color);
+  }
+
+  &__actions {
+    @include flex(flex-end);
+
+    gap: space(3);
+  }
+}

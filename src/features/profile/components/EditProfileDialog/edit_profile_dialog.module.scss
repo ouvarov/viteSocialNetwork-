@@ -1,0 +1,52 @@
+.dialog {
+  @include card;
+
+  width: min(100% - #{space(4) * 2}, #{rem(480px)});
+  margin: auto;
+  color: theme(page, color);
+
+  &::backdrop {
+    background-color: theme(backdrop, background-color);
+  }
+
+  &__title {
+    @include text(lead, bold);
+
+    margin-bottom: space(4);
+  }
+
+  &__avatar {
+    @include flex(flex-start);
+
+    gap: space(4);
+    margin-bottom: space(4);
+  }
+
+  &__photo_actions {
+    @include flex(flex-start, flex-start, column);
+
+    gap: space(2);
+  }
+
+  &__hint {
+    @include text(caption);
+
+    color: theme(muted, color);
+  }
+
+  &__file {
+    @include visually-hidden;
+  }
+
+  &__error {
+    margin-bottom: space(3);
+    color: theme(danger, color);
+  }
+
+  &__actions {
+    @include flex(flex-end);
+
+    gap: space(3);
+    margin-top: space(5);
+  }
+}

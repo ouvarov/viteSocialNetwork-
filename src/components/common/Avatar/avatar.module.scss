@@ -1,0 +1,40 @@
+$avatar-sizes: (
+  xs: 24px,
+  sm: 32px,
+  md: 40px,
+  lg: 48px,
+  xl: 80px,
+);
+$avatar-color-count: 6;
+$initials-scale: 0.38;
+
+.avatar {
+  @include flex;
+  @include size(var(--avatar-size));
+
+  flex-shrink: 0;
+  border-radius: radius(full);
+  font-size: calc(var(--avatar-size) * #{$initials-scale});
+  font-weight: token($font-weights, bold, 'font weight');
+  line-height: 1;
+  object-fit: cover;
+  user-select: none;
+}
+
+@each $name, $size in $avatar-sizes {
+  .avatar--#{$name} {
+    --avatar-size: #{rem($size)};
+  }
+}
+
+.avatar--xl {
+  @include media-up(sm) {
+    --avatar-size: #{rem(96px)};
+  }
+}
+
+@for $index from 1 through $avatar-color-count {
+  .avatar--color_#{$index} {
+    @include use-theme(avatar-#{$index});
+  }
+}

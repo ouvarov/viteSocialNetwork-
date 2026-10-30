@@ -72,7 +72,14 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [restoreSession]);
 
   const value = useMemo(
-    () => ({ user, login, logout, isLoading, hasSignedOut }),
+    () => ({
+      user,
+      login,
+      logout,
+      updateUser: setUser,
+      isLoading,
+      hasSignedOut,
+    }),
     [user, login, logout, isLoading, hasSignedOut],
   );
 

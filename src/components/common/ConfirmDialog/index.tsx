@@ -1,7 +1,8 @@
 import type { FC, ReactNode, SyntheticEvent } from 'react';
-import { useEffect, useId, useRef } from 'react';
+import { useId } from 'react';
 
 import { Button } from '@/components/common/Button';
+import { useModalDialog } from '@/hooks/useModalDialog.ts';
 
 import styles from './confirm_dialog.module.scss';
 
@@ -28,17 +29,9 @@ const ConfirmDialog: FC<ConfirmDialogProps> = ({
   onConfirm,
   onClose,
 }) => {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const dialogRef = useModalDialog(isOpen);
   const titleId = useId();
   const textId = useId();
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    if (isOpen && !dialog.open) dialog.showModal();
-    if (!isOpen && dialog.open) dialog.close();
-  }, [isOpen]);
 
   const keepOpenWhileConfirming = (event: SyntheticEvent) => {
     if (isConfirming) event.preventDefault();

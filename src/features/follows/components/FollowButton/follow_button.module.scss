@@ -1,0 +1,30 @@
+.follow {
+  @include flex(flex-start, center, column);
+
+  gap: space(1);
+
+  &__button {
+    min-width: rem(104px);
+  }
+
+  &__unfollow {
+    display: none;
+  }
+
+  &__button--following:hover &__label,
+  &__button--following:focus-visible &__label {
+    display: none;
+  }
+
+  &__button--following:hover &__unfollow,
+  &__button--following:focus-visible &__unfollow {
+    display: inline;
+    color: theme(danger, color);
+  }
+
+  &__error {
+    @include text(caption);
+
+    color: theme(danger, color);
+  }
+}
