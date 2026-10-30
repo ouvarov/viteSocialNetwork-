@@ -1,6 +1,7 @@
 import { fireEvent, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { queryKeys } from '@/api/query-keys.ts';
 import type { UserDataTypes } from '@/features/users/types.ts';
 import { renderWithProviders } from '@/test/render.tsx';
 import { API, http, HttpResponse, server, USER } from '@/test/server.ts';
@@ -102,6 +103,27 @@ describe('EditProfileDialog', () => {
     expect(auth.updateUser).toHaveBeenCalledWith(
       expect.objectContaining({ description: 'Mathematician' }),
     );
+  });
+
+  it('refreshes cached posts so they show the new name', async () => {
+    recordRequests();
+    const { user, queryClient, onClose } = renderDialog();
+    queryClient.setQueryData(queryKeys.feed(), { pages: [], pageParams: [] });
+    queryClient.setQueryData(queryKeys.userPosts(USER.id), {
+      pages: [],
+      pageParams: [],
+    });
+
+    await user.type(screen.getByLabelText('Name'), ' L.');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    await vi.waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(queryClient.getQueryState(queryKeys.feed())?.isInvalidated).toBe(
+      true,
+    );
+    expect(
+      queryClient.getQueryState(queryKeys.userPosts(USER.id))?.isInvalidated,
+    ).toBe(true);
   });
 
   it('removes the photo', async () => {

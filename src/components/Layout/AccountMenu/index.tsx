@@ -1,9 +1,10 @@
 import type { FC } from 'react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId } from 'react';
 import { Link } from 'react-router';
 
 import { Avatar } from '@/components/common/Avatar';
 import type { UserDataTypes } from '@/features/users/types.ts';
+import { useDismissableMenu } from '@/hooks/useDismissableMenu.ts';
 import { profilePage } from '@/routes/routePaths.ts';
 
 import styles from './account_menu.module.scss';
@@ -15,31 +16,7 @@ type AccountMenuProps = {
 
 const AccountMenu: FC<AccountMenuProps> = ({ user, onLogout }) => {
   const menuId = useId();
-  const rootRef = useRef<HTMLDivElement>(null);
-  const toggleRef = useRef<HTMLButtonElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const closeOnOutsideClick = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-
-      setIsOpen(false);
-      toggleRef.current?.focus();
-    };
-
-    document.addEventListener('pointerdown', closeOnOutsideClick);
-    document.addEventListener('keydown', closeOnEscape);
-
-    return () => {
-      document.removeEventListener('pointerdown', closeOnOutsideClick);
-      document.removeEventListener('keydown', closeOnEscape);
-    };
-  }, [isOpen]);
+  const { rootRef, toggleRef, isOpen, toggle, close } = useDismissableMenu();
 
   return (
     <div ref={rootRef} className={styles.account}>
@@ -50,7 +27,7 @@ const AccountMenu: FC<AccountMenuProps> = ({ user, onLogout }) => {
         aria-label="Account menu"
         aria-expanded={isOpen}
         aria-controls={menuId}
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={toggle}
       >
         <Avatar
           userId={user.id}
@@ -67,7 +44,7 @@ const AccountMenu: FC<AccountMenuProps> = ({ user, onLogout }) => {
               <Link
                 className={styles.account__item}
                 to={profilePage(user.id)}
-                onClick={() => setIsOpen(false)}
+                onClick={close}
               >
                 Your profile
               </Link>

@@ -109,6 +109,10 @@ const useToggleFollow = (userId: string) => {
         isFollowedByMe,
         followersCount,
       }));
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.feed(),
+        exact: true,
+      });
 
       if (user) {
         void queryClient.invalidateQueries({

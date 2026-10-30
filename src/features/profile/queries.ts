@@ -47,6 +47,7 @@ const useUpdateProfile = () => {
         exact: true,
       });
       void queryClient.invalidateQueries({ queryKey: queryKeys.chats() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.postLists() });
       updateUser(user);
     },
   });

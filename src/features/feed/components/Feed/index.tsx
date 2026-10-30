@@ -1,6 +1,6 @@
 import type { FC } from 'react';
-import { Fragment } from 'react';
-import { useLocation } from 'react-router';
+import { Fragment, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -84,14 +84,20 @@ const FeedList: FC = () => {
 
 const Feed: FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isComposerFocused] = useState(() =>
+    isComposerRequested(location.state),
+  );
   useDocumentTitle('Home');
+
+  useEffect(() => {
+    if (isComposerFocused) void navigate('.', { replace: true, state: null });
+  }, [isComposerFocused, navigate]);
 
   return (
     <div className={styles.feed}>
       <h1 className={styles.feed__title}>Home</h1>
-      <PostComposer
-        isFocusedOnMount={isComposerRequested(location.state as unknown)}
-      />
+      <PostComposer isFocusedOnMount={isComposerFocused} />
       <FeedList />
     </div>
   );

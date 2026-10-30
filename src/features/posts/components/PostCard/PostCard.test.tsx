@@ -80,6 +80,26 @@ describe('PostCard', () => {
     expect(screen.getByText('Helo world')).toBeInTheDocument();
   });
 
+  it('sends nothing on Ctrl+Enter while the text is unchanged', async () => {
+    let patches = 0;
+    server.use(
+      http.patch(`${API}/posts/${POST.id}`, () => {
+        patches += 1;
+        return HttpResponse.json(POST);
+      }),
+    );
+    const { user } = renderWithProviders(<PostCard post={POST} isOwn />);
+
+    await openEditor(user);
+    await user.type(
+      screen.getByRole('textbox', { name: 'Edit post' }),
+      '{Control>}{Enter}{/Control}',
+    );
+
+    expect(patches).toBe(0);
+    expect(screen.getByRole('textbox', { name: 'Edit post' })).toBeVisible();
+  });
+
   it('keeps Save off until the text changes', async () => {
     const { user } = renderWithProviders(<PostCard post={POST} isOwn />);
 

@@ -37,6 +37,8 @@ const PostCard: FC<PostCardProps> = ({ post, isOwn }) => {
   const [draft, setDraft] = useState(post.text);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const wasEditingRef = useRef(false);
   const { mutate: toggleLike } = useToggleLike();
   const {
     mutate: editPost,
@@ -52,6 +54,9 @@ const PostCard: FC<PostCardProps> = ({ post, isOwn }) => {
 
   useEffect(() => {
     if (isEditing) editorRef.current?.focus();
+    else if (wasEditingRef.current) textRef.current?.focus();
+
+    wasEditingRef.current = isEditing;
   }, [isEditing]);
 
   const startEditing = () => {
@@ -62,7 +67,7 @@ const PostCard: FC<PostCardProps> = ({ post, isOwn }) => {
 
   const saveDraft = () => {
     const text = draft.trim();
-    if (!text) return;
+    if (!text || text === post.text || isSaving) return;
 
     editPost({ id: post.id, text }, { onSuccess: () => setIsEditing(false) });
   };
@@ -75,13 +80,11 @@ const PostCard: FC<PostCardProps> = ({ post, isOwn }) => {
   return (
     <article className={styles.post} aria-labelledby={authorId}>
       <header className={styles.post__header}>
-        <Link to={profilePage(post.author.id)} tabIndex={-1} aria-hidden>
-          <Avatar
-            userId={post.author.id}
-            userName={post.author.userName}
-            imageUrl={post.author.imageUrl}
-          />
-        </Link>
+        <Avatar
+          userId={post.author.id}
+          userName={post.author.userName}
+          imageUrl={post.author.imageUrl}
+        />
         <p className={styles.post__byline}>
           <Link
             id={authorId}
@@ -144,7 +147,9 @@ const PostCard: FC<PostCardProps> = ({ post, isOwn }) => {
           </div>
         </div>
       ) : (
-        <p className={styles.post__text}>{post.text}</p>
+        <p ref={textRef} className={styles.post__text} tabIndex={-1}>
+          {post.text}
+        </p>
       )}
 
       {post.imageUrl && (

@@ -1,7 +1,8 @@
 import type { FC } from 'react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId } from 'react';
 
 import { MoreIcon } from '@/components/icons/MoreIcon.tsx';
+import { useDismissableMenu } from '@/hooks/useDismissableMenu.ts';
 
 import styles from './post_menu.module.scss';
 
@@ -12,34 +13,10 @@ type PostMenuProps = {
 
 const PostMenu: FC<PostMenuProps> = ({ onEdit, onDelete }) => {
   const menuId = useId();
-  const rootRef = useRef<HTMLDivElement>(null);
-  const toggleRef = useRef<HTMLButtonElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const closeOnOutsideClick = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setIsOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-
-      setIsOpen(false);
-      toggleRef.current?.focus();
-    };
-
-    document.addEventListener('pointerdown', closeOnOutsideClick);
-    document.addEventListener('keydown', closeOnEscape);
-
-    return () => {
-      document.removeEventListener('pointerdown', closeOnOutsideClick);
-      document.removeEventListener('keydown', closeOnEscape);
-    };
-  }, [isOpen]);
+  const { rootRef, toggleRef, isOpen, toggle, close } = useDismissableMenu();
 
   const choose = (action: () => void) => () => {
-    setIsOpen(false);
+    close();
     action();
   };
 
@@ -52,7 +29,7 @@ const PostMenu: FC<PostMenuProps> = ({ onEdit, onDelete }) => {
         aria-label="Post options"
         aria-expanded={isOpen}
         aria-controls={menuId}
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={toggle}
       >
         <MoreIcon />
       </button>
