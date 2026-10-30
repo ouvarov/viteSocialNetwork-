@@ -1,0 +1,47 @@
+.menu {
+  position: relative;
+
+  &__toggle {
+    @include flex;
+    @include size(rem(40px));
+
+    border-radius: radius(full);
+    color: theme(muted, color);
+
+    &:hover {
+      color: theme(page, color);
+    }
+  }
+
+  &__list {
+    @include card;
+
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: z(overlay);
+    min-width: rem(160px);
+    margin: 0;
+    padding: space(1);
+    list-style: none;
+  }
+
+  &__item {
+    @include text(body, bold);
+
+    width: 100%;
+    padding: space(2) space(3);
+    border-radius: radius(sm);
+    color: theme(page, color);
+    text-align: left;
+
+    &:hover {
+      background-color: theme(field, background-color);
+    }
+  }
+
+  &__item_danger {
+    composes: menu__item;
+    color: theme(danger, color);
+  }
+}

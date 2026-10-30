@@ -12,7 +12,7 @@ test('image upload shows the API error for a non-image and a preview for a PNG',
   request,
 }) => {
   const user = await registerUser(request, 'Uploader');
-  await signIn(page, user);
+  await signIn(page, user, '/');
   const fileInput = page.locator('input[type=file]');
 
   await fileInput.setInputFiles({
@@ -38,7 +38,7 @@ test('a post can be published, liked and unliked', async ({
   request,
 }) => {
   const user = await registerUser(request, 'Author');
-  await signIn(page, user);
+  await signIn(page, user, '/');
   const text = `hello ${Date.now()}`;
 
   await page.getByRole('textbox', { name: 'New post' }).fill(text);
@@ -65,7 +65,7 @@ test('the post form validates and trims before sending', async ({
     page,
     (url, method) => method === 'POST' && url.pathname === '/api/posts',
   );
-  await signIn(page, user);
+  await signIn(page, user, '/');
   const field = page.getByRole('textbox', { name: 'New post' });
   const publish = page.getByRole('button', { name: 'Publish' });
 

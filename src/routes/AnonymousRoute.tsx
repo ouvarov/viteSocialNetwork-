@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router';
 import { SessionLoader } from '@/components/SessionLoader';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { readRedirectPath } from '@/routes/redirect-state.ts';
-import { profilePage } from '@/routes/routePaths.ts';
+import { feedPage } from '@/routes/routePaths.ts';
 
 type AnonymousRouteProps = {
   children: ReactNode;
@@ -19,10 +19,7 @@ const AnonymousRoute: FC<AnonymousRouteProps> = ({ children }): ReactNode => {
   if (!user) return children;
 
   return (
-    <Navigate
-      to={readRedirectPath(location.state) ?? profilePage(user.id)}
-      replace
-    />
+    <Navigate to={readRedirectPath(location.state) ?? feedPage()} replace />
   );
 };
 

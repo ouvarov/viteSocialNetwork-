@@ -1,0 +1,15 @@
+.pager {
+  &__more {
+    justify-self: center;
+  }
+
+  &__error {
+    color: theme(danger, color);
+    text-align: center;
+  }
+
+  &__end {
+    color: theme(muted, color);
+    text-align: center;
+  }
+}

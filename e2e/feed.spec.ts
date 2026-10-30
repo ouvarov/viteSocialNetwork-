@@ -94,7 +94,7 @@ test.describe('profile feed', () => {
       { length: TOTAL_POSTS },
       (_, index) => `post ${TOTAL_POSTS - index}`,
     );
-    await expect(page.locator('main article p')).toHaveText(expected);
+    await expect(page.locator('main article > p')).toHaveText(expected);
     expect(listRequests).toHaveLength(3);
     expect(
       listRequests
@@ -237,19 +237,18 @@ test.describe('profile feed', () => {
   });
 });
 
-test('creating and deleting a post updates the feed without a refetch', async ({
+test('creating and deleting a post updates the home feed without a refetch', async ({
   page,
   request,
 }) => {
   const author = await registerUser(request, 'Editor');
   await seedPosts(request, author, 3);
-  const listRequests = countRequests(
+  const feedRequests = countRequests(
     page,
-    (url, method) =>
-      method === 'GET' && url.pathname === `/api/users/${author.id}/posts`,
+    (url, method) => method === 'GET' && url.pathname === '/api/feed',
   );
-  await signIn(page, author);
-  await expect(page.locator('main article')).toHaveCount(3);
+  await signIn(page, author, '/');
+  await expect(card(page, 'post 1')).toBeVisible();
 
   await page.getByRole('textbox', { name: 'New post' }).fill('fresh post');
   await page.getByRole('button', { name: 'Publish' }).click();
@@ -257,7 +256,16 @@ test('creating and deleting a post updates the feed without a refetch', async ({
     'fresh post',
   );
 
-  await card(page, 'post 1').getByRole('button', { name: 'Delete' }).click();
+  await card(page, 'post 1')
+    .getByRole('button', { name: 'Post options' })
+    .click();
+  await card(page, 'post 1')
+    .getByRole('button', { name: 'Delete post' })
+    .click();
+  await page
+    .getByRole('dialog', { name: 'Delete this post?' })
+    .getByRole('button', { name: 'Delete' })
+    .click();
   await expect(card(page, 'post 1')).toHaveCount(0);
-  expect(firstPageLoads(listRequests)).toBe(1);
+  expect(firstPageLoads(feedRequests)).toBe(1);
 });

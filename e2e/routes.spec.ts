@@ -60,7 +60,7 @@ test('the socket code loads only with the chat', async ({ page, request }) => {
   expect(scripts.hasSocket()).toBe(false);
 
   await signIn(page, user);
-  await expect(page.getByText('No posts yet')).toBeVisible();
+  await expect(page.getByText("You haven't posted yet")).toBeVisible();
   expect(scripts.hasSocket()).toBe(false);
 
   const socketOpened = page.waitForEvent('websocket');
@@ -71,7 +71,7 @@ test('the socket code loads only with the chat', async ({ page, request }) => {
   expect(scripts.hasSocket()).toBe(true);
 });
 
-test('a signed-in user gets the 404 page and a link back to their profile', async ({
+test('a signed-in user gets the 404 page and a link back to the home feed', async ({
   page,
   request,
 }) => {
@@ -80,7 +80,10 @@ test('a signed-in user gets the 404 page and a link back to their profile', asyn
 
   await expect(notFound(page)).toBeVisible();
   await page.getByRole('link', { name: 'Go to the home page' }).click();
-  await expect(page).toHaveURL(new RegExp(`/profile/${user.id}$`));
+  await expect(page).toHaveURL(/:3001\/$/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Home' }),
+  ).toBeAttached();
 });
 
 test('a crashing page keeps the shell and clears on navigation', async ({
@@ -89,7 +92,7 @@ test('a crashing page keeps the shell and clears on navigation', async ({
 }) => {
   const user = await registerUser(request, 'Crash');
   await signIn(page, user);
-  await expect(page.getByText('No posts yet')).toBeVisible();
+  await expect(page.getByText("You haven't posted yet")).toBeVisible();
 
   await page.route('**/api/chat', (route) =>
     route.request().method() === 'GET'

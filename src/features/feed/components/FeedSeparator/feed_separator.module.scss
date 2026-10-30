@@ -1,0 +1,36 @@
+.separator {
+  display: grid;
+  gap: space(3);
+  padding: space(2) 0;
+  text-align: center;
+
+  &__caught_up {
+    display: grid;
+    gap: space(1);
+  }
+
+  &__title {
+    @include text(lead, bold);
+  }
+
+  &__text {
+    color: theme(muted, color);
+  }
+
+  &__label {
+    @include flex;
+    @include text(caption, bold);
+
+    gap: space(3);
+    color: theme(muted, color);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    &::before,
+    &::after {
+      content: '';
+      flex: 1;
+      border-top: 1px solid theme(surface, border-color);
+    }
+  }
+}

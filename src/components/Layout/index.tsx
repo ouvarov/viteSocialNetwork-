@@ -9,11 +9,11 @@ import {
 } from 'react-router';
 import classNames from 'classnames';
 
-import { Button } from '@/components/common/Button';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { ThemeToggle } from '@/features/theme/components/ThemeToggle';
-import { chatsPage, profilePage, usersPage } from '@/routes/routePaths.ts';
+import { chatsPage, feedPage, peoplePage } from '@/routes/routePaths.ts';
 
+import { AccountMenu } from './AccountMenu';
 import styles from './layout.module.scss';
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }): string =>
@@ -33,8 +33,6 @@ const Layout: FC = () => {
     mainRef.current?.focus();
   }, [pathname]);
 
-  const ownProfile = profilePage(String(user?.id));
-
   return (
     <div className={styles.shell}>
       {isNavigating && <div className={styles.progress} aria-hidden />}
@@ -43,14 +41,14 @@ const Layout: FC = () => {
       </a>
       <header className={styles.header}>
         <div className={styles.header__inner}>
-          <Link to={ownProfile} className={styles.brand}>
+          <Link to={feedPage()} className={styles.brand}>
             Pulse
           </Link>
           <nav aria-label="Main" className={styles.nav}>
-            <NavLink to={ownProfile} className={navLinkClassName}>
-              Profile
+            <NavLink to={feedPage()} end className={navLinkClassName}>
+              Home
             </NavLink>
-            <NavLink to={usersPage()} className={navLinkClassName}>
+            <NavLink to={peoplePage()} className={navLinkClassName}>
               People
             </NavLink>
             <NavLink to={chatsPage()} className={navLinkClassName}>
@@ -59,9 +57,7 @@ const Layout: FC = () => {
           </nav>
           <div className={styles.actions}>
             <ThemeToggle />
-            <Button variant="secondary" size="sm" onClick={logout}>
-              Log out
-            </Button>
+            {user && <AccountMenu user={user} onLogout={logout} />}
           </div>
         </div>
       </header>

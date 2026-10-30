@@ -1,0 +1,55 @@
+.account {
+  position: relative;
+
+  &__toggle {
+    @include flex;
+
+    border-radius: radius(full);
+  }
+
+  &__menu {
+    @include card;
+
+    position: absolute;
+    top: calc(100% + #{space(2)});
+    right: 0;
+    z-index: z(overlay);
+    min-width: rem(200px);
+    padding: space(2);
+  }
+
+  &__name {
+    @include text(body, bold);
+
+    padding: space(2) space(3);
+    border-bottom: 1px solid theme(surface, border-color);
+    overflow-wrap: anywhere;
+  }
+
+  &__list {
+    margin: space(1) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    @include text(body, bold);
+
+    display: block;
+    width: 100%;
+    padding: space(2) space(3);
+    border-radius: radius(sm);
+    color: theme(page, color);
+    text-align: left;
+
+    &:hover {
+      background-color: theme(field, background-color);
+      text-decoration: none;
+    }
+  }
+
+  &__item_danger {
+    composes: account__item;
+    color: theme(danger, color);
+  }
+}

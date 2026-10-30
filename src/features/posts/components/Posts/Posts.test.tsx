@@ -10,11 +10,13 @@ import { Posts } from './index.tsx';
 const post = (id: string, overrides: Partial<PostTypes> = {}): PostTypes => ({
   id,
   ownerId: USER.id,
+  author: { id: USER.id, userName: USER.userName, imageUrl: null },
   imageUrl: null,
   imageWidth: null,
   imageHeight: null,
   text: `Post ${id}`,
   created: '2026-10-01T12:00:00.000Z',
+  editedAt: null,
   likeCount: 0,
   likedByMe: false,
   ...overrides,
@@ -53,8 +55,11 @@ describe('Posts', () => {
     serveOnePage();
     renderPosts(true);
     expect(
-      await screen.findByText('Share your first post above.'),
+      await screen.findByText("You haven't posted yet"),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Write your first post' }),
+    ).toHaveAttribute('href', '/');
   });
 
   it('shows the API error and loads again on Try again', async () => {
@@ -140,7 +145,17 @@ describe('Posts', () => {
     const { user } = renderPosts(true);
 
     const article = (await screen.findByText('Post a')).closest('article')!;
-    await user.click(within(article).getByRole('button', { name: 'Delete' }));
+    await user.click(
+      within(article).getByRole('button', { name: 'Post options' }),
+    );
+    await user.click(
+      within(article).getByRole('button', { name: 'Delete post' }),
+    );
+    await user.click(
+      within(
+        screen.getByRole('dialog', { name: 'Delete this post?' }),
+      ).getByRole('button', { name: 'Delete' }),
+    );
 
     await waitFor(() =>
       expect(screen.queryByText('Post a')).not.toBeInTheDocument(),
@@ -148,13 +163,13 @@ describe('Posts', () => {
     expect(screen.getByText('Post b')).toBeInTheDocument();
   });
 
-  it('does not offer Delete on another profile', async () => {
+  it('offers no post options on another profile', async () => {
     serveOnePage(post('a'));
     renderPosts(false);
 
     await screen.findByText('Post a');
     expect(
-      screen.queryByRole('button', { name: 'Delete' }),
+      screen.queryByRole('button', { name: 'Post options' }),
     ).not.toBeInTheDocument();
   });
 });

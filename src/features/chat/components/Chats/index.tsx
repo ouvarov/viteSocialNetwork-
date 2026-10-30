@@ -10,7 +10,7 @@ import { useChats } from '@/features/chat/queries.ts';
 import { useChatListUpdates } from '@/features/chat/useChatListUpdates.ts';
 import { DELETED_USER_NAME } from '@/features/users/deleted-user.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
-import { chatPage, usersPage } from '@/routes/routePaths.ts';
+import { chatPage, peoplePage } from '@/routes/routePaths.ts';
 
 import styles from './chats.module.scss';
 
@@ -34,7 +34,7 @@ const ChatsList: FC = () => {
     return (
       <EmptyState
         title="No chats yet"
-        action={<Link to={usersPage()}>Find someone to talk to</Link>}
+        action={<Link to={peoplePage()}>Find someone to talk to</Link>}
       >
         Open a profile and start a chat.
       </EmptyState>

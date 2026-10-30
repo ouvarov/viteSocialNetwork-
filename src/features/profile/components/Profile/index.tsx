@@ -4,7 +4,6 @@ import { useParams } from 'react-router';
 import { ErrorState } from '@/components/common/ErrorState';
 import { Loader } from '@/components/common/Loader';
 import { useAuth } from '@/features/auth/useAuth.ts';
-import { PostComposer } from '@/features/posts/components/PostComposer';
 import { Posts } from '@/features/posts/components/Posts';
 import { ProfileInfo } from '@/features/profile/components/ProfileInfo';
 import { useUser } from '@/features/users/queries.ts';
@@ -38,7 +37,6 @@ const Profile: FC = () => {
       ) : (
         <ProfileInfo profile={profile} isOwnProfile={isOwnProfile} />
       )}
-      {isOwnProfile && <PostComposer userId={userId} />}
       <Posts userId={userId} isOwnProfile={isOwnProfile} />
     </div>
   );

@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDropzone } from 'react-dropzone';
 import { useForm } from 'react-hook-form';
@@ -15,11 +15,11 @@ import type { PostFormValues } from '@/features/posts/schemas.ts';
 import styles from './post_composer.module.scss';
 
 type PostComposerProps = {
-  userId: string;
+  isFocusedOnMount?: boolean;
 };
 
-const PostComposer: FC<PostComposerProps> = ({ userId }) => {
-  const { mutateAsync: createPost } = useCreatePost(userId);
+const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
+  const { mutateAsync: createPost } = useCreatePost();
   const {
     mutate: uploadImage,
     isPending: isUploading,
@@ -32,6 +32,7 @@ const PostComposer: FC<PostComposerProps> = ({ userId }) => {
     register,
     handleSubmit,
     setValue,
+    setFocus,
     reset,
     setError,
     formState: { errors, isSubmitting },
@@ -39,6 +40,10 @@ const PostComposer: FC<PostComposerProps> = ({ userId }) => {
     resolver: zodResolver(postSchema),
     defaultValues: { text: '', imageUploadId: undefined },
   });
+
+  useEffect(() => {
+    if (isFocusedOnMount) setFocus('text');
+  }, [isFocusedOnMount, setFocus]);
 
   const removeImage = () => {
     setValue('imageUploadId', undefined);

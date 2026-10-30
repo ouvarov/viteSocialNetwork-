@@ -1,17 +1,13 @@
 import type { FC } from 'react';
+import { Link } from 'react-router';
 
-import { getApiErrorMessage } from '@/api/errors.ts';
-import { Button } from '@/components/common/Button';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
 import { Loader } from '@/components/common/Loader';
 import { PostCard } from '@/features/posts/components/PostCard';
-import {
-  usePosts,
-  useRemovePost,
-  useToggleLike,
-} from '@/features/posts/queries.ts';
-import { useOnVisible } from '@/hooks/useOnVisible.ts';
+import { PostsPager } from '@/features/posts/components/PostsPager';
+import { usePosts } from '@/features/posts/queries.ts';
+import { feedPage } from '@/routes/routePaths.ts';
 
 import styles from './posts.module.scss';
 
@@ -32,18 +28,6 @@ const Posts: FC<PostsProps> = ({ userId, isOwnProfile }) => {
     isFetchingNextPage,
     isFetchNextPageError,
   } = usePosts(userId);
-  const { mutate: toggleLike } = useToggleLike(userId);
-  const {
-    mutate: removePost,
-    isPending: isRemoving,
-    variables: removingPostId,
-  } = useRemovePost(userId);
-
-  const loadMore = () => void fetchNextPage();
-  const loadMoreRef = useOnVisible<HTMLButtonElement>(
-    loadMore,
-    hasNextPage && !isFetchingNextPage && !isFetchNextPageError,
-  );
 
   if (isPending) return <Loader label="Loading posts" />;
 
@@ -60,11 +44,21 @@ const Posts: FC<PostsProps> = ({ userId, isOwnProfile }) => {
   const posts = data.pages.flatMap((page) => page.items);
 
   if (posts.length === 0) {
-    return (
+    return isOwnProfile ? (
+      <EmptyState
+        title="You haven't posted yet"
+        action={
+          <Link to={feedPage()} state={{ focusComposer: true }}>
+            Write your first post
+          </Link>
+        }
+      >
+        Your posts show up here and in the Home feed of everyone who follows
+        you.
+      </EmptyState>
+    ) : (
       <EmptyState title="No posts yet">
-        {isOwnProfile
-          ? 'Share your first post above.'
-          : 'Nothing has been posted here.'}
+        Nothing has been posted here.
       </EmptyState>
     );
   }
@@ -72,35 +66,16 @@ const Posts: FC<PostsProps> = ({ userId, isOwnProfile }) => {
   return (
     <section aria-label="Posts" className={styles.posts}>
       {posts.map((post) => (
-        <PostCard
-          key={post.id}
-          post={post}
-          canDelete={isOwnProfile}
-          isDeleting={isRemoving && removingPostId === post.id}
-          onToggleLike={toggleLike}
-          onDelete={removePost}
-        />
+        <PostCard key={post.id} post={post} isOwn={isOwnProfile} />
       ))}
-      {isFetchNextPageError && (
-        <p className={styles.posts__error} role="alert">
-          {getApiErrorMessage(error, 'Could not load more posts')}
-        </p>
-      )}
-      {hasNextPage ? (
-        <Button
-          ref={loadMoreRef}
-          variant="secondary"
-          className={styles.posts__more}
-          isLoading={isFetchingNextPage}
-          onClick={loadMore}
-        >
-          {isFetchNextPageError ? 'Try again' : 'Show more posts'}
-        </Button>
-      ) : (
-        data.pages.length > 1 && (
-          <p className={styles.posts__end}>You have reached the end.</p>
-        )
-      )}
+      <PostsPager
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        isFetchNextPageError={isFetchNextPageError}
+        error={error}
+        hasSeveralPages={data.pages.length > 1}
+        onLoadMore={() => void fetchNextPage()}
+      />
     </section>
   );
 };

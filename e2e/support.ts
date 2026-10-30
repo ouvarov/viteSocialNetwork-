@@ -78,6 +78,11 @@ const signIn = async (page: Page, user: TestUser, path?: string) => {
   await page.goto(path ?? `/profile/${user.id}`);
 };
 
+const logOut = async (page: Page) => {
+  await page.getByRole('button', { name: 'Account menu' }).click();
+  await page.getByRole('button', { name: 'Log out' }).click();
+};
+
 const fillSignIn = async (page: Page, email: string, password = PASSWORD) => {
   await page.getByRole('textbox', { name: 'Your email' }).fill(email);
   await page.getByLabel('Your password').fill(password);
@@ -121,6 +126,7 @@ const collectPageErrors = (page: Page) => {
 };
 
 export {
+  logOut,
   API,
   SOCKET_ORIGIN,
   PASSWORD,

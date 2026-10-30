@@ -7,6 +7,7 @@ import {
   countRequests,
   createChat,
   fillSignIn,
+  logOut,
   registerUser,
   signIn,
   uniqueEmail,
@@ -22,7 +23,7 @@ const fieldError = (page: Page, label: string) =>
     };
   });
 
-test('sign up lands on the new profile and keeps the token out of web storage', async ({
+test('sign up lands on the home feed and keeps the token out of web storage', async ({
   page,
 }) => {
   await page.goto('/sign-up');
@@ -34,8 +35,10 @@ test('sign up lands on the new profile and keeps the token out of web storage', 
   await page.getByLabel('Your password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign up' }).click();
 
-  await expect(page).toHaveURL(/\/profile\/[0-9a-f-]{36}$/);
-  await expect(page.getByRole('heading', { name: 'Ada' })).toBeVisible();
+  await expect(page).toHaveURL(/:3001\/$/);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Home' }),
+  ).toBeAttached();
   expect(
     await page.evaluate(() => localStorage.length + sessionStorage.length),
   ).toBe(0);
@@ -117,7 +120,7 @@ test('sign-in validates on the client, and a double click sends one request', as
 
   await page.getByLabel('Your password').fill(PASSWORD);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(new RegExp(`/profile/${user.id}$`));
+  await expect(page).toHaveURL(/:3001\/$/);
 });
 
 test('logging out clears the previous user from the cache', async ({
@@ -134,12 +137,12 @@ test('logging out clears the previous user from the cache', async ({
 
   await signIn(page, ada, '/chats');
   await expect(page.getByRole('link', { name: secret })).toBeVisible();
-  await page.getByRole('button', { name: 'Log out' }).click();
+  await logOut(page);
   await expect(page).toHaveURL(/\/sign-in$/);
 
   await fillSignIn(page, bob.email);
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(new RegExp(`/profile/${bob.id}$`));
+  await expect(page).toHaveURL(/:3001\/$/);
   await page.getByRole('link', { name: 'Chats' }).click();
   await expect(page.getByRole('link', { name: shared })).toBeVisible();
   await expect(page.getByRole('link', { name: secret })).toHaveCount(0);

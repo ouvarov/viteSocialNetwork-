@@ -42,6 +42,9 @@ $themes: (
     backdrop: (
       background-color: #000000a6,
     ),
+    like: (
+      color: #ff7a6b,
+    ),
     avatar-1: (
       background-color: #3a2f63,
       color: #e6e0f8,
@@ -108,6 +111,9 @@ $themes: (
     backdrop: (
       background-color: #1b182466,
     ),
+    like: (
+      color: #c8281c,
+    ),
     avatar-1: (
       background-color: #e6e0f8,
       color: #3a2f63,
@@ -165,6 +171,7 @@ $required-keys: (
     color,
   ),
   backdrop: (background-color),
+  like: (color),
   avatar-1: (
     background-color,
     color,

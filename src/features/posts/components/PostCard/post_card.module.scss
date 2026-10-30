@@ -1,23 +1,34 @@
+$min-aspect-ratio: 0.8;
+$max-aspect-ratio: 1.91;
+
 .post {
   @include card;
 
   display: grid;
   gap: space(3);
 
-  &__figure {
-    overflow: hidden;
-    margin: calc(-1 * #{space(4)}) calc(-1 * #{space(4)}) 0;
-    border-radius: radius(lg) radius(lg) 0 0;
+  &__header {
+    @include flex(flex-start);
 
-    @include media-up(sm) {
-      margin: calc(-1 * #{space(5)}) calc(-1 * #{space(5)}) 0;
-    }
+    gap: space(3);
   }
 
-  &__image {
-    width: 100%;
-    max-height: rem(480px);
-    object-fit: cover;
+  &__byline {
+    flex: 1;
+    min-width: 0;
+    color: theme(muted, color);
+  }
+
+  &__author {
+    @include text(body, bold);
+
+    color: theme(page, color);
+    overflow-wrap: anywhere;
+  }
+
+  &__date,
+  &__edited {
+    @include text(caption);
   }
 
   &__text {
@@ -27,43 +38,82 @@
     white-space: pre-wrap;
   }
 
-  &__footer {
-    @include flex(space-between);
-
-    flex-wrap: wrap;
+  &__editor {
+    display: grid;
     gap: space(2);
   }
 
-  &__date {
-    @include text(caption);
-
-    color: theme(muted, color);
+  &__editor_label {
+    @include visually-hidden;
   }
 
-  &__actions {
+  &__editor_field {
+    @include text(body-lg);
+
+    min-height: rem(96px);
+    padding: space(2) space(3);
+    border: 1px solid theme(field, border-color);
+    border-radius: radius(md);
+    background-color: theme(field, background-color);
+    color: theme(field, color);
+    resize: vertical;
+  }
+
+  &__editor_actions {
     @include flex(flex-end);
 
     gap: space(2);
+  }
+
+  &__figure {
+    overflow: hidden;
+    margin: 0;
+    border: 1px solid theme(surface, border-color);
+    border-radius: radius(md);
+    background-color: theme(field, background-color);
+    aspect-ratio: clamp(
+      #{$min-aspect-ratio},
+      var(--post-aspect-ratio),
+      #{$max-aspect-ratio}
+    );
+  }
+
+  &__image {
+    @include size(100%);
+
+    object-fit: cover;
+  }
+
+  &__footer {
+    @include flex(flex-start);
   }
 
   &__like {
     @include flex;
     @include text(caption, bold);
 
-    gap: space(2);
+    gap: space(1);
     min-height: rem(36px);
-    padding: space(1) space(4);
-    border: 1px solid theme(field, border-color);
+    padding: space(1) space(3);
     border-radius: radius(full);
+    color: theme(muted, color);
+    transition: color duration(fast);
 
+    &:hover,
     &[aria-pressed='true'] {
-      @include use-theme(accent);
-
-      border-color: transparent;
+      color: theme(like, color);
     }
+  }
+
+  &__like_label {
+    @include visually-hidden;
   }
 
   &__count {
     font-variant-numeric: tabular-nums;
+  }
+
+  &__error {
+    color: theme(danger, color);
   }
 }
