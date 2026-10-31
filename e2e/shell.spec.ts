@@ -99,7 +99,7 @@ test('keyboard: skip link, focus ring and focus moving to main on navigation', a
   await page.getByRole('link', { name: 'People' }).click();
   await expect(page.getByRole('heading', { name: 'People' })).toBeVisible();
   await expect(page.locator('main')).toBeFocused();
-  await expect(page).toHaveTitle('Users · Pulse');
+  await expect(page).toHaveTitle('People · Pulse');
 });
 
 test('empty chats link to the users page', async ({ page, request }) => {
@@ -128,7 +128,7 @@ test('the users list shows the API error and recovers with Try again', async ({
 
   const error = page
     .getByRole('alert')
-    .filter({ hasText: 'Could not load users' });
+    .filter({ hasText: 'Could not load people' });
   await expect(error).toContainText('Database is down', { timeout: 15_000 });
   await page.unroute(/\/api\/users\?/);
   await page.getByRole('button', { name: 'Try again' }).click();

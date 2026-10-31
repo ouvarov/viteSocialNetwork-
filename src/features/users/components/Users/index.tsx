@@ -33,14 +33,12 @@ type PersonRowProps = {
 
 const PersonRow: FC<PersonRowProps> = ({ person, isMe }) => (
   <li className={styles.person}>
-    <Link to={profilePage(person.id)} tabIndex={-1} aria-hidden>
-      <Avatar
-        userId={person.id}
-        userName={person.userName}
-        imageUrl={person.imageUrl}
-        size="lg"
-      />
-    </Link>
+    <Avatar
+      userId={person.id}
+      userName={person.userName}
+      imageUrl={person.imageUrl}
+      size="lg"
+    />
     <div className={styles.person__body}>
       <Link className={styles.person__name} to={profilePage(person.id)}>
         {person.userName}
