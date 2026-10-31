@@ -1,0 +1,13 @@
+.feed {
+  display: grid;
+  gap: space(4);
+
+  &__title {
+    @include visually-hidden;
+  }
+
+  &__list {
+    display: grid;
+    gap: space(4);
+  }
+}

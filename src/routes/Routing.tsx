@@ -13,10 +13,11 @@ import { PrivateRoute } from '@/routes/PrivateRoute.tsx';
 import {
   chatPage,
   chatsPage,
+  legacyUsersPage,
   loginPage,
+  peoplePage,
   profilePage,
   signUpPage,
-  usersPage,
 } from '@/routes/routePaths.ts';
 
 const PageLoader: FC = () => <Loader fullScreen />;
@@ -45,6 +46,16 @@ const anonymousPages: RouteObject[] = [
 
 const privatePages: RouteObject[] = [
   {
+    index: true,
+    lazy: async () => ({
+      Component: (await import('@/features/feed/components/Feed')).Feed,
+    }),
+  },
+  {
+    path: legacyUsersPage(),
+    element: <Navigate to={peoplePage()} replace />,
+  },
+  {
     path: profilePage(':userId'),
     lazy: async () => ({
       Component: (await import('@/features/profile/components/Profile'))
@@ -52,7 +63,7 @@ const privatePages: RouteObject[] = [
     }),
   },
   {
-    path: usersPage(),
+    path: peoplePage(),
     lazy: async () => ({
       Component: (await import('@/features/users/components/Users')).Users,
     }),
@@ -77,7 +88,6 @@ const router = createBrowserRouter([
     ErrorBoundary: RootError,
     HydrateFallback: PageLoader,
     children: [
-      { index: true, element: <Navigate to={loginPage()} replace /> },
       {
         element: (
           <AnonymousRoute>

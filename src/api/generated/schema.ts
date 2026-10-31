@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/feed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PostController_findFeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/posts": {
         parameters: {
             query?: never;
@@ -193,7 +209,7 @@ export interface paths {
         delete: operations["PostController_remove"];
         options?: never;
         head?: never;
-        patch?: never;
+        patch: operations["PostController_update"];
         trace?: never;
     };
     "/api/chat/create": {
@@ -419,6 +435,44 @@ export interface components {
             /** @example 2 */
             followingCount: number;
         };
+        PostAuthorDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Ada Lovelace */
+            userName: string;
+            imageUrl: string | null;
+        };
+        FeedItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            ownerId: string;
+            author: components["schemas"]["PostAuthorDto"];
+            imageUrl: string | null;
+            /** @description Null for posts without an image or from before sizes were stored */
+            imageWidth: number | null;
+            imageHeight: number | null;
+            text: string;
+            /** Format: date-time */
+            created: string;
+            /**
+             * Format: date-time
+             * @description When the text was last edited
+             */
+            editedAt: string | null;
+            /** @example 3 */
+            likeCount: number;
+            /** @description Whether the caller liked this post */
+            likedByMe: boolean;
+            /** @description True for posts by people the caller followed when the feed was opened, and for their own posts */
+            fromFollowing: boolean;
+        };
+        FeedPageDto: {
+            /** @description Followed people and own posts first, newest first; then everyone else */
+            items: components["schemas"]["FeedItemDto"][];
+            /** @description Pass as cursor to get the next page; it keeps the moment the feed was opened, so new posts do not shift pages */
+            nextCursor: string | null;
+        };
         CreatePostDto: {
             /**
              * Format: uuid
@@ -433,6 +487,7 @@ export interface components {
             id: string;
             /** Format: uuid */
             ownerId: string;
+            author: components["schemas"]["PostAuthorDto"];
             imageUrl: string | null;
             /** @description Null for posts without an image or from before sizes were stored */
             imageWidth: number | null;
@@ -440,6 +495,11 @@ export interface components {
             text: string;
             /** Format: date-time */
             created: string;
+            /**
+             * Format: date-time
+             * @description When the text was last edited
+             */
+            editedAt: string | null;
             /** @example 3 */
             likeCount: number;
             /** @description Whether the caller liked this post */
@@ -449,6 +509,10 @@ export interface components {
             items: components["schemas"]["PostResponseDto"][];
             /** @description Pass as cursor to get the next page; null on the last page */
             nextCursor: string | null;
+        };
+        UpdatePostDto: {
+            /** @example Shipping a new release this weekend. */
+            text: string;
         };
         CreateChatDto: {
             /**
@@ -860,6 +924,30 @@ export interface operations {
             };
         };
     };
+    PostController_findFeed: {
+        parameters: {
+            query?: {
+                /** @description Each list has its own default page size */
+                limit?: number;
+                /** @description nextCursor from the previous page */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedPageDto"];
+                };
+            };
+        };
+    };
     PostController_create: {
         parameters: {
             query?: never;
@@ -981,6 +1069,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Post not found or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PostController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePostDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostResponseDto"];
+                };
             };
             /** @description Post not found or not yours */
             404: {

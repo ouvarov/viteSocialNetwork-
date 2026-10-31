@@ -47,11 +47,11 @@ test('a sleeping API shows the wake-up notice and the session waits for it', asy
   expect(refreshesBeforeWake).toEqual([]);
 
   release();
-  await expect(page.getByText('No posts yet')).toBeVisible();
+  await expect(page.getByText("You haven't posted yet")).toBeVisible();
   await expect(notice).toHaveCount(0);
 });
 
-test('own profile: empty state, title, active link and a long post on a phone', async ({
+test('own profile: empty state, title, the way to the composer and a long post on a phone', async ({
   page,
   request,
 }) => {
@@ -59,18 +59,23 @@ test('own profile: empty state, title, active link and a long post on a phone', 
   await page.setViewportSize({ width: 360, height: 740 });
   await signIn(page, user);
 
-  await expect(page.getByText('No posts yet')).toBeVisible();
+  await expect(page.getByText("You haven't posted yet")).toBeVisible();
   await expect(page).toHaveTitle('Shell · Pulse');
-  await expect(page.getByRole('link', { name: 'Profile' })).toHaveAttribute(
+
+  await page.getByRole('link', { name: 'Write your first post' }).click();
+  await expect(page.getByRole('link', { name: 'Home' })).toHaveAttribute(
     'aria-current',
     'page',
   );
+  const composer = page.getByRole('textbox', { name: 'New post' });
+  await expect(composer).toBeFocused();
 
-  await page
-    .getByRole('textbox', { name: 'New post' })
-    .fill(`A long word: ${'x'.repeat(120)}`);
+  const longPost = `A long word: ${'x'.repeat(120)}`;
+  await composer.fill(longPost);
   await page.getByRole('button', { name: 'Publish' }).click();
-  await expect(page.locator('main article')).toHaveCount(1);
+  await expect(
+    page.locator('main article').filter({ hasText: longPost }),
+  ).toHaveCount(1);
   expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
 });
 
@@ -80,7 +85,7 @@ test('keyboard: skip link, focus ring and focus moving to main on navigation', a
 }) => {
   const user = await registerUser(request, 'Keys');
   await signIn(page, user);
-  await expect(page.getByText('No posts yet')).toBeVisible();
+  await expect(page.getByText("You haven't posted yet")).toBeVisible();
 
   await page.keyboard.press('Tab');
   const skipLink = page.getByRole('link', { name: 'Skip to content' });
@@ -141,7 +146,7 @@ test('an unknown profile fails fast without retries', async ({
 }) => {
   const user = await registerUser(request, 'Seeker');
   await signIn(page, user);
-  await expect(page.getByText('No posts yet')).toBeVisible();
+  await expect(page.getByText("You haven't posted yet")).toBeVisible();
 
   const startedAt = Date.now();
   await page.goto(`/profile/${UNKNOWN_USER_ID}`);

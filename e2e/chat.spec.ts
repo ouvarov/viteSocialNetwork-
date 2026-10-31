@@ -12,6 +12,7 @@ import {
   collectPageErrors,
   countRequests,
   createChat,
+  logOut,
   registerUser,
   signIn,
 } from './support.ts';
@@ -283,7 +284,7 @@ test.describe('realtime chat', () => {
     await expect(connecting(page)).toHaveCount(0);
 
     const closed = socket.waitForEvent('close');
-    await page.getByRole('button', { name: 'Log out' }).click();
+    await logOut(page);
     await expect(page).toHaveURL(/\/sign-in$/);
     await closed;
   });

@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
+import { queryKeys } from '@/api/query-keys.ts';
 import type { PersonTypes } from '@/features/follows/types.ts';
 import { renderWithProviders } from '@/test/render.tsx';
 import { API, http, HttpResponse, server, USER } from '@/test/server.ts';
@@ -49,6 +50,34 @@ describe('Users', () => {
     expect(
       within(rowOf('Ada Lovelace')).queryByRole('button'),
     ).not.toBeInTheDocument();
+  });
+
+  it('refreshes the home feed after a follow', async () => {
+    servePeople(GRACE, ME);
+    server.use(
+      http.put(`${API}/users/${GRACE.id}/follow`, () =>
+        HttpResponse.json({
+          userId: GRACE.id,
+          isFollowedByMe: true,
+          followersCount: 5,
+          followingCount: 0,
+        }),
+      ),
+    );
+    const { user, queryClient } = renderWithProviders(<Users />, {
+      auth: { user: USER },
+    });
+    queryClient.setQueryData(queryKeys.feed(), { pages: [], pageParams: [] });
+
+    await user.click(
+      await screen.findByRole('button', { name: 'Follow Grace Hopper' }),
+    );
+
+    await vi.waitFor(() =>
+      expect(queryClient.getQueryState(queryKeys.feed())?.isInvalidated).toBe(
+        true,
+      ),
+    );
   });
 
   it('shows the follow at once and keeps the server count', async () => {
