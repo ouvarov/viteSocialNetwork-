@@ -181,9 +181,9 @@ test.describe('realtime chat', () => {
     await expect(message(page, 'sent while offline')).toBeVisible();
     await page.waitForTimeout(1000);
     await expect(messages(page)).toHaveText([
-      'missed one',
-      'missed two',
-      'sent while offline',
+      /^missed one/,
+      /^missed two/,
+      /^sent while offline/,
     ]);
     bobSocket.close();
   });

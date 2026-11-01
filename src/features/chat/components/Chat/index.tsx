@@ -1,5 +1,5 @@
-import type { FC } from 'react';
-import { useId, useRef, useState } from 'react';
+import type { FC, KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router';
@@ -13,12 +13,15 @@ import { ErrorState } from '@/components/common/ErrorState';
 import { Loader } from '@/components/common/Loader';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Textarea } from '@/components/common/Textarea';
+import { useAuth } from '@/features/auth/useAuth.ts';
 import { Message } from '@/features/chat/components/Message';
+import { groupMessages } from '@/features/chat/message-groups.ts';
 import { toChronological } from '@/features/chat/messages.ts';
 import {
   useChat,
   useChatMessages,
   useDeleteChat,
+  useMarkChatRead,
 } from '@/features/chat/queries.ts';
 import { messageSchema } from '@/features/chat/schemas.ts';
 import type { MessageFormValues } from '@/features/chat/schemas.ts';
@@ -37,6 +40,16 @@ import styles from './chat.module.scss';
 const CHAT_TITLE_WHILE_LOADING = 'Chat';
 const NO_MESSAGES: MessagesDataTypes[] = [];
 
+const lastIncomingId = (
+  messages: MessagesDataTypes[],
+  userId: string | undefined,
+): string | undefined =>
+  [...messages].reverse().find(({ senderId }) => senderId !== userId)
+    ?.messageId;
+
+const isSendShortcut = (event: KeyboardEvent<HTMLTextAreaElement>) =>
+  event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing;
+
 const deleteForMeText = (peerName: string | undefined) =>
   peerName
     ? `The history disappears only for you. ${peerName} still sees it.`
@@ -45,6 +58,8 @@ const deleteForMeText = (peerName: string | undefined) =>
 const Chat: FC = () => {
   const { chatId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { mutate: markRead } = useMarkChatRead();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const closedNoteId = useId();
   const logRef = useRef<HTMLDivElement>(null);
@@ -78,7 +93,12 @@ const Chat: FC = () => {
   } = useDeleteChat();
 
   const messages = history ? toChronological(history) : NO_MESSAGES;
+  const newestIncomingId = lastIncomingId(messages, user?.id);
   const peerName = chat?.peer?.userName;
+
+  useEffect(() => {
+    if (chatId) markRead(chatId);
+  }, [chatId, newestIncomingId, markRead]);
   const title = chat
     ? (peerName ?? DELETED_USER_NAME)
     : CHAT_TITLE_WHILE_LOADING;
@@ -220,8 +240,8 @@ const Chat: FC = () => {
         )}
         {messages.length > 0 && (
           <ol className={styles.chat__messages}>
-            {messages.map((item) => (
-              <Message {...item} key={item.messageId} />
+            {groupMessages(messages).map((grouped) => (
+              <Message {...grouped} key={grouped.message.messageId} />
             ))}
           </ol>
         )}
@@ -242,6 +262,12 @@ const Chat: FC = () => {
             className={styles.chat__field}
             aria-describedby={chat.canSend ? undefined : closedNoteId}
             error={messageErrors.content?.message}
+            onKeyDown={(event) => {
+              if (!isSendShortcut(event)) return;
+
+              event.preventDefault();
+              void messageForm.handleSubmit(onSendMessage)();
+            }}
           />
           <Button isLoading={messageForm.formState.isSubmitting} type="submit">
             Send

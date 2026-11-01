@@ -276,6 +276,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ChatController_markRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat/{id}": {
         parameters: {
             query?: never;
@@ -470,7 +486,7 @@ export interface components {
         FeedPageDto: {
             /** @description Followed people and own posts first, newest first; then everyone else */
             items: components["schemas"]["FeedItemDto"][];
-            /** @description Pass as cursor to get the next page; it keeps the moment the feed was opened, so new posts do not shift pages */
+            /** @description Pass as cursor to get the next page; it keeps the moment the feed was opened, so new posts do not shift pages. An unfollow during the session can return posts already shown: dedupe by id */
             nextCursor: string | null;
         };
         CreatePostDto: {
@@ -532,6 +548,17 @@ export interface components {
             userName: string;
             imageUrl: string | null;
         };
+        LastMessageDto: {
+            /** @example Green on the first try. Suspicious. */
+            content: string;
+            /**
+             * Format: uuid
+             * @description null when the sender deleted their account
+             */
+            senderId: string | null;
+            /** Format: date-time */
+            sentAt: string;
+        };
         ChatSummaryDto: {
             /** Format: uuid */
             chatId: string;
@@ -539,6 +566,13 @@ export interface components {
             peer: components["schemas"]["ChatPeerDto"] | null;
             /** Format: date-time */
             lastMessageAt: string | null;
+            /** @description The latest message in the chat */
+            lastMessage: components["schemas"]["LastMessageDto"] | null;
+            /**
+             * @description Messages from the other person since you last read the chat
+             * @example 2
+             */
+            unreadCount: number;
         };
         ChatDto: {
             /** Format: uuid */
@@ -1227,6 +1261,33 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MessagePageDto"];
                 };
+            };
+            /** @description Chat not found or not a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ChatController_markRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marks every message in the chat as read for you */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Chat not found or not a member */
             404: {

@@ -10,7 +10,7 @@ import { unwrap } from '@/api/errors.ts';
 import { queryKeys } from '@/api/query-keys.ts';
 
 import { collectLiveMessages, mergeMessages } from './messages.ts';
-import type { MessagePagesData } from './types.ts';
+import type { ChatsDataTypes, MessagePagesData } from './types.ts';
 
 const MESSAGES_PAGE_SIZE = 50;
 
@@ -105,4 +105,31 @@ const useDeleteChat = () => {
   });
 };
 
-export { useChat, useChatMessages, useChats, useCreateChat, useDeleteChat };
+const useMarkChatRead = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (chatId: string) => {
+      await unwrap(
+        client.POST('/api/chat/{id}/read', {
+          params: { path: { id: chatId } },
+        }),
+      );
+    },
+    onSuccess: (_result, chatId) =>
+      queryClient.setQueryData<ChatsDataTypes[]>(queryKeys.chats(), (chats) =>
+        chats?.map((chat) =>
+          chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat,
+        ),
+      ),
+  });
+};
+
+export {
+  useChat,
+  useChatMessages,
+  useChats,
+  useCreateChat,
+  useDeleteChat,
+  useMarkChatRead,
+};

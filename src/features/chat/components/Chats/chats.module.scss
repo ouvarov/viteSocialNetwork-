@@ -15,9 +15,46 @@
     text-decoration: none;
   }
 
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__top {
+    @include flex(space-between, baseline);
+
+    gap: space(2);
+  }
+
   &__name {
     @include text(body-lg, bold);
 
     overflow-wrap: anywhere;
+  }
+
+  &__time {
+    @include text(caption);
+
+    flex-shrink: 0;
+    color: theme(muted, color);
+  }
+
+  &__preview {
+    display: block;
+    overflow: hidden;
+    color: theme(muted, color);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__unread {
+    @include flex;
+    @include text(caption, bold);
+    @include use-theme(accent);
+
+    min-width: rem(24px);
+    height: rem(24px);
+    padding: 0 space(2);
+    border-radius: radius(full);
   }
 }
