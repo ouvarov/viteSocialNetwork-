@@ -549,7 +549,10 @@ export interface components {
             imageUrl: string | null;
         };
         LastMessageDto: {
-            /** @example Green on the first try. Suspicious. */
+            /**
+             * @description The first 200 characters of the message
+             * @example Green on the first try. Suspicious.
+             */
             content: string;
             /**
              * Format: uuid
