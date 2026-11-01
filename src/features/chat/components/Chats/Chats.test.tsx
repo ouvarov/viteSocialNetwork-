@@ -44,7 +44,7 @@ describe('Chats', () => {
 
     const row = await rowOf('Bob');
     expect(within(row).getByText('Did the build pass?')).toBeInTheDocument();
-    expect(within(row).getByLabelText('3 unread')).toHaveTextContent('3');
+    expect(row).toHaveAccessibleName(/3 unread/);
   });
 
   it('marks your own last message and shows no badge when all is read', async () => {
@@ -63,7 +63,7 @@ describe('Chats', () => {
     expect(
       within(row).getByText('You: Green on the first try'),
     ).toBeInTheDocument();
-    expect(within(row).queryByLabelText(/unread/)).not.toBeInTheDocument();
+    expect(row).not.toHaveAccessibleName(/unread/);
   });
 
   it('says when a chat has no messages yet', async () => {

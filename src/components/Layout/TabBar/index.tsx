@@ -32,11 +32,15 @@ const tabClassName = ({ isActive }: { isActive: boolean }): string =>
     [styles['tab_bar__tab--active']]: isActive,
   });
 
+const SECTION_TABS: Tab[] = [
+  { to: feedPage(), label: 'Home', icon: <HomeIcon />, isEnd: true },
+  { to: peoplePage(), label: 'People', icon: <PeopleIcon /> },
+  { to: chatsPage(), label: 'Chats', icon: <ChatIcon /> },
+];
+
 const TabBar: FC<TabBarProps> = ({ user }) => {
   const tabs: Tab[] = [
-    { to: feedPage(), label: 'Home', icon: <HomeIcon />, isEnd: true },
-    { to: peoplePage(), label: 'People', icon: <PeopleIcon /> },
-    { to: chatsPage(), label: 'Chats', icon: <ChatIcon /> },
+    ...SECTION_TABS,
     {
       to: profilePage(user.id),
       label: 'Profile',

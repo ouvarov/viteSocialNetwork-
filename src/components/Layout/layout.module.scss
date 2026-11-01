@@ -100,7 +100,7 @@
 
   &--with_tab_bar {
     padding-bottom: calc(
-      #{rem(60px)} + #{space(4)} + env(safe-area-inset-bottom)
+      #{$tab-bar-height} + #{space(4)} + env(safe-area-inset-bottom)
     );
   }
 

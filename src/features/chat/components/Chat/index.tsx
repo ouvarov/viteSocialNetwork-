@@ -95,10 +95,12 @@ const Chat: FC = () => {
   const messages = history ? toChronological(history) : NO_MESSAGES;
   const newestIncomingId = lastIncomingId(messages, user?.id);
   const peerName = chat?.peer?.userName;
+  const isHistoryLoaded = Boolean(history);
 
   useEffect(() => {
-    if (chatId) markRead(chatId);
-  }, [chatId, newestIncomingId, markRead]);
+    if (chatId && isHistoryLoaded) markRead(chatId);
+  }, [chatId, isHistoryLoaded, newestIncomingId, markRead]);
+
   const title = chat
     ? (peerName ?? DELETED_USER_NAME)
     : CHAT_TITLE_WHILE_LOADING;
@@ -140,6 +142,15 @@ const Chat: FC = () => {
             : 'Message not sent. Check your connection and try again.',
       });
     }
+  };
+
+  const sendOnEnter = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!isSendShortcut(event)) return;
+
+    event.preventDefault();
+    if (messageForm.formState.isSubmitting) return;
+
+    void messageForm.handleSubmit(onSendMessage)();
   };
 
   const openDeleteDialog = () => {
@@ -262,12 +273,7 @@ const Chat: FC = () => {
             className={styles.chat__field}
             aria-describedby={chat.canSend ? undefined : closedNoteId}
             error={messageErrors.content?.message}
-            onKeyDown={(event) => {
-              if (!isSendShortcut(event)) return;
-
-              event.preventDefault();
-              void messageForm.handleSubmit(onSendMessage)();
-            }}
+            onKeyDown={sendOnEnter}
           />
           <Button isLoading={messageForm.formState.isSubmitting} type="submit">
             Send

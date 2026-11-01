@@ -11,7 +11,7 @@ type SkeletonProps = {
 };
 
 const PostSkeleton: FC = () => (
-  <div className={styles.post}>
+  <div className={styles.skeleton__post}>
     <div className={styles.skeleton__row}>
       <span className={styles.skeleton__circle} />
       <span className={styles.skeleton__line} />
@@ -23,7 +23,7 @@ const PostSkeleton: FC = () => (
 );
 
 const PersonSkeleton: FC = () => (
-  <div className={styles.person}>
+  <div className={styles.skeleton__person}>
     <span className={styles.skeleton__circle} />
     <div className={styles.skeleton__column}>
       <span className={styles.skeleton__line} />
@@ -33,7 +33,7 @@ const PersonSkeleton: FC = () => (
 );
 
 const ProfileSkeleton: FC = () => (
-  <div className={styles.profile}>
+  <div className={styles.skeleton__profile}>
     <span className={styles['skeleton__circle--large']} />
     <div className={styles.skeleton__column}>
       <span className={styles.skeleton__line} />

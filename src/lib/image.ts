@@ -1,5 +1,6 @@
 const WEBP_QUALITY = 0.85;
 const JPEG_QUALITY = 0.9;
+const JPEG_BACKGROUND = '#fff';
 
 const toBlob = (
   canvas: HTMLCanvasElement,
@@ -28,10 +29,20 @@ const createCanvas = (width: number, height: number) => {
   return { canvas, context };
 };
 
+const fillTransparency = (canvas: HTMLCanvasElement) => {
+  const context = canvas.getContext('2d');
+  if (!context) return;
+
+  context.globalCompositeOperation = 'destination-over';
+  context.fillStyle = JPEG_BACKGROUND;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+};
+
 const encodeCanvas = async (canvas: HTMLCanvasElement): Promise<Blob> => {
   const webp = await toBlob(canvas, 'image/webp', WEBP_QUALITY);
   if (webp?.type === 'image/webp') return webp;
 
+  fillTransparency(canvas);
   const jpeg = await toBlob(canvas, 'image/jpeg', JPEG_QUALITY);
   if (!jpeg) throw new Error('Could not encode the image');
 

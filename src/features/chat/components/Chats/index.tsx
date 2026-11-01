@@ -83,11 +83,11 @@ const ChatsList: FC = () => {
               </span>
             </span>
             {unreadCount > 0 && (
-              <span
-                className={styles.item__unread}
-                aria-label={`${unreadCount} unread`}
-              >
-                {unreadCount}
+              <span className={styles.item__unread}>
+                <span aria-hidden>{unreadCount}</span>
+                <span className={styles.item__unread_label}>
+                  {unreadCount} unread
+                </span>
               </span>
             )}
           </Link>

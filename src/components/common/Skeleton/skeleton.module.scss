@@ -59,24 +59,24 @@
     aspect-ratio: 16 / 9;
     border-radius: radius(md);
   }
-}
 
-.post {
-  @include card;
+  &__post {
+    @include card;
 
-  display: grid;
-  gap: space(3);
-}
+    display: grid;
+    gap: space(3);
+  }
 
-.person {
-  @include flex(flex-start);
+  &__person {
+    @include flex(flex-start);
 
-  gap: space(3);
-  padding: space(3) space(4);
-}
+    gap: space(3);
+    padding: space(3) space(4);
+  }
 
-.profile {
-  @include flex(flex-start);
+  &__profile {
+    @include flex(flex-start);
 
-  gap: space(4);
+    gap: space(4);
+  }
 }

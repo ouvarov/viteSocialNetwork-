@@ -188,6 +188,31 @@ test.describe('realtime chat', () => {
     bobSocket.close();
   });
 
+  test('Enter sends once even when pressed twice, Shift+Enter adds a line', async ({
+    page,
+    request,
+  }) => {
+    const { ada, chatId } = await setUpChat(request);
+    await signIn(page, ada, `/chat/${chatId}`);
+    await expect(page.getByText('No messages yet')).toBeVisible();
+    await expect(connecting(page)).toHaveCount(0);
+
+    const field = page.getByRole('textbox', { name: 'Message' });
+    await field.fill('first line');
+    await field.press('Shift+Enter');
+    await field.pressSequentially('second line');
+    await field.press('Enter');
+    await field.press('Enter');
+
+    await expect(message(page, 'second line')).toBeVisible();
+    await expect(field).toHaveValue('');
+    await page.waitForTimeout(1000);
+    await expect(messages(page)).toHaveCount(1);
+    await expect(messages(page).first()).toContainText(
+      'first line\nsecond line',
+    );
+  });
+
   test('a message arriving during a refetch survives the older response', async ({
     page,
     request,

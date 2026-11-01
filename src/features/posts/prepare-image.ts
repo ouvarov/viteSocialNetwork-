@@ -18,7 +18,7 @@ const prepareImage = async (file: File): Promise<Blob> => {
   const sourceUrl = URL.createObjectURL(file);
   try {
     const image = await loadImage(sourceUrl).catch(() => null);
-    if (!image) return file;
+    if (!image?.naturalWidth || !image.naturalHeight) return file;
 
     const { width, height } = scaledSize(
       image.naturalWidth,

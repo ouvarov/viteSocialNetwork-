@@ -13,6 +13,13 @@ import type { PostFormValues } from '@/features/posts/schemas.ts';
 
 import styles from './post_composer.module.scss';
 
+const ACCEPTED_IMAGES = {
+  'image/jpeg': [],
+  'image/png': [],
+  'image/webp': [],
+  'image/gif': [],
+};
+
 type PostComposerProps = {
   isFocusedOnMount?: boolean;
 };
@@ -51,6 +58,7 @@ const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
 
   const { getRootProps, getInputProps } = useDropzone({
     multiple: false,
+    accept: ACCEPTED_IMAGES,
     onDrop: ([file]) => {
       if (!file) return;
 

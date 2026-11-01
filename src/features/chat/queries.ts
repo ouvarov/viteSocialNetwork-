@@ -116,12 +116,17 @@ const useMarkChatRead = () => {
         }),
       );
     },
-    onSuccess: (_result, chatId) =>
+    onSuccess: (_result, chatId) => {
       queryClient.setQueryData<ChatsDataTypes[]>(queryKeys.chats(), (chats) =>
         chats?.map((chat) =>
           chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat,
         ),
-      ),
+      );
+      return queryClient.invalidateQueries({
+        queryKey: queryKeys.chats(),
+        exact: true,
+      });
+    },
   });
 };
 

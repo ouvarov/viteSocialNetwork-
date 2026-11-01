@@ -55,6 +55,7 @@ $durations: (
   fast: 150ms,
   base: 300ms,
 );
+$tab-bar-height: rem(60px);
 
 @function token($map, $key, $scale) {
   @if not map.has-key($map, $key) {

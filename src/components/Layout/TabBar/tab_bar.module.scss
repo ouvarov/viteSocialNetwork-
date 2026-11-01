@@ -18,7 +18,7 @@
     @include flex(center, center, column);
 
     gap: space(1);
-    min-height: rem(60px);
+    min-height: $tab-bar-height;
     color: theme(muted, color);
 
     &:hover {
