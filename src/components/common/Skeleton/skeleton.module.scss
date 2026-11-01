@@ -1,0 +1,82 @@
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+%bone {
+  display: block;
+  background-color: theme(surface, border-color);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.skeleton {
+  display: grid;
+  gap: space(4);
+
+  &__row {
+    @include flex(flex-start);
+
+    gap: space(3);
+  }
+
+  &__column {
+    display: grid;
+    flex: 1;
+    gap: space(2);
+  }
+
+  &__line {
+    @extend %bone;
+
+    width: 60%;
+    height: rem(12px);
+    border-radius: radius(sm);
+
+    &--short {
+      composes: skeleton__line;
+      width: 35%;
+    }
+  }
+
+  &__circle {
+    @extend %bone;
+    @include size(rem(40px));
+
+    flex-shrink: 0;
+    border-radius: radius(full);
+
+    &--large {
+      composes: skeleton__circle;
+
+      @include size(rem(80px));
+    }
+  }
+
+  &__media {
+    @extend %bone;
+
+    aspect-ratio: 16 / 9;
+    border-radius: radius(md);
+  }
+}
+
+.post {
+  @include card;
+
+  display: grid;
+  gap: space(3);
+}
+
+.person {
+  @include flex(flex-start);
+
+  gap: space(3);
+  padding: space(3) space(4);
+}
+
+.profile {
+  @include flex(flex-start);
+
+  gap: space(4);
+}

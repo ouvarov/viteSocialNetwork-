@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import { useParams } from 'react-router';
 
 import { ErrorState } from '@/components/common/ErrorState';
-import { Loader } from '@/components/common/Loader';
+import { Skeleton } from '@/components/common/Skeleton';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { Posts } from '@/features/posts/components/Posts';
 import { ProfileInfo } from '@/features/profile/components/ProfileInfo';
@@ -33,7 +33,7 @@ const Profile: FC = () => {
   return (
     <div className={styles.profile}>
       {isPending ? (
-        <Loader label="Loading profile" />
+        <Skeleton variant="profile" label="Loading profile" />
       ) : (
         <ProfileInfo profile={profile} isOwnProfile={isOwnProfile} />
       )}

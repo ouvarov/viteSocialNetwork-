@@ -29,9 +29,7 @@
 
   &__inner {
     display: grid;
-    grid-template-areas:
-      'brand actions'
-      'nav nav';
+    grid-template-areas: 'brand actions';
     grid-template-columns: 1fr auto;
     gap: space(2) space(4);
     align-items: center;
@@ -55,26 +53,22 @@
 }
 
 .nav {
-  display: flex;
+  display: none;
   grid-area: nav;
   gap: space(1);
 
   @include media-up(md) {
+    display: flex;
     justify-content: center;
   }
 
   &__link {
     @include text(body, bold);
 
-    flex: 1;
     padding: space(2) space(3);
     border-radius: radius(full);
     color: theme(muted, color);
     text-align: center;
-
-    @include media-up(md) {
-      flex: none;
-    }
 
     &:hover {
       color: theme(page, color);
@@ -102,6 +96,12 @@
 
   &:focus {
     outline: none;
+  }
+
+  &--with_tab_bar {
+    padding-bottom: calc(
+      #{rem(60px)} + #{space(4)} + env(safe-area-inset-bottom)
+    );
   }
 
   @include media-up(md) {

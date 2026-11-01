@@ -1,5 +1,3 @@
-import { useMutation } from '@tanstack/react-query';
-
 import { client } from './client.ts';
 import { unwrap } from './errors.ts';
 
@@ -15,6 +13,4 @@ const uploadImage = (image: Blob) =>
     }),
   );
 
-const useUploadImage = () => useMutation({ mutationFn: uploadImage });
-
-export { uploadImage, useUploadImage };
+export { uploadImage };

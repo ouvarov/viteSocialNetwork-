@@ -8,7 +8,7 @@ import { Button } from '@/components/common/Button';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
 import { Input } from '@/components/common/Input';
-import { Loader } from '@/components/common/Loader';
+import { Skeleton } from '@/components/common/Skeleton';
 import { PageHeader } from '@/components/common/PageHeader';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { FollowButton } from '@/features/follows/components/FollowButton';
@@ -82,7 +82,8 @@ const UsersList: FC<{ query: string }> = ({ query }) => {
     hasNextPage && !isFetchingNextPage && !isFetchNextPageError,
   );
 
-  if (isPending) return <Loader label="Loading people" />;
+  if (isPending)
+    return <Skeleton variant="person" count={5} label="Loading people" />;
 
   if (isError && !data) {
     return (

@@ -11,9 +11,15 @@ import classNames from 'classnames';
 
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { ThemeToggle } from '@/features/theme/components/ThemeToggle';
-import { chatsPage, feedPage, peoplePage } from '@/routes/routePaths.ts';
+import {
+  chatPage,
+  chatsPage,
+  feedPage,
+  peoplePage,
+} from '@/routes/routePaths.ts';
 
 import { AccountMenu } from './AccountMenu';
+import { TabBar } from './TabBar';
 import styles from './layout.module.scss';
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }): string =>
@@ -25,6 +31,7 @@ const Layout: FC = () => {
   const mainRef = useRef<HTMLElement>(null);
   const previousPathname = useRef(pathname);
   const isNavigating = useNavigation().state === 'loading';
+  const isTabBarShown = !pathname.startsWith(chatPage(''));
 
   useEffect(() => {
     if (previousPathname.current === pathname) return;
@@ -65,11 +72,14 @@ const Layout: FC = () => {
         id="main"
         ref={mainRef}
         tabIndex={-1}
-        className={styles.main}
+        className={classNames(styles.main, {
+          [styles['main--with_tab_bar']]: isTabBarShown,
+        })}
         aria-busy={isNavigating || undefined}
       >
         <Outlet />
       </main>
+      {isTabBarShown && user && <TabBar user={user} />}
     </div>
   );
 };

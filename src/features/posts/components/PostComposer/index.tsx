@@ -5,10 +5,9 @@ import { useDropzone } from 'react-dropzone';
 import { useForm } from 'react-hook-form';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
-import { useUploadImage } from '@/api/upload.ts';
 import { Button } from '@/components/common/Button';
 import { Textarea } from '@/components/common/Textarea';
-import { useCreatePost } from '@/features/posts/queries.ts';
+import { useCreatePost, useUploadPostImage } from '@/features/posts/queries.ts';
 import { postSchema } from '@/features/posts/schemas.ts';
 import type { PostFormValues } from '@/features/posts/schemas.ts';
 
@@ -24,7 +23,7 @@ const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
     mutate: uploadImage,
     isPending: isUploading,
     error: uploadError,
-  } = useUploadImage();
+  } = useUploadPostImage();
 
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 

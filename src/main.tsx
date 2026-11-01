@@ -6,6 +6,8 @@ import { createQueryClient } from '@/api/query-client.ts';
 import App from '@/App';
 import { AuthProvider } from '@/features/auth/AuthProvider.tsx';
 
+import '@fontsource/lato/400.css';
+import '@fontsource/lato/700.css';
 import '@/styles/global.scss';
 
 const queryClient = createQueryClient();
