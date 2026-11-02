@@ -12,7 +12,22 @@ const messageSchema = z.object({
     .max(MAX_MESSAGE_LENGTH, `Keep it under ${MAX_MESSAGE_LENGTH} characters`),
 }) satisfies z.ZodType<Omit<CreateMessagePayload, 'chatId'>>;
 
+const MAX_GROUP_TITLE_LENGTH = 100;
+
+const groupTitleSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, 'Name the group')
+    .max(
+      MAX_GROUP_TITLE_LENGTH,
+      `Keep it under ${MAX_GROUP_TITLE_LENGTH} characters`,
+    ),
+});
+
 type MessageFormValues = z.infer<typeof messageSchema>;
 
-export { messageSchema };
-export type { MessageFormValues };
+type GroupTitleFormValues = z.infer<typeof groupTitleSchema>;
+
+export { groupTitleSchema, messageSchema };
+export type { GroupTitleFormValues, MessageFormValues };

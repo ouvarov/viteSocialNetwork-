@@ -15,6 +15,9 @@ const BOB = {
 
 const chat = (overrides: Partial<ChatsDataTypes>): ChatsDataTypes => ({
   chatId: '33333333-3333-4333-8333-333333333333',
+  kind: 'direct',
+  title: null,
+  memberCount: 2,
   peer: BOB,
   lastMessageAt: null,
   lastMessage: null,
@@ -29,12 +32,44 @@ const rowOf = async (name: string) =>
   screen.findByRole('link', { name: new RegExp(name) });
 
 describe('Chats', () => {
+  it('shows a group by its name, with who wrote the last message', async () => {
+    serveChats(
+      chat({
+        kind: 'group',
+        title: 'Launch crew',
+        memberCount: 3,
+        peer: null,
+        lastMessage: {
+          content: 'Ship it',
+          senderId: BOB.id,
+          senderName: BOB.userName,
+          sentAt: new Date().toISOString(),
+        },
+      }),
+    );
+    renderWithProviders(<Chats />, { auth: { user: USER } });
+
+    const row = await rowOf('Launch crew');
+    expect(within(row).getByText('Bob: Ship it')).toBeInTheDocument();
+  });
+
+  it('counts people in a group with no messages yet', async () => {
+    serveChats(
+      chat({ kind: 'group', title: 'Quiet', memberCount: 4, peer: null }),
+    );
+    renderWithProviders(<Chats />, { auth: { user: USER } });
+
+    const row = await rowOf('Quiet');
+    expect(within(row).getByText('4 people')).toBeInTheDocument();
+  });
+
   it('previews the last message and counts the unread ones', async () => {
     serveChats(
       chat({
         lastMessage: {
           content: 'Did the build pass?',
           senderId: BOB.id,
+          senderName: BOB.userName,
           sentAt: new Date().toISOString(),
         },
         unreadCount: 3,
@@ -53,6 +88,7 @@ describe('Chats', () => {
         lastMessage: {
           content: 'Green on the first try',
           senderId: USER.id,
+          senderName: USER.userName,
           sentAt: new Date().toISOString(),
         },
       }),

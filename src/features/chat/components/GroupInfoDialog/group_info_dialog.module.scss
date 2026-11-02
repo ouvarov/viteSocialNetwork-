@@ -1,0 +1,89 @@
+.dialog {
+  @include card;
+
+  width: min(100% - #{space(4) * 2}, #{rem(560px)});
+  margin: auto;
+  color: theme(page, color);
+
+  &::backdrop {
+    background-color: theme(backdrop, background-color);
+  }
+
+  &__title {
+    @include text(lead, bold);
+
+    overflow-wrap: anywhere;
+  }
+
+  &__rename {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: space(3);
+    align-items: center;
+    margin-top: space(4);
+  }
+
+  &__rename_field {
+    min-width: 0;
+  }
+
+  &__heading {
+    @include text(body, bold);
+
+    margin-top: space(4);
+  }
+
+  &__members {
+    display: grid;
+    gap: space(3);
+    overflow-y: auto;
+    max-height: rem(320px);
+    margin-block: space(2) space(3);
+  }
+
+  &__member {
+    @include flex(flex-start);
+
+    flex-wrap: wrap;
+    gap: space(3);
+  }
+
+  &__member_name {
+    flex: 1;
+    min-width: rem(120px);
+    overflow-wrap: anywhere;
+  }
+
+  &__role {
+    @include text(caption);
+
+    display: block;
+    color: theme(muted, color);
+  }
+
+  &__member_actions {
+    @include flex(flex-end);
+
+    flex-wrap: wrap;
+    gap: space(2);
+  }
+
+  &__adding {
+    display: grid;
+    justify-items: start;
+    gap: space(3);
+  }
+
+  &__error {
+    margin-top: space(3);
+    color: theme(danger, color);
+  }
+
+  &__actions {
+    @include flex(flex-end);
+
+    flex-wrap: wrap;
+    gap: space(3);
+    margin-top: space(5);
+  }
+}

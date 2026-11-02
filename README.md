@@ -1,7 +1,7 @@
 <h1 align="center">Pulse — web</h1>
 
 <p align="center">
-  The React client of Pulse, a real-time social network: profiles, image posts, likes and live chat.
+  The React client of Pulse, a real-time social network: profiles, image posts, likes and live direct and group chats.
 </p>
 
 <p align="center">
@@ -34,6 +34,7 @@ The API lives in [ouvarov/nestSocialNetwork](https://github.com/ouvarov/nestSoci
   - posts with drag-and-drop image upload and a preview.
 - **Live chat:**
   - Socket.IO messages are written straight into the TanStack Query cache;
+  - group chats with an owner, moderators and members, where the controls follow your role and someone removed loses the chat at once;
   - after a reconnect, the chat rejoins its room and reloads the history, so nothing is lost;
   - sends wait for the server's ack with a timeout, and an offline state is shown;
   - on an expired token, the client refreshes and reconnects.
@@ -196,8 +197,8 @@ docs/adr/       architecture decisions
 ## What I'd do next
 
 - A Storybook for the shared UI, with a theme toolbar.
-- Typing indicators, read receipts and unread counts in the chat list.
-- Image resizing on upload, and responsive `srcset` in the feed.
+- Typing indicators and read receipts.
+- Responsive `srcset` in the feed.
 - The React Compiler, once the hook rules it flags are settled.
 
 ## Scripts
