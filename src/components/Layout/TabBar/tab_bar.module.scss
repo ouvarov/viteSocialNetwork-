@@ -1,0 +1,40 @@
+.tab_bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: z(base);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid theme(surface, border-color);
+  background-color: theme(page, background-color);
+
+  @include media-up(md) {
+    display: none;
+  }
+
+  &__tab {
+    @include flex(center, center, column);
+
+    gap: space(1);
+    min-height: $tab-bar-height;
+    color: theme(muted, color);
+
+    &:hover {
+      text-decoration: none;
+    }
+
+    &--active {
+      color: theme(page, color);
+    }
+  }
+
+  &__label {
+    @include text(caption);
+  }
+
+  &__tab--active &__label {
+    @include text(caption, bold);
+  }
+}

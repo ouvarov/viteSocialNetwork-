@@ -9,7 +9,9 @@ import { useRef } from 'react';
 import { client } from '@/api/client.ts';
 import { unwrap } from '@/api/errors.ts';
 import { queryKeys } from '@/api/query-keys.ts';
+import { uploadImage } from '@/api/upload.ts';
 
+import { prepareImage } from './prepare-image.ts';
 import type {
   FeedPageTypes,
   PostPageTypes,
@@ -196,6 +198,11 @@ const useRemovePost = () => {
   });
 };
 
+const useUploadPostImage = () =>
+  useMutation({
+    mutationFn: async (file: File) => uploadImage(await prepareImage(file)),
+  });
+
 export {
   useCreatePost,
   useEditPost,
@@ -203,4 +210,5 @@ export {
   usePosts,
   useRemovePost,
   useToggleLike,
+  useUploadPostImage,
 };

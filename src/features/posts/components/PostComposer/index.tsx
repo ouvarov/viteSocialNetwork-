@@ -5,14 +5,22 @@ import { useDropzone } from 'react-dropzone';
 import { useForm } from 'react-hook-form';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
-import { useUploadImage } from '@/api/upload.ts';
 import { Button } from '@/components/common/Button';
 import { Textarea } from '@/components/common/Textarea';
-import { useCreatePost } from '@/features/posts/queries.ts';
+import { useCreatePost, useUploadPostImage } from '@/features/posts/queries.ts';
 import { postSchema } from '@/features/posts/schemas.ts';
 import type { PostFormValues } from '@/features/posts/schemas.ts';
 
 import styles from './post_composer.module.scss';
+
+const ACCEPTED_IMAGES = {
+  'image/jpeg': [],
+  'image/png': [],
+  'image/webp': [],
+  'image/gif': [],
+};
+
+const REJECTED_IMAGE_MESSAGE = 'Choose one JPEG, PNG, WebP or GIF image';
 
 type PostComposerProps = {
   isFocusedOnMount?: boolean;
@@ -24,7 +32,7 @@ const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
     mutate: uploadImage,
     isPending: isUploading,
     error: uploadError,
-  } = useUploadImage();
+  } = useUploadPostImage();
 
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
@@ -35,6 +43,7 @@ const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
     setFocus,
     reset,
     setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
@@ -52,7 +61,10 @@ const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
 
   const { getRootProps, getInputProps } = useDropzone({
     multiple: false,
+    accept: ACCEPTED_IMAGES,
     onDrop: ([file]) => {
+      clearErrors('root.server');
+
       if (!file) return;
 
       uploadImage(file, {
@@ -61,6 +73,9 @@ const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
           setImagePreviewUrl(url);
         },
       });
+    },
+    onDropRejected: () => {
+      setError('root.server', { message: REJECTED_IMAGE_MESSAGE });
     },
   });
 

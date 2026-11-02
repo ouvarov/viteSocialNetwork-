@@ -201,3 +201,36 @@ test('every page fits 360px and 1280px', async ({ page, request }) => {
     }
   }
 });
+
+test('a phone gets the bottom tab bar, and an open chat hides it', async ({
+  page,
+  request,
+}) => {
+  const user = await registerUser(request, 'Thumb');
+  const other = await registerUser(request, 'Pocket');
+  const chatId = await createChat(request, user, other);
+  await page.setViewportSize({ width: 360, height: 740 });
+  await signIn(page, user, '/people');
+
+  const tabBar = page.getByRole('navigation', { name: 'Main' });
+  await expect(tabBar).toHaveCount(1);
+  await expect(tabBar.getByRole('link', { name: 'People' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+
+  await tabBar.getByRole('link', { name: 'Profile' }).click();
+  await expect(page).toHaveURL(`/profile/${user.id}`);
+  await expect(page.getByText("You haven't posted yet")).toBeVisible();
+
+  await page.goto(`/chat/${chatId}`);
+  await expect(page.getByRole('heading', { name: 'Pocket' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Main' })).toHaveCount(0);
+
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/people');
+  await expect(
+    page.getByRole('banner').getByRole('navigation', { name: 'Main' }),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Profile' })).toHaveCount(0);
+});

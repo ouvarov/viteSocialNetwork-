@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
-import { Loader } from '@/components/common/Loader';
+import { Skeleton } from '@/components/common/Skeleton';
 import { PostCard } from '@/features/posts/components/PostCard';
 import { PostsPager } from '@/features/posts/components/PostsPager';
 import { usePosts } from '@/features/posts/queries.ts';
@@ -29,7 +29,8 @@ const Posts: FC<PostsProps> = ({ userId, isOwnProfile }) => {
     isFetchNextPageError,
   } = usePosts(userId);
 
-  if (isPending) return <Loader label="Loading posts" />;
+  if (isPending)
+    return <Skeleton variant="post" count={2} label="Loading posts" />;
 
   if (isError && !data) {
     return (

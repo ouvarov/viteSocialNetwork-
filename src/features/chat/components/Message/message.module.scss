@@ -16,10 +16,23 @@
     color: theme(muted, color);
   }
 
+  &__time {
+    @include text(caption);
+
+    display: block;
+    margin-top: space(1);
+    opacity: 0.75;
+    text-align: right;
+  }
+
   &__owner {
     @include use-theme(message-own);
 
     align-self: flex-end;
     border-radius: radius(lg) radius(lg) radius(sm);
+  }
+
+  &__grouped {
+    margin-top: calc(-1 * #{space(1)});
   }
 }

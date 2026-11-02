@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router';
 
 import { EmptyState } from '@/components/common/EmptyState';
 import { ErrorState } from '@/components/common/ErrorState';
-import { Loader } from '@/components/common/Loader';
+import { Skeleton } from '@/components/common/Skeleton';
 import { useAuth } from '@/features/auth/useAuth.ts';
 import { FeedSeparator } from '@/features/feed/components/FeedSeparator';
 import { firstFromEveryone, uniqueById } from '@/features/feed/feed-items.ts';
@@ -36,7 +36,8 @@ const FeedList: FC = () => {
     isFetchNextPageError,
   } = useFeed();
 
-  if (isPending) return <Loader label="Loading your feed" />;
+  if (isPending)
+    return <Skeleton variant="post" count={3} label="Loading your feed" />;
 
   if (isError && !data) {
     return (

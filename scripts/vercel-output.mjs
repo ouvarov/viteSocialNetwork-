@@ -29,8 +29,8 @@ const buildContentSecurityPolicy = (scriptHashes) =>
   [
     "default-src 'self'",
     `script-src 'self' ${scriptHashes.join(' ')}`,
-    "style-src 'self' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com",
+    "style-src 'self'",
+    "font-src 'self'",
     "img-src 'self' data: blob: https:",
     `connect-src 'self' ${apiOrigin} ${socketOrigin}`,
     "object-src 'none'",
