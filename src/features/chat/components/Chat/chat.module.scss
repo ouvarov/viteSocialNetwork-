@@ -38,6 +38,14 @@
     gap: space(2);
   }
 
+  &__day {
+    @include text(caption);
+
+    align-self: center;
+    margin-block: space(2);
+    color: theme(muted, color);
+  }
+
   &__composer {
     display: grid;
     gap: space(1);

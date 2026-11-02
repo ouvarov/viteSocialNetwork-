@@ -603,6 +603,13 @@ export interface components {
             /** @description Pass as cursor to get older messages; null on the last page */
             nextCursor: string | null;
         };
+        MarkReadDto: {
+            /**
+             * Format: uuid
+             * @description The newest message you have seen; without it, the whole chat is read
+             */
+            upToMessageId?: string;
+        };
         UploadResponseDto: {
             /**
              * Format: uuid
@@ -1283,9 +1290,13 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MarkReadDto"];
+            };
+        };
         responses: {
-            /** @description Marks every message in the chat as read for you */
+            /** @description Marks the chat as read for you, up to the given message or entirely */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -1403,7 +1414,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Dependencies respond */
+            /** @description Postgres responds */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1412,7 +1423,7 @@ export interface operations {
                     "application/json": components["schemas"]["ReadinessDto"];
                 };
             };
-            /** @description A dependency is down */
+            /** @description Postgres is down */
             503: {
                 headers: {
                     [name: string]: unknown;

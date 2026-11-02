@@ -1,5 +1,5 @@
-import type { FC, KeyboardEvent } from 'react';
-import { useEffect, useId, useRef, useState } from 'react';
+import type { FC, KeyboardEvent, SyntheticEvent } from 'react';
+import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router';
@@ -29,6 +29,7 @@ import type { MessagesDataTypes } from '@/features/chat/types.ts';
 import { useChatListUpdates } from '@/features/chat/useChatListUpdates.ts';
 import { ChatSocketError, useChatRoom } from '@/features/chat/useChatRoom.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
+import { useDocumentVisible } from '@/hooks/useDocumentVisible.ts';
 import { DELETED_USER_NAME } from '@/features/users/deleted-user.ts';
 import { useOnVisible } from '@/hooks/useOnVisible.ts';
 import { useScrollAnchor } from '@/hooks/useScrollAnchor.ts';
@@ -47,8 +48,13 @@ const lastIncomingId = (
   [...messages].reverse().find(({ senderId }) => senderId !== userId)
     ?.messageId;
 
+const isCoarsePointer = () => window.matchMedia('(pointer: coarse)').matches;
+
 const isSendShortcut = (event: KeyboardEvent<HTMLTextAreaElement>) =>
-  event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing;
+  event.key === 'Enter' &&
+  !event.shiftKey &&
+  !event.nativeEvent.isComposing &&
+  !isCoarsePointer();
 
 const deleteForMeText = (peerName: string | undefined) =>
   peerName
@@ -63,6 +69,8 @@ const Chat: FC = () => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const closedNoteId = useId();
   const logRef = useRef<HTMLDivElement>(null);
+  const isSendingRef = useRef(false);
+  const isDocumentVisible = useDocumentVisible();
 
   const {
     data: chat,
@@ -95,11 +103,12 @@ const Chat: FC = () => {
   const messages = history ? toChronological(history) : NO_MESSAGES;
   const newestIncomingId = lastIncomingId(messages, user?.id);
   const peerName = chat?.peer?.userName;
-  const isHistoryLoaded = Boolean(history);
 
   useEffect(() => {
-    if (chatId && isHistoryLoaded) markRead(chatId);
-  }, [chatId, isHistoryLoaded, newestIncomingId, markRead]);
+    if (chatId && newestIncomingId && isDocumentVisible) {
+      markRead({ chatId, upToMessageId: newestIncomingId });
+    }
+  }, [chatId, newestIncomingId, isDocumentVisible, markRead]);
 
   const title = chat
     ? (peerName ?? DELETED_USER_NAME)
@@ -144,13 +153,20 @@ const Chat: FC = () => {
     }
   };
 
-  const sendOnEnter = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!isSendShortcut(event)) return;
-
+  const submitMessage = (event: SyntheticEvent) => {
     event.preventDefault();
-    if (messageForm.formState.isSubmitting) return;
+    if (isSendingRef.current) return;
 
-    void messageForm.handleSubmit(onSendMessage)();
+    isSendingRef.current = true;
+    void messageForm
+      .handleSubmit(onSendMessage)()
+      .finally(() => {
+        isSendingRef.current = false;
+      });
+  };
+
+  const sendOnEnter = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (isSendShortcut(event)) submitMessage(event);
   };
 
   const openDeleteDialog = () => {
@@ -252,7 +268,14 @@ const Chat: FC = () => {
         {messages.length > 0 && (
           <ol className={styles.chat__messages}>
             {groupMessages(messages).map((grouped) => (
-              <Message {...grouped} key={grouped.message.messageId} />
+              <Fragment key={grouped.message.messageId}>
+                {grouped.dayLabel && (
+                  <li className={styles.chat__day} data-day>
+                    {grouped.dayLabel}
+                  </li>
+                )}
+                <Message {...grouped} />
+              </Fragment>
             ))}
           </ol>
         )}
@@ -261,7 +284,7 @@ const Chat: FC = () => {
       <form
         className={styles.chat__composer}
         noValidate
-        onSubmit={(e) => void messageForm.handleSubmit(onSendMessage)(e)}
+        onSubmit={submitMessage}
       >
         <fieldset className={styles.chat__fields} disabled={!chat.canSend}>
           <Textarea

@@ -102,7 +102,7 @@ const setUpChat = async (request: APIRequestContext) => {
 };
 
 const messages = (page: Page) =>
-  page.getByRole('log', { name: 'Messages' }).locator('li');
+  page.getByRole('log', { name: 'Messages' }).locator('li:not([data-day])');
 
 const message = (page: Page, text: string) =>
   messages(page).filter({ hasText: text });
@@ -243,6 +243,26 @@ test.describe('realtime chat', () => {
     });
     await page.waitForTimeout(3000);
     await expect(message(page, 'during the refetch')).toHaveCount(1);
+    bobSocket.close();
+  });
+
+  test('an unread message shows a badge until the chat is opened', async ({
+    page,
+    request,
+  }) => {
+    const { ada, bob, chatId } = await setUpChat(request);
+    const bobSocket = await connectAs(bob, chatId);
+    await bobSocket.say('read me');
+    await signIn(page, ada, '/chats');
+
+    const unreadRow = page.getByRole('link', { name: /1 unread/ });
+    await expect(unreadRow).toBeVisible();
+    await unreadRow.click();
+    await expect(message(page, 'read me')).toBeVisible();
+
+    await signIn(page, ada, '/chats');
+    await expect(page.getByRole('link', { name: /read me/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /unread/ })).toHaveCount(0);
     bobSocket.close();
   });
 
