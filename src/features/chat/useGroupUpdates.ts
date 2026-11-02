@@ -10,19 +10,26 @@ const useGroupUpdates = (chatId: string | undefined) => {
   useEffect(() => {
     if (!chatId) return;
 
-    const onGroupChanged = ({ chatId: changedId }: { chatId: string }) => {
-      if (changedId !== chatId) return;
+    const queryKey = queryKeys.chat(chatId);
 
-      void queryClient.invalidateQueries({
-        queryKey: queryKeys.chat(chatId),
-        exact: true,
-      });
+    const refreshChat = () => {
+      const isLeavingThisChat =
+        queryClient.isMutating({ mutationKey: queryKey }) > 0;
+      if (isLeavingThisChat) return;
+
+      void queryClient.invalidateQueries({ queryKey, exact: true });
+    };
+
+    const onGroupChanged = ({ chatId: changedId }: { chatId: string }) => {
+      if (changedId === chatId) refreshChat();
     };
 
     socket.on('groupChanged', onGroupChanged);
+    socket.on('connect', refreshChat);
 
     return () => {
       socket.off('groupChanged', onGroupChanged);
+      socket.off('connect', refreshChat);
     };
   }, [chatId, queryClient]);
 };

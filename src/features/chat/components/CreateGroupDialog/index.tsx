@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import type { FC, SyntheticEvent } from 'react';
 import { useId, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -39,6 +39,10 @@ const CreateGroupDialog: FC<CreateGroupDialogProps> = ({ onClose }) => {
     defaultValues: { title: '' },
   });
 
+  const keepOpenWhileCreating = (event: SyntheticEvent) => {
+    if (isPending) event.preventDefault();
+  };
+
   const togglePerson = (userId: string) => {
     setIsNobodySelected(false);
     setMemberIds((selected) =>
@@ -70,6 +74,7 @@ const CreateGroupDialog: FC<CreateGroupDialogProps> = ({ onClose }) => {
       ref={dialogRef}
       className={styles.dialog}
       aria-labelledby={titleId}
+      onCancel={keepOpenWhileCreating}
       onClose={onClose}
     >
       <h2 id={titleId} className={styles.dialog__title}>
@@ -102,7 +107,11 @@ const CreateGroupDialog: FC<CreateGroupDialogProps> = ({ onClose }) => {
           </p>
         )}
         <div className={styles.dialog__actions}>
-          <Button variant="secondary" onClick={onClose}>
+          <Button
+            variant="secondary"
+            disabled={isPending}
+            onClick={() => dialogRef.current?.close()}
+          >
             Cancel
           </Button>
           <Button type="submit" isLoading={isPending}>

@@ -9,7 +9,16 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', '*.config.*', 'src/api/generated'] },
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'playwright-report',
+      'test-results',
+      '*.config.*',
+      'src/api/generated',
+    ],
+  },
   {
     files: ['src/**/*.{ts,tsx}'],
     extends: [

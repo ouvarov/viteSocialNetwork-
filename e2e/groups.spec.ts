@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 
 import type { TestUser } from './support.ts';
-import { axeViolations, registerUser, signIn } from './support.ts';
+import { API, axeViolations, registerUser, signIn } from './support.ts';
 
 const uniqueName = (name: string) => `${name} ${randomUUID().slice(0, 8)}`;
 
@@ -150,6 +150,49 @@ test('a member sees no management, and leaving returns to the list', async ({
   await expect(bobPage).toHaveURL(/\/chats$/);
   await expect(bobPage.getByRole('link', { name: /Plain/ })).toHaveCount(0);
   await bobContext.close();
+});
+
+test('closing group info returns focus to the button that opened it', async ({
+  page,
+  request,
+}) => {
+  const { ada, bob } = await setUpPeople(request);
+  await createGroup(page, ada, [bob], 'Focused');
+
+  await page.getByRole('button', { name: 'Group info' }).click();
+  await page.getByRole('button', { name: 'Close' }).click();
+
+  await expect(page.getByRole('button', { name: 'Group info' })).toBeFocused();
+});
+
+test('a failed refresh keeps the open chat on screen', async ({
+  page,
+  request,
+}) => {
+  const { ada, bob } = await setUpPeople(request);
+  await createGroup(page, ada, [bob], 'Steady');
+  await page.getByRole('textbox', { name: 'Message' }).fill('Still here');
+  await page.getByRole('button', { name: 'Send' }).click();
+  await expect(page.getByText('Still here')).toBeVisible();
+  const chatId = page.url().split('/').pop();
+
+  await page.route(`**/api/chat/find/${chatId}`, (route) =>
+    route.fulfill({ status: 503, body: '{}' }),
+  );
+  const refreshFailed = page.waitForResponse(
+    (response) =>
+      response.url().includes(`/api/chat/find/${chatId}`) &&
+      response.status() === 503,
+  );
+  const renamed = await request.patch(`${API}/chat/${chatId}`, {
+    headers: { authorization: `Bearer ${ada.token}` },
+    data: { title: 'Renamed elsewhere' },
+  });
+  expect(renamed.ok()).toBe(true);
+  await refreshFailed;
+
+  await expect(page.getByText('Could not open this chat')).toHaveCount(0);
+  await expect(page.getByText('Still here')).toBeVisible();
 });
 
 test('the owner deletes the group for everyone', async ({ page, request }) => {

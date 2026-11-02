@@ -196,21 +196,26 @@ const useForgetChat = (chatId: string) => {
   };
 };
 
-const useLeaveGroup = (chatId: string) => {
+const useLeaveGroup = (chatId: string, onLeft: () => void) => {
   const forgetChat = useForgetChat(chatId);
 
   return useMutation({
+    mutationKey: queryKeys.chat(chatId),
     mutationFn: async (userId: string) => {
       await unwrap(runGroupAction(chatId, { type: 'remove', userId }));
     },
-    onSuccess: forgetChat,
+    onSuccess: () => {
+      onLeft();
+      return forgetChat();
+    },
   });
 };
 
-const useDeleteGroup = (chatId: string) => {
+const useDeleteGroup = (chatId: string, onDeleted: () => void) => {
   const forgetChat = useForgetChat(chatId);
 
   return useMutation({
+    mutationKey: queryKeys.chat(chatId),
     mutationFn: async () => {
       await unwrap(
         client.DELETE('/api/chat/{id}/group', {
@@ -218,7 +223,10 @@ const useDeleteGroup = (chatId: string) => {
         }),
       );
     },
-    onSuccess: forgetChat,
+    onSuccess: () => {
+      onDeleted();
+      return forgetChat();
+    },
   });
 };
 

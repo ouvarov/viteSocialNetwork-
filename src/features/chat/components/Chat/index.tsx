@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router';
 
-import { getApiErrorMessage } from '@/api/errors.ts';
+import { getApiErrorMessage, isNotFoundError } from '@/api/errors.ts';
 import { HTTP_STATUS } from '@/api/http-status.ts';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -187,7 +187,7 @@ const Chat: FC = () => {
 
   if (isPending) return <Loader label="Loading chat" />;
 
-  if (isError) {
+  if (!chat || (isError && isNotFoundError(error))) {
     return (
       <ErrorState
         title="Could not open this chat"

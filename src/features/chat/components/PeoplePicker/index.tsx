@@ -49,8 +49,10 @@ const PeoplePicker: FC<PeoplePickerProps> = ({
   return (
     <fieldset className={styles.picker}>
       <legend className={styles.picker__legend}>People</legend>
-      {people.length === 0 && !hasNextPage && (
-        <p className={styles.picker__empty}>Nobody else to add</p>
+      {people.length === 0 && (
+        <p className={styles.picker__empty}>
+          {hasNextPage ? 'Show more to find others' : 'Nobody else to add'}
+        </p>
       )}
       <ul className={styles.picker__list}>
         {people.map(({ id, userName, imageUrl }) => (

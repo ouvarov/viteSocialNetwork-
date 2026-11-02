@@ -36,7 +36,7 @@ const previewOf = (
 };
 
 const nameOf = ({ kind, title, peer }: ChatsDataTypes): string =>
-  kind === 'group' ? String(title) : (peer?.userName ?? DELETED_USER_NAME);
+  title ?? peer?.userName ?? (kind === 'group' ? 'Group' : DELETED_USER_NAME);
 
 const ChatsList: FC = () => {
   const { user } = useAuth();

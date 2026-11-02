@@ -1,19 +1,18 @@
 import type { FC } from 'react';
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 
 import { getApiErrorMessage } from '@/api/errors.ts';
-import { Avatar } from '@/components/common/Avatar';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Input } from '@/components/common/Input';
 import { useAuth } from '@/features/auth/useAuth.ts';
+import { GroupMemberRow } from '@/features/chat/components/GroupMemberRow';
 import { PeoplePicker } from '@/features/chat/components/PeoplePicker';
 import {
   canManageGroup,
-  canRemoveMember,
   isGroupOwner,
 } from '@/features/chat/group-permissions.ts';
 import {
@@ -23,21 +22,11 @@ import {
 } from '@/features/chat/queries.ts';
 import { groupTitleSchema } from '@/features/chat/schemas.ts';
 import type { GroupTitleFormValues } from '@/features/chat/schemas.ts';
-import type {
-  ChatDataTypes,
-  ChatMemberTypes,
-  ChatRoleTypes,
-} from '@/features/chat/types.ts';
+import type { ChatDataTypes, ChatMemberTypes } from '@/features/chat/types.ts';
 import { useModalDialog } from '@/hooks/useModalDialog.ts';
 import { chatsPage } from '@/routes/routePaths.ts';
 
 import styles from './group_info_dialog.module.scss';
-
-const ROLE_LABELS: Record<ChatRoleTypes, string> = {
-  owner: 'Owner',
-  moderator: 'Moderator',
-  member: 'Member',
-};
 
 type PendingConfirm =
   | { kind: 'leave' }
@@ -83,6 +72,7 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
   const { chatId, members, myRole, title: chatTitle } = chat;
   const title = chatTitle ?? '';
   const dialogRef = useModalDialog(true);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -92,9 +82,14 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
     null,
   );
 
+  useEffect(() => {
+    closeButtonRef.current?.focus();
+  }, []);
+
+  const goToChats = () => void navigate(chatsPage());
   const action = useGroupAction(chatId);
-  const leave = useLeaveGroup(chatId);
-  const deleteGroup = useDeleteGroup(chatId);
+  const leave = useLeaveGroup(chatId, goToChats);
+  const deleteGroup = useDeleteGroup(chatId, goToChats);
 
   const {
     register,
@@ -103,21 +98,19 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
   } = useForm<GroupTitleFormValues>({
     resolver: zodResolver(groupTitleSchema),
     values: { title },
+    resetOptions: { keepDirtyValues: true },
   });
 
   const isManager = canManageGroup(myRole);
   const isOwner = isGroupOwner(myRole);
   const memberIds = members.map(({ id }) => id);
+  const pendingType = action.isPending ? action.variables.type : null;
 
   const askToConfirm = (confirm: PendingConfirm) => {
     action.reset();
+    leave.reset();
+    deleteGroup.reset();
     setPendingConfirm(confirm);
-  };
-
-  const closeAndLeavePage = () => {
-    setPendingConfirm(null);
-    onClose();
-    void navigate(chatsPage());
   };
 
   const togglePerson = (userId: string) =>
@@ -141,25 +134,25 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
   const runConfirm = () => {
     if (!pendingConfirm) return;
 
-    const close = { onSuccess: () => setPendingConfirm(null) };
+    const closeConfirm = { onSuccess: () => setPendingConfirm(null) };
 
     switch (pendingConfirm.kind) {
       case 'leave':
-        leave.mutate(String(user?.id), { onSuccess: closeAndLeavePage });
+        if (user) leave.mutate(user.id);
         return;
       case 'delete':
-        deleteGroup.mutate(undefined, { onSuccess: closeAndLeavePage });
+        deleteGroup.mutate();
         return;
       case 'transfer':
         action.mutate(
           { type: 'transfer', userId: pendingConfirm.member.id },
-          close,
+          closeConfirm,
         );
         return;
       case 'remove':
         action.mutate(
           { type: 'remove', userId: pendingConfirm.member.id },
-          close,
+          closeConfirm,
         );
     }
   };
@@ -196,7 +189,12 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
               className={styles.dialog__rename_field}
               error={errors.title?.message}
             />
-            <Button variant="secondary" size="sm" type="submit">
+            <Button
+              variant="secondary"
+              size="sm"
+              type="submit"
+              isLoading={pendingType === 'rename'}
+            >
               Save name
             </Button>
           </form>
@@ -204,68 +202,20 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
 
         <h3 className={styles.dialog__heading}>{members.length} people</h3>
         <ul className={styles.dialog__members}>
-          {members.map((member) => {
-            const { id, userName, imageUrl, role } = member;
-            const isMe = id === user?.id;
-
-            return (
-              <li key={id} className={styles.dialog__member}>
-                <Avatar userId={id} userName={userName} imageUrl={imageUrl} />
-                <span className={styles.dialog__member_name}>
-                  {isMe ? `${userName} (you)` : userName}
-                  <span className={styles.dialog__role}>
-                    {ROLE_LABELS[role]}
-                  </span>
-                </span>
-                {!isMe && (
-                  <span className={styles.dialog__member_actions}>
-                    {isOwner && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        aria-label={
-                          role === 'moderator'
-                            ? `Make ${userName} a member`
-                            : `Make ${userName} a moderator`
-                        }
-                        onClick={() =>
-                          action.mutate({
-                            type: 'setRole',
-                            userId: id,
-                            role: role === 'moderator' ? 'member' : 'moderator',
-                          })
-                        }
-                      >
-                        {role === 'moderator' ? 'Member' : 'Moderator'}
-                      </Button>
-                    )}
-                    {isOwner && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        aria-label={`Make ${userName} the owner`}
-                        onClick={() =>
-                          askToConfirm({ kind: 'transfer', member })
-                        }
-                      >
-                        Owner
-                      </Button>
-                    )}
-                    {canRemoveMember(myRole, role) && (
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        aria-label={`Remove ${userName}`}
-                        onClick={() => askToConfirm({ kind: 'remove', member })}
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </span>
-                )}
-              </li>
-            );
-          })}
+          {members.map((member) => (
+            <GroupMemberRow
+              key={member.id}
+              member={member}
+              myRole={myRole}
+              isMe={member.id === user?.id}
+              isBusy={action.isPending}
+              onSetRole={(role) =>
+                action.mutate({ type: 'setRole', userId: member.id, role })
+              }
+              onMakeOwner={() => askToConfirm({ kind: 'transfer', member })}
+              onRemove={() => askToConfirm({ kind: 'remove', member })}
+            />
+          ))}
         </ul>
 
         {isManager && !isAddingPeople && (
@@ -277,7 +227,7 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
             Add people
           </Button>
         )}
-        {isAddingPeople && (
+        {isManager && isAddingPeople && (
           <div className={styles.dialog__adding}>
             <PeoplePicker
               excludedIds={memberIds}
@@ -287,7 +237,7 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
             <Button
               size="sm"
               disabled={newMemberIds.length === 0}
-              isLoading={action.isPending}
+              isLoading={pendingType === 'add'}
               onClick={addPeople}
             >
               Add to the group
@@ -320,7 +270,12 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
           >
             Leave group
           </Button>
-          <Button variant="secondary" size="sm" onClick={onClose}>
+          <Button
+            ref={closeButtonRef}
+            variant="secondary"
+            size="sm"
+            onClick={() => dialogRef.current?.close()}
+          >
             Close
           </Button>
         </div>

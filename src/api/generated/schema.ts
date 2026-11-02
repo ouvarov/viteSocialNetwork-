@@ -703,7 +703,7 @@ export interface components {
             peer: components["schemas"]["ChatPeerDto"] | null;
             /** @description Everyone in a group, oldest first; empty for a direct chat */
             members: components["schemas"]["ChatMemberDto"][];
-            /** @description false when the other person in a direct chat is gone */
+            /** @description false when the other person in a direct chat is gone; always true in a group */
             canSend: boolean;
         };
         ChatMessageDto: {
@@ -1466,7 +1466,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Clears the history for you only; the chat is removed once nobody sees it */
+            /** @description Clears the history for you only; a direct chat is removed once nobody sees it */
             204: {
                 headers: {
                     [name: string]: unknown;
