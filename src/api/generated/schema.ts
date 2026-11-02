@@ -1290,7 +1290,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["MarkReadDto"];
             };
@@ -1414,7 +1414,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Dependencies respond */
+            /** @description Postgres responds */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1423,7 +1423,7 @@ export interface operations {
                     "application/json": components["schemas"]["ReadinessDto"];
                 };
             };
-            /** @description A dependency is down */
+            /** @description Postgres is down */
             503: {
                 headers: {
                     [name: string]: unknown;
