@@ -105,18 +105,21 @@ const useDeleteChat = () => {
   });
 };
 
+type MarkChatRead = { chatId: string; upToMessageId: string };
+
 const useMarkChatRead = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (chatId: string) => {
+    mutationFn: async ({ chatId, upToMessageId }: MarkChatRead) => {
       await unwrap(
         client.POST('/api/chat/{id}/read', {
           params: { path: { id: chatId } },
+          body: { upToMessageId },
         }),
       );
     },
-    onSuccess: (_result, chatId) => {
+    onSuccess: (_result, { chatId }) => {
       queryClient.setQueryData<ChatsDataTypes[]>(queryKeys.chats(), (chats) =>
         chats?.map((chat) =>
           chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat,
