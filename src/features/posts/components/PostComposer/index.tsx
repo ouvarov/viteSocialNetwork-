@@ -20,6 +20,8 @@ const ACCEPTED_IMAGES = {
   'image/gif': [],
 };
 
+const REJECTED_IMAGE_MESSAGE = 'Choose one JPEG, PNG, WebP or GIF image';
+
 type PostComposerProps = {
   isFocusedOnMount?: boolean;
 };
@@ -41,6 +43,7 @@ const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
     setFocus,
     reset,
     setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
@@ -60,6 +63,8 @@ const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
     multiple: false,
     accept: ACCEPTED_IMAGES,
     onDrop: ([file]) => {
+      clearErrors('root.server');
+
       if (!file) return;
 
       uploadImage(file, {
@@ -68,6 +73,9 @@ const PostComposer: FC<PostComposerProps> = ({ isFocusedOnMount = false }) => {
           setImagePreviewUrl(url);
         },
       });
+    },
+    onDropRejected: () => {
+      setError('root.server', { message: REJECTED_IMAGE_MESSAGE });
     },
   });
 

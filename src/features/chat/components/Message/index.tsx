@@ -33,9 +33,12 @@ const Message: FC<GroupedMessage> = ({
       )}
       {content}
       {isLastInGroup && (
-        <time className={styles.item__time} dateTime={sentAt}>
-          {timeFormatter.format(new Date(sentAt))}
-        </time>
+        <>
+          {' '}
+          <time className={styles.item__time} dateTime={sentAt}>
+            {timeFormatter.format(new Date(sentAt))}
+          </time>
+        </>
       )}
     </li>
   );
