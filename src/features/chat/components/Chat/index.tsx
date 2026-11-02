@@ -1,4 +1,4 @@
-import type { FC, KeyboardEvent } from 'react';
+import type { FC, KeyboardEvent, SyntheticEvent } from 'react';
 import { Fragment, useEffect, useId, useRef, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -48,13 +48,13 @@ const lastIncomingId = (
   [...messages].reverse().find(({ senderId }) => senderId !== userId)
     ?.messageId;
 
-const hasTouchKeyboard = () => window.matchMedia('(pointer: coarse)').matches;
+const isCoarsePointer = () => window.matchMedia('(pointer: coarse)').matches;
 
 const isSendShortcut = (event: KeyboardEvent<HTMLTextAreaElement>) =>
   event.key === 'Enter' &&
   !event.shiftKey &&
   !event.nativeEvent.isComposing &&
-  !hasTouchKeyboard();
+  !isCoarsePointer();
 
 const deleteForMeText = (peerName: string | undefined) =>
   peerName
@@ -153,9 +153,7 @@ const Chat: FC = () => {
     }
   };
 
-  const sendOnEnter = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!isSendShortcut(event)) return;
-
+  const submitMessage = (event: SyntheticEvent) => {
     event.preventDefault();
     if (isSendingRef.current) return;
 
@@ -165,6 +163,10 @@ const Chat: FC = () => {
       .finally(() => {
         isSendingRef.current = false;
       });
+  };
+
+  const sendOnEnter = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (isSendShortcut(event)) submitMessage(event);
   };
 
   const openDeleteDialog = () => {
@@ -282,7 +284,7 @@ const Chat: FC = () => {
       <form
         className={styles.chat__composer}
         noValidate
-        onSubmit={(e) => void messageForm.handleSubmit(onSendMessage)(e)}
+        onSubmit={submitMessage}
       >
         <fieldset className={styles.chat__fields} disabled={!chat.canSend}>
           <Textarea
