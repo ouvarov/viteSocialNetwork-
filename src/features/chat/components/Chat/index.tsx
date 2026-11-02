@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router';
 
-import { getApiErrorMessage } from '@/api/errors.ts';
+import { getApiErrorMessage, isNotFoundError } from '@/api/errors.ts';
 import { HTTP_STATUS } from '@/api/http-status.ts';
 import { Button } from '@/components/common/Button';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -14,6 +14,7 @@ import { Loader } from '@/components/common/Loader';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Textarea } from '@/components/common/Textarea';
 import { useAuth } from '@/features/auth/useAuth.ts';
+import { GroupInfoDialog } from '@/features/chat/components/GroupInfoDialog';
 import { Message } from '@/features/chat/components/Message';
 import { groupMessages } from '@/features/chat/message-groups.ts';
 import { toChronological } from '@/features/chat/messages.ts';
@@ -21,6 +22,7 @@ import {
   useChat,
   useChatMessages,
   useDeleteChat,
+  useForgetMessagesWhenGone,
   useMarkChatRead,
 } from '@/features/chat/queries.ts';
 import { messageSchema } from '@/features/chat/schemas.ts';
@@ -28,6 +30,7 @@ import type { MessageFormValues } from '@/features/chat/schemas.ts';
 import type { MessagesDataTypes } from '@/features/chat/types.ts';
 import { useChatListUpdates } from '@/features/chat/useChatListUpdates.ts';
 import { ChatSocketError, useChatRoom } from '@/features/chat/useChatRoom.ts';
+import { useGroupUpdates } from '@/features/chat/useGroupUpdates.ts';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle.ts';
 import { useDocumentVisible } from '@/hooks/useDocumentVisible.ts';
 import { DELETED_USER_NAME } from '@/features/users/deleted-user.ts';
@@ -67,6 +70,7 @@ const Chat: FC = () => {
   const { user } = useAuth();
   const { mutate: markRead } = useMarkChatRead();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isGroupInfoOpen, setIsGroupInfoOpen] = useState(false);
   const closedNoteId = useId();
   const logRef = useRef<HTMLDivElement>(null);
   const isSendingRef = useRef(false);
@@ -93,6 +97,8 @@ const Chat: FC = () => {
   const { sendMessage, isJoinFailed, retryJoin } = useChatRoom(chatId);
   const isConnected = useSocketConnected();
   useChatListUpdates();
+  useGroupUpdates(chatId);
+  useForgetMessagesWhenGone(chatId, isError && isNotFoundError(error));
   const {
     mutate: deleteChat,
     reset: resetDelete,
@@ -110,9 +116,10 @@ const Chat: FC = () => {
     }
   }, [chatId, newestIncomingId, isDocumentVisible, markRead]);
 
-  const title = chat
-    ? (peerName ?? DELETED_USER_NAME)
-    : CHAT_TITLE_WHILE_LOADING;
+  const isGroup = chat?.kind === 'group';
+  const title = !chat
+    ? CHAT_TITLE_WHILE_LOADING
+    : (chat.title ?? peerName ?? DELETED_USER_NAME);
   useDocumentTitle(title);
   useScrollAnchor(
     logRef,
@@ -182,7 +189,7 @@ const Chat: FC = () => {
 
   if (isPending) return <Loader label="Loading chat" />;
 
-  if (isError) {
+  if (!chat || (isError && isNotFoundError(error))) {
     return (
       <ErrorState
         title="Could not open this chat"
@@ -197,15 +204,33 @@ const Chat: FC = () => {
   return (
     <section className={styles.chat}>
       <PageHeader title={title}>
-        <Button
-          variant="danger"
-          size="sm"
-          aria-haspopup="dialog"
-          onClick={openDeleteDialog}
-        >
-          Delete for me
-        </Button>
+        {isGroup ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            aria-haspopup="dialog"
+            onClick={() => setIsGroupInfoOpen(true)}
+          >
+            Group info
+          </Button>
+        ) : (
+          <Button
+            variant="danger"
+            size="sm"
+            aria-haspopup="dialog"
+            onClick={openDeleteDialog}
+          >
+            Delete for me
+          </Button>
+        )}
       </PageHeader>
+
+      {isGroup && isGroupInfoOpen && (
+        <GroupInfoDialog
+          chat={chat}
+          onClose={() => setIsGroupInfoOpen(false)}
+        />
+      )}
 
       <ConfirmDialog
         isOpen={isConfirmingDelete}
@@ -274,7 +299,7 @@ const Chat: FC = () => {
                     {grouped.dayLabel}
                   </li>
                 )}
-                <Message {...grouped} />
+                <Message {...grouped} isInGroupChat={isGroup} />
               </Fragment>
             ))}
           </ol>

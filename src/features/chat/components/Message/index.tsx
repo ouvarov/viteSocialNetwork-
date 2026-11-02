@@ -11,15 +11,23 @@ const timeFormatter = new Intl.DateTimeFormat(undefined, {
   timeStyle: 'short',
 });
 
-const Message: FC<GroupedMessage> = ({
-  message: { senderId, content, sentAt },
+type MessageProps = GroupedMessage & { isInGroupChat?: boolean };
+
+const Message: FC<MessageProps> = ({
+  message: { senderId, senderName, content, sentAt },
   isFirstInGroup,
   isLastInGroup,
+  isInGroupChat = false,
 }) => {
   const { user } = useAuth();
 
   const isOwner = senderId === user?.id;
-  const isFromDeletedUser = senderId === null;
+  const senderLabel =
+    senderId === null
+      ? DELETED_USER_NAME
+      : isInGroupChat && !isOwner
+        ? senderName
+        : null;
 
   return (
     <li
@@ -28,8 +36,8 @@ const Message: FC<GroupedMessage> = ({
         [styles.item__grouped]: !isFirstInGroup,
       })}
     >
-      {isFromDeletedUser && isFirstInGroup && (
-        <span className={styles.item__sender}>{DELETED_USER_NAME}</span>
+      {senderLabel && isFirstInGroup && (
+        <span className={styles.item__sender}>{senderLabel}</span>
       )}
       {content}
       {isLastInGroup && (

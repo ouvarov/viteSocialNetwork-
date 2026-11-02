@@ -305,6 +305,102 @@ export interface paths {
         delete: operations["ChatController_delete"];
         options?: never;
         head?: never;
+        patch: operations["GroupChatController_rename"];
+        trace?: never;
+    };
+    "/api/chat/group": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["GroupChatController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/{id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["GroupChatController_addMembers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/{id}/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["GroupChatController_removeMember"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/{id}/members/{userId}/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["GroupChatController_setRole"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/{id}/owner": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["GroupChatController_transferOwner"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/{id}/group": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["GroupChatController_deleteGroup"];
+        options?: never;
+        head?: never;
         patch?: never;
         trace?: never;
     };
@@ -559,30 +655,55 @@ export interface components {
              * @description null when the sender deleted their account
              */
             senderId: string | null;
+            /** @description null when the sender deleted their account */
+            senderName: string | null;
             /** Format: date-time */
             sentAt: string;
         };
         ChatSummaryDto: {
             /** Format: uuid */
             chatId: string;
-            /** @description null when the other person deleted their account */
+            /** @enum {string} */
+            kind: "direct" | "group";
+            /** @description The group name; null for a direct chat */
+            title: string | null;
+            /** @example 2 */
+            memberCount: number;
+            /** @description null in a group, or when the other person deleted their account */
             peer: components["schemas"]["ChatPeerDto"] | null;
             /** Format: date-time */
             lastMessageAt: string | null;
-            /** @description The latest message in the chat */
+            /** @description The latest message you can see in the chat */
             lastMessage: components["schemas"]["LastMessageDto"] | null;
             /**
-             * @description Messages from the other person since you last read the chat
+             * @description Messages from others since you last read the chat
              * @example 2
              */
             unreadCount: number;
         };
+        ChatMemberDto: {
+            /** Format: uuid */
+            id: string;
+            /** @example Ada Lovelace */
+            userName: string;
+            imageUrl: string | null;
+            /** @enum {string} */
+            role: "owner" | "moderator" | "member";
+        };
         ChatDto: {
             /** Format: uuid */
             chatId: string;
-            /** @description null when the other person deleted their account */
+            /** @enum {string} */
+            kind: "direct" | "group";
+            /** @description The group name; null for a direct chat */
+            title: string | null;
+            /** @enum {string} */
+            myRole: "owner" | "moderator" | "member";
+            /** @description null in a group, or when the other person deleted their account */
             peer: components["schemas"]["ChatPeerDto"] | null;
-            /** @description false when the other person is gone */
+            /** @description Everyone in a group, oldest first; empty for a direct chat */
+            members: components["schemas"]["ChatMemberDto"][];
+            /** @description false when the other person in a direct chat is gone; always true in a group */
             canSend: boolean;
         };
         ChatMessageDto: {
@@ -593,6 +714,8 @@ export interface components {
              * @description null when the sender deleted their account
              */
             senderId: string | null;
+            /** @description null when the sender deleted their account */
+            senderName: string | null;
             content: string;
             /** Format: date-time */
             sentAt: string;
@@ -609,6 +732,26 @@ export interface components {
              * @description The newest message you have seen; without it, the whole chat is read
              */
             upToMessageId?: string;
+        };
+        CreateGroupDto: {
+            title: string;
+            /** @description The other people; you become the owner */
+            memberIds: string[];
+        };
+        GroupTitleDto: {
+            title: string;
+        };
+        AddMembersDto: {
+            /** @description People already in the group are skipped */
+            userIds: string[];
+        };
+        SetRoleDto: {
+            /** @enum {string} */
+            role: "moderator" | "member";
+        };
+        TransferOwnerDto: {
+            /** Format: uuid */
+            userId: string;
         };
         UploadResponseDto: {
             /**
@@ -1323,8 +1466,316 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Clears the history for you only; the chat is removed once nobody sees it */
+            /** @description Clears the history for you only; a direct chat is removed once nobody sees it */
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Chat not found or not a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupChatController_rename: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GroupTitleDto"];
+            };
+        };
+        responses: {
+            /** @description Renames the group */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input or not a group */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Your role does not allow this */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Chat not found or not a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupChatController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateGroupDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatIdDto"];
+                };
+            };
+            /** @description Invalid input or not a group */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Your role does not allow this */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Chat not found or not a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupChatController_addMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddMembersDto"];
+            };
+        };
+        responses: {
+            /** @description New people see messages only from now on */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input or not a group */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Your role does not allow this */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Chat not found or not a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupChatController_removeMember: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removes someone, or leaves with your own id. An owner who leaves hands over to the oldest moderator, then the oldest member */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input or not a group */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Your role does not allow this */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Chat not found or not a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupChatController_setRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetRoleDto"];
+            };
+        };
+        responses: {
+            /** @description Makes or unmakes a moderator */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input or not a group */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Your role does not allow this */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Chat not found or not a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupChatController_transferOwner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransferOwnerDto"];
+            };
+        };
+        responses: {
+            /** @description Hands the group over; you become a moderator */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input or not a group */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Your role does not allow this */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Chat not found or not a member */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GroupChatController_deleteGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deletes the group for everyone */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid input or not a group */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Your role does not allow this */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

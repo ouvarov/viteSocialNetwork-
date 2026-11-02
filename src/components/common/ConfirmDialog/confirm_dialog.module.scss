@@ -11,11 +11,14 @@
 
   &__title {
     @include text(lead, bold);
+
+    overflow-wrap: anywhere;
   }
 
   &__text {
     margin-top: space(2);
     color: theme(muted, color);
+    overflow-wrap: anywhere;
   }
 
   &__fields {

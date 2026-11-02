@@ -10,6 +10,7 @@ const message = (
 ): MessagesDataTypes => ({
   messageId: id,
   senderId,
+  senderName: senderId,
   content: `Message ${id}`,
   sentAt: new Date(Date.UTC(2026, 10, 1, 12, minute)).toISOString(),
 });

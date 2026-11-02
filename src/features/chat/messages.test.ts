@@ -18,6 +18,7 @@ const message = (
 ): MessagesDataTypes => ({
   messageId,
   senderId: 'sender',
+  senderName: 'Sender',
   content,
   sentAt,
 });

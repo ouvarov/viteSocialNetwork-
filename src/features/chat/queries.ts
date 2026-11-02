@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   useInfiniteQuery,
   useMutation,
@@ -10,7 +11,11 @@ import { unwrap } from '@/api/errors.ts';
 import { queryKeys } from '@/api/query-keys.ts';
 
 import { collectLiveMessages, mergeMessages } from './messages.ts';
-import type { ChatsDataTypes, MessagePagesData } from './types.ts';
+import type {
+  ChatRoleTypes,
+  ChatsDataTypes,
+  MessagePagesData,
+} from './types.ts';
 
 const MESSAGES_PAGE_SIZE = 50;
 
@@ -105,6 +110,149 @@ const useDeleteChat = () => {
   });
 };
 
+type NewGroup = { title: string; memberIds: string[] };
+
+const useCreateGroup = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: NewGroup) =>
+      unwrap(client.POST('/api/chat/group', { body })),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.chats(),
+        exact: true,
+      }),
+  });
+};
+
+type GroupAction =
+  | { type: 'rename'; title: string }
+  | { type: 'add'; userIds: string[] }
+  | { type: 'remove'; userId: string }
+  | { type: 'setRole'; userId: string; role: Exclude<ChatRoleTypes, 'owner'> }
+  | { type: 'transfer'; userId: string };
+
+const runGroupAction = (chatId: string, action: GroupAction) => {
+  const path = { id: chatId };
+
+  switch (action.type) {
+    case 'rename':
+      return client.PATCH('/api/chat/{id}', {
+        params: { path },
+        body: { title: action.title },
+      });
+    case 'add':
+      return client.POST('/api/chat/{id}/members', {
+        params: { path },
+        body: { userIds: action.userIds },
+      });
+    case 'remove':
+      return client.DELETE('/api/chat/{id}/members/{userId}', {
+        params: { path: { ...path, userId: action.userId } },
+      });
+    case 'setRole':
+      return client.PUT('/api/chat/{id}/members/{userId}/role', {
+        params: { path: { ...path, userId: action.userId } },
+        body: { role: action.role },
+      });
+    case 'transfer':
+      return client.PUT('/api/chat/{id}/owner', {
+        params: { path },
+        body: { userId: action.userId },
+      });
+  }
+};
+
+const useGroupAction = (chatId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (action: GroupAction) => {
+      await unwrap(runGroupAction(chatId, action));
+    },
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.chat(chatId),
+          exact: true,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.chats(),
+          exact: true,
+        }),
+      ]),
+  });
+};
+
+const useForgetChat = (chatId: string) => {
+  const queryClient = useQueryClient();
+
+  return {
+    forgetChat: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.chat(chatId) });
+      return queryClient.invalidateQueries({
+        queryKey: queryKeys.chats(),
+        exact: true,
+      });
+    },
+    refreshChat: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.chat(chatId),
+        exact: true,
+      }),
+  };
+};
+
+const useForgetMessagesWhenGone = (
+  chatId: string | undefined,
+  isChatGone: boolean,
+) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!chatId || !isChatGone) return;
+
+    queryClient.removeQueries({ queryKey: queryKeys.chatMessages(chatId) });
+  }, [chatId, isChatGone, queryClient]);
+};
+
+const useLeaveGroup = (chatId: string, onLeft: () => void) => {
+  const { forgetChat, refreshChat } = useForgetChat(chatId);
+
+  return useMutation({
+    mutationKey: queryKeys.chat(chatId),
+    mutationFn: async (userId: string) => {
+      await unwrap(runGroupAction(chatId, { type: 'remove', userId }));
+    },
+    onSuccess: () => {
+      onLeft();
+      return forgetChat();
+    },
+    onError: refreshChat,
+  });
+};
+
+const useDeleteGroup = (chatId: string, onDeleted: () => void) => {
+  const { forgetChat, refreshChat } = useForgetChat(chatId);
+
+  return useMutation({
+    mutationKey: queryKeys.chat(chatId),
+    mutationFn: async () => {
+      await unwrap(
+        client.DELETE('/api/chat/{id}/group', {
+          params: { path: { id: chatId } },
+        }),
+      );
+    },
+    onSuccess: () => {
+      onDeleted();
+      return forgetChat();
+    },
+    onError: refreshChat,
+  });
+};
+
 type MarkChatRead = { chatId: string; upToMessageId: string };
 
 const useMarkChatRead = () => {
@@ -138,6 +286,11 @@ export {
   useChatMessages,
   useChats,
   useCreateChat,
+  useCreateGroup,
+  useDeleteGroup,
+  useForgetMessagesWhenGone,
+  useGroupAction,
+  useLeaveGroup,
   useDeleteChat,
   useMarkChatRead,
 };

@@ -16,3 +16,7 @@ export type ChatDataTypes = Schemas['ChatDto'];
 export type ChatsDataTypes = Schemas['ChatSummaryDto'];
 
 export type ChatPeerTypes = Schemas['ChatPeerDto'];
+
+export type ChatMemberTypes = Schemas['ChatMemberDto'];
+
+export type ChatRoleTypes = ChatMemberTypes['role'];

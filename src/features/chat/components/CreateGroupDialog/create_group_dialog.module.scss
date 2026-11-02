@@ -1,0 +1,32 @@
+.dialog {
+  @include card;
+
+  width: min(100% - #{space(4) * 2}, #{rem(480px)});
+  margin: auto;
+  color: theme(page, color);
+
+  &::backdrop {
+    background-color: theme(backdrop, background-color);
+  }
+
+  &__title {
+    @include text(lead, bold);
+  }
+
+  &__form {
+    display: grid;
+    gap: space(3);
+    margin-top: space(4);
+  }
+
+  &__error {
+    color: theme(danger, color);
+  }
+
+  &__actions {
+    @include flex(flex-end);
+
+    gap: space(3);
+    margin-top: space(2);
+  }
+}

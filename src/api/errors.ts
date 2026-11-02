@@ -47,4 +47,13 @@ const getApiErrorMessage = (error: unknown, fallback: string): string => {
 const isUnauthorizedError = (error: unknown): boolean =>
   error instanceof ApiError && error.status === HTTP_STATUS.UNAUTHORIZED;
 
-export { ApiError, getApiErrorMessage, isUnauthorizedError, unwrap };
+const isNotFoundError = (error: unknown): boolean =>
+  error instanceof ApiError && error.status === HTTP_STATUS.NOT_FOUND;
+
+export {
+  ApiError,
+  getApiErrorMessage,
+  isNotFoundError,
+  isUnauthorizedError,
+  unwrap,
+};

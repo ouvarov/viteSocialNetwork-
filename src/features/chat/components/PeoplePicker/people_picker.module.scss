@@ -1,0 +1,35 @@
+.picker {
+  display: grid;
+  gap: space(2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  &__legend {
+    @include text(body, bold);
+
+    margin-bottom: space(2);
+    padding: 0;
+  }
+
+  &__empty {
+    color: theme(muted, color);
+  }
+
+  &__list {
+    display: grid;
+    gap: space(1);
+    overflow-y: auto;
+    max-height: rem(240px);
+  }
+
+  &__person {
+    @include flex(flex-start);
+
+    gap: space(3);
+    padding: space(1);
+    overflow-wrap: anywhere;
+    cursor: pointer;
+  }
+}

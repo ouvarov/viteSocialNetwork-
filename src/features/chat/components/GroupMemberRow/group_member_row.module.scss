@@ -1,0 +1,26 @@
+.row {
+  @include flex(flex-start);
+
+  flex-wrap: wrap;
+  gap: space(3);
+
+  &__name {
+    flex: 1;
+    min-width: rem(120px);
+    overflow-wrap: anywhere;
+  }
+
+  &__role {
+    @include text(caption);
+
+    display: block;
+    color: theme(muted, color);
+  }
+
+  &__actions {
+    @include flex(flex-end);
+
+    flex-wrap: wrap;
+    gap: space(2);
+  }
+}
