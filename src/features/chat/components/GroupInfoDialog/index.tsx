@@ -94,6 +94,7 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
   const {
     register,
     handleSubmit,
+    reset: resetTitle,
     formState: { errors },
   } = useForm<GroupTitleFormValues>({
     resolver: zodResolver(groupTitleSchema),
@@ -178,7 +179,10 @@ const GroupInfoDialog: FC<GroupInfoDialogProps> = ({ chat, onClose }) => {
             noValidate
             onSubmit={(e) =>
               void handleSubmit((values) =>
-                action.mutate({ type: 'rename', title: values.title }),
+                action.mutate(
+                  { type: 'rename', title: values.title },
+                  { onSuccess: () => resetTitle(values) },
+                ),
               )(e)
             }
           >

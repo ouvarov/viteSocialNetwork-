@@ -176,20 +176,18 @@ test('a failed refresh keeps the open chat on screen', async ({
   await expect(page.getByText('Still here')).toBeVisible();
   const chatId = page.url().split('/').pop();
 
-  await page.route(`**/api/chat/find/${chatId}`, (route) =>
-    route.fulfill({ status: 503, body: '{}' }),
-  );
-  const refreshFailed = page.waitForResponse(
-    (response) =>
-      response.url().includes(`/api/chat/find/${chatId}`) &&
-      response.status() === 503,
-  );
+  let failedRefreshes = 0;
+  await page.route(`**/api/chat/find/${chatId}`, (route) => {
+    failedRefreshes += 1;
+    return route.fulfill({ status: 503, body: '{}' });
+  });
   const renamed = await request.patch(`${API}/chat/${chatId}`, {
     headers: { authorization: `Bearer ${ada.token}` },
     data: { title: 'Renamed elsewhere' },
   });
   expect(renamed.ok()).toBe(true);
-  await refreshFailed;
+  await expect.poll(() => failedRefreshes, { timeout: 10_000 }).toBe(3);
+  await page.waitForTimeout(500);
 
   await expect(page.getByText('Could not open this chat')).toHaveCount(0);
   await expect(page.getByText('Still here')).toBeVisible();

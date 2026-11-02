@@ -22,6 +22,7 @@ import {
   useChat,
   useChatMessages,
   useDeleteChat,
+  useForgetMessagesWhenGone,
   useMarkChatRead,
 } from '@/features/chat/queries.ts';
 import { messageSchema } from '@/features/chat/schemas.ts';
@@ -97,6 +98,7 @@ const Chat: FC = () => {
   const isConnected = useSocketConnected();
   useChatListUpdates();
   useGroupUpdates(chatId);
+  useForgetMessagesWhenGone(chatId, isError && isNotFoundError(error));
   const {
     mutate: deleteChat,
     reset: resetDelete,

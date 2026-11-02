@@ -38,6 +38,10 @@ const GroupMemberRow: FC<GroupMemberRowProps> = ({
   const isOwnerViewing = isGroupOwner(myRole);
   const nextRole = role === 'moderator' ? 'member' : 'moderator';
 
+  const unlessBusy = (run: () => void) => () => {
+    if (!isBusy) run();
+  };
+
   return (
     <li className={styles.row}>
       <Avatar userId={id} userName={userName} imageUrl={imageUrl} />
@@ -51,9 +55,9 @@ const GroupMemberRow: FC<GroupMemberRowProps> = ({
             <Button
               variant="secondary"
               size="sm"
-              disabled={isBusy}
+              aria-disabled={isBusy}
               aria-label={`Make ${userName} a ${nextRole}`}
-              onClick={() => onSetRole(nextRole)}
+              onClick={unlessBusy(() => onSetRole(nextRole))}
             >
               {ROLE_LABELS[nextRole]}
             </Button>
@@ -62,9 +66,9 @@ const GroupMemberRow: FC<GroupMemberRowProps> = ({
             <Button
               variant="secondary"
               size="sm"
-              disabled={isBusy}
+              aria-disabled={isBusy}
               aria-label={`Make ${userName} the owner`}
-              onClick={onMakeOwner}
+              onClick={unlessBusy(onMakeOwner)}
             >
               Owner
             </Button>
@@ -73,9 +77,9 @@ const GroupMemberRow: FC<GroupMemberRowProps> = ({
             <Button
               variant="danger"
               size="sm"
-              disabled={isBusy}
+              aria-disabled={isBusy}
               aria-label={`Remove ${userName}`}
-              onClick={onRemove}
+              onClick={unlessBusy(onRemove)}
             >
               Remove
             </Button>

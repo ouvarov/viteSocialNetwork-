@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   useInfiniteQuery,
   useMutation,
@@ -187,17 +188,37 @@ const useGroupAction = (chatId: string) => {
 const useForgetChat = (chatId: string) => {
   const queryClient = useQueryClient();
 
-  return () => {
-    queryClient.removeQueries({ queryKey: queryKeys.chat(chatId) });
-    return queryClient.invalidateQueries({
-      queryKey: queryKeys.chats(),
-      exact: true,
-    });
+  return {
+    forgetChat: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.chat(chatId) });
+      return queryClient.invalidateQueries({
+        queryKey: queryKeys.chats(),
+        exact: true,
+      });
+    },
+    refreshChat: () =>
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.chat(chatId),
+        exact: true,
+      }),
   };
 };
 
+const useForgetMessagesWhenGone = (
+  chatId: string | undefined,
+  isChatGone: boolean,
+) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!chatId || !isChatGone) return;
+
+    queryClient.removeQueries({ queryKey: queryKeys.chatMessages(chatId) });
+  }, [chatId, isChatGone, queryClient]);
+};
+
 const useLeaveGroup = (chatId: string, onLeft: () => void) => {
-  const forgetChat = useForgetChat(chatId);
+  const { forgetChat, refreshChat } = useForgetChat(chatId);
 
   return useMutation({
     mutationKey: queryKeys.chat(chatId),
@@ -208,11 +229,12 @@ const useLeaveGroup = (chatId: string, onLeft: () => void) => {
       onLeft();
       return forgetChat();
     },
+    onError: refreshChat,
   });
 };
 
 const useDeleteGroup = (chatId: string, onDeleted: () => void) => {
-  const forgetChat = useForgetChat(chatId);
+  const { forgetChat, refreshChat } = useForgetChat(chatId);
 
   return useMutation({
     mutationKey: queryKeys.chat(chatId),
@@ -227,6 +249,7 @@ const useDeleteGroup = (chatId: string, onDeleted: () => void) => {
       onDeleted();
       return forgetChat();
     },
+    onError: refreshChat,
   });
 };
 
@@ -265,6 +288,7 @@ export {
   useCreateChat,
   useCreateGroup,
   useDeleteGroup,
+  useForgetMessagesWhenGone,
   useGroupAction,
   useLeaveGroup,
   useDeleteChat,
