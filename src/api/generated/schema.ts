@@ -673,7 +673,7 @@ export interface components {
             peer: components["schemas"]["ChatPeerDto"] | null;
             /** Format: date-time */
             lastMessageAt: string | null;
-            /** @description The latest message in the chat */
+            /** @description The latest message you can see in the chat */
             lastMessage: components["schemas"]["LastMessageDto"] | null;
             /**
              * @description Messages from others since you last read the chat
